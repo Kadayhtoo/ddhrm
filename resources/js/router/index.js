@@ -1,0 +1,107 @@
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import MainLayout from '@/layouts/MainLayout.vue';
+import AdminPanelPage from '@/pages/AdminPanelPage.vue';
+import DashboardPage from '@/pages/DashboardPage.vue';
+import LoginPage from '@/pages/LoginPage.vue';
+import PlaceholderPage from '@/pages/PlaceholderPage.vue';
+import StaffManagePage from '@/pages/StaffManagePage.vue';
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes: [
+        {
+            path: '/login',
+            name: 'login',
+            component: LoginPage,
+            meta: { guestOnly: true },
+        },
+        {
+            path: '/',
+            component: MainLayout,
+            meta: { requiresAuth: true },
+            children: [
+                {
+                    path: '',
+                    name: 'dashboard',
+                    component: DashboardPage,
+                    meta: { title: 'Dashboard', permission: 'dashboard.view' },
+                },
+                {
+                    path: 'admin',
+                    name: 'admin',
+                    component: AdminPanelPage,
+                    meta: { title: 'Admin panel', permission: 'admin.access' },
+                },
+                {
+                    path: 'staff',
+                    name: 'staff',
+                    component: StaffManagePage,
+                    meta: { title: 'Staff', permission: 'staff.view' },
+                },
+                {
+                    path: 'attendance',
+                    name: 'attendance',
+                    component: PlaceholderPage,
+                    meta: { title: 'Attendance' },
+                    props: { title: 'Attendance', subtitle: 'Clock in/out, reports, and rules (per your PDF MVP).' },
+                },
+                {
+                    path: 'payroll',
+                    name: 'payroll',
+                    component: PlaceholderPage,
+                    meta: { title: 'Payroll' },
+                    props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
+                },
+                {
+                    path: 'leave',
+                    name: 'leave',
+                    component: PlaceholderPage,
+                    meta: { title: 'Leave' },
+                    props: { title: 'Leave', subtitle: 'Leave rules, applications, approvals.' },
+                },
+                {
+                    path: 'invoices',
+                    name: 'invoices',
+                    component: PlaceholderPage,
+                    meta: { title: 'Invoices' },
+                    props: { title: 'Client invoices', subtitle: 'Clients, projects, invoices, payments.' },
+                },
+            ],
+        },
+    ],
+});
+
+router.beforeEach(async (to, _from, next) => {
+    const auth = useAuthStore();
+
+    if (to.meta.requiresAuth && !auth.token) {
+        return next({ name: 'login', query: { redirect: to.fullPath } });
+    }
+
+    if (to.meta.guestOnly && auth.token) {
+        return next({ name: 'dashboard' });
+    }
+
+    if (to.meta.requiresAuth && auth.token && !auth.user) {
+        try {
+            await auth.fetchMe();
+        } catch {
+            auth.clearSession();
+
+            return next({ name: 'login' });
+        }
+    }
+
+    if (to.meta.requiresAuth && auth.token && to.meta.permission) {
+        const need = to.meta.permission;
+        const list = Array.isArray(need) ? need : [need];
+        if (!auth.canAny(list)) {
+            return next({ name: 'dashboard' });
+        }
+    }
+
+    return next();
+});
+
+export default router;

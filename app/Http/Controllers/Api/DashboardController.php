@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Repositories\Contracts\UserRepositoryInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class DashboardController extends Controller
+{
+    public function __construct(
+        protected UserRepositoryInterface $users,
+    ) {}
+
+    public function summary(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user?->loadMissing('roles');
+
+        if (! $user || ! $user->hasPermission('dashboard.view')) {
+            abort(403);
+        }
+
+        $activeStaff = $this->users->allActive()->count();
+
+        return response()->json([
+            'welcome' => 'DDHRM',
+            'role_slugs' => $user->roles->pluck('slug')->values()->all(),
+            'modules' => [
+                'staff' => ['label' => 'Active staff', 'value' => $activeStaff],
+                'attendance' => ['label' => 'Attendance', 'value' => 'Clock in / out'],
+                'payroll' => ['label' => 'Payroll', 'value' => 'Generate & payslips'],
+                'leave' => ['label' => 'Leave', 'value' => 'Rules & approvals'],
+                'invoices' => ['label' => 'Client invoices', 'value' => 'Projects & PDF'],
+            ],
+        ]);
+    }
+}
