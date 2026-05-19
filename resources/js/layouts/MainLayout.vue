@@ -8,6 +8,7 @@
             color="surface"
             border="end"
             app
+            class="bg-navi"
         >
             <div class="pa-4 d-flex align-center">
                 <v-avatar color="primary" size="36" rounded="lg" class="text-white font-weight-bold">
@@ -34,6 +35,14 @@
                     :to="{ name: 'admin' }"
                     rounded="lg"
                 />
+                 <v-list-item
+                    v-if="auth.can('departments.view')"
+                    prepend-icon="mdi-office-building-outline"
+                    title="Department"
+                    :to="{ name: 'department' }"
+                    rounded="lg"
+                />
+
                 <v-list-item
                     v-if="auth.can('staff.view')"
                     prepend-icon="mdi-account-group-outline"
@@ -48,12 +57,6 @@
                     rounded="lg"
                 />
                 <v-list-item
-                    prepend-icon="mdi-cash-multiple"
-                    title="Payroll"
-                    :to="{ name: 'payroll' }"
-                    rounded="lg"
-                />
-                <v-list-item
                     prepend-icon="mdi-beach"
                     title="Leave"
                     :to="{ name: 'leave' }"
@@ -65,6 +68,24 @@
                     :to="{ name: 'invoices' }"
                     rounded="lg"
                 />
+                <v-list-group value="system-management">
+                    <template #activator="{ props }">
+                        <v-list-item
+                            v-bind="props"
+                            prepend-icon="mdi-cog-outline"
+                            title="System Manage"
+                            rounded="lg"
+                        />
+                    </template>
+
+                    <v-list-item
+                        v-if="showRolesMenu"
+                        prepend-icon="mdi-shield-account-outline"
+                        title="Roles"
+                        :to="{ name: 'roles' }"
+                        rounded="lg"
+                    />
+                </v-list-group>
             </v-list>
 
             <template #append>
@@ -122,8 +143,9 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
 import { useDisplay } from 'vuetify';
 import { useAuthStore } from '@/stores/auth';
 
@@ -134,12 +156,39 @@ const auth = useAuthStore();
 
 const drawer = ref(true);
 const rail = ref(false);
+const roles = ref([]);
+const systemGroup = ref(true);
+const systemRolesGroup = ref(true);
+
+const showRolesMenu = computed(() => auth.can('roles.view') || auth.can('roles.manage') || auth.hasRoleSlug('admin'));
 
 const pageTitle = computed(() => route.meta.title ?? 'Dashboard');
 
+async function loadRoles() {
+    if (!showRolesMenu.value) {
+        return;
+    }
+
+    try {
+        const { data } = await axios.get('/api/roles');
+        roles.value = data.data ?? [];
+    } catch {
+        roles.value = [];
+    }
+}
+
+function openRole(role) {
+    router.push({ name: 'roles.detail', params: { id: role.id } });
+}
+
+function isSelectedRole(role) {
+    return route.name === 'roles.detail' && Number(route.params.id) === role.id;
+}
+
+onMounted(loadRoles);
+
 const initials = computed(() => {
     const name = auth.user?.name ?? '?';
-
     return name
         .split(' ')
         .map((p) => p[0])
@@ -153,3 +202,9 @@ async function onLogout() {
     await router.push({ name: 'login' });
 }
 </script>
+
+<style scoped>
+.bg-navi {
+    background-color:#DAE9F8 !important;
+}
+</style>

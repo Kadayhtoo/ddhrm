@@ -5,7 +5,10 @@ import AdminPanelPage from '@/pages/AdminPanelPage.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
 import PlaceholderPage from '@/pages/PlaceholderPage.vue';
+import RoleDetailPage from '@/pages/RoleDetailPage.vue';
+import RoleListViewPage from '@/pages/RoleListViewPage.vue';
 import StaffManagePage from '@/pages/StaffManagePage.vue';
+import DepartmentManagePage from '@/pages/DepartmentManagePage.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -33,6 +36,19 @@ const router = createRouter({
                     component: AdminPanelPage,
                     meta: { title: 'Admin panel', permission: 'admin.access' },
                 },
+                {
+                    path: 'department',
+                    name: 'department',
+                    component: DepartmentManagePage,
+                    meta: { title: 'Department', permission: 'departments.view' },
+                },
+                {
+                    path: 'roles',
+                    name: 'roles',
+                    component: RoleListViewPage,
+                    meta: { title: 'Roles', permission: 'roles.view' },
+                },
+
                 {
                     path: 'staff',
                     name: 'staff',
@@ -88,7 +104,6 @@ router.beforeEach(async (to, _from, next) => {
             await auth.fetchMe();
         } catch {
             auth.clearSession();
-
             return next({ name: 'login' });
         }
     }
@@ -96,7 +111,7 @@ router.beforeEach(async (to, _from, next) => {
     if (to.meta.requiresAuth && auth.token && to.meta.permission) {
         const need = to.meta.permission;
         const list = Array.isArray(need) ? need : [need];
-        if (!auth.canAny(list)) {
+        if (!auth.canAny(list) && !auth.hasRoleSlug('admin')) {
             return next({ name: 'dashboard' });
         }
     }
