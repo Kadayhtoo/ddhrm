@@ -23,6 +23,8 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Create department', 'slug' => 'departments.create'],
             ['name' => 'Update department', 'slug' => 'departments.update'],
             ['name' => 'Delete department', 'slug' => 'departments.delete'],
+            ['name' => 'view attendance', 'slug' => 'attendance.view'],
+            ['name' => 'Manage attendance', 'slug' => 'attendance.manage'],  
         ];
 
         $permissions = collect($definitions)->map(fn (array $row) => Permission::query()->firstOrCreate(
@@ -34,14 +36,17 @@ class RolePermissionSeeder extends Seeder
 
         $roleConfigs = [
             ['name' => 'Staff', 'slug' => 'staff', 'permissions' => ['dashboard.view']],
-            ['name' => 'HR', 'slug' => 'hr', 'permissions' => ['dashboard.view', 'staff.view', 'staff.create', 'staff.update', ]],
+            ['name' => 'HR', 'slug' => 'hr', 'permissions' => ['dashboard.view', 'staff.view', 'staff.create', 'staff.update']],
             ['name' => 'Admin', 'slug' => 'admin', 'permissions' => [
-                'dashboard.view', 'admin.access', 'staff.view', 'staff.create', 'staff.update', 'staff.delete', 'roles.view','roles.manage',
+                'dashboard.view', 'admin.access', 'staff.view', 'staff.create', 'staff.update', 'staff.delete', 'roles.view', 'roles.manage',
             ]],
             ['name' => 'CEO', 'slug' => 'ceo', 'permissions' => [
                 'dashboard.view', 'admin.access', 'staff.view', 'staff.create', 'staff.update', 'staff.delete', 'roles.view', 'roles.manage',
             ]],
         ];
+
+        $currentSlugs = collect($definitions)->pluck('slug')->all();
+        Permission::query()->whereNotIn('slug', $currentSlugs)->delete();
 
         foreach ($roleConfigs as $cfg) {
             $role = Role::query()->firstOrCreate(
@@ -49,8 +54,25 @@ class RolePermissionSeeder extends Seeder
                 ['name' => $cfg['name']],
             );
 
-            $ids = collect($cfg['permissions'])->map(fn (string $slug) => $bySlug[$slug]->id)->all();
-            $role->permissions()->sync($ids);
+            $targetPermissionIds = collect($cfg['permissions'])
+                ->map(fn (string $slug) => $bySlug[$slug]->id ?? null)
+                ->filter()
+                ->all();
+
+            if ($role->wasRecentlyCreated) {
+                $role->permissions()->sync($targetPermissionIds);
+            } else {
+                $role->permissions()->syncWithoutDetaching($targetPermissionIds);
+
+                $removedPermissionIds = Permission::query()
+                    ->whereNotIn('slug', $currentSlugs)
+                    ->pluck('id')
+                    ->all();
+                
+                if (!empty($removedPermissionIds)) {
+                    $role->permissions()->detach($removedPermissionIds);
+                }
+            }
         }
     }
 }

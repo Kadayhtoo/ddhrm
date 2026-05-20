@@ -46,4 +46,29 @@ class AuthController extends Controller
             'user' => $request->user()->toApiArray(),
         ]);
     }
+
+    public function profile(Request $request): JsonResponse
+    {
+        return response()->json([
+            'data' => $request->user()->toApiArray()
+        ]);
+    }
+
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validatedData = $request->validate([
+            'name'  => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $updatedUser = $this->authService->updateProfile($user, $validatedData);
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'user' => $updatedUser->toApiArray(),
+        ]);
+    }
 }

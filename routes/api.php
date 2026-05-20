@@ -23,4 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('staff', StaffController::class)->parameters(['staff' => 'user']);
     Route::apiResource('department', DepartmentController::class);
+
+    Route::get('admin/profile', [AuthController::class, 'profile']); 
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 });
