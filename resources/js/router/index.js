@@ -8,6 +8,7 @@ import PlaceholderPage from '@/pages/PlaceholderPage.vue';
 import RoleDetailPage from '@/pages/RoleDetailPage.vue';
 import RoleListViewPage from '@/pages/RoleListViewPage.vue';
 import StaffManagePage from '@/pages/StaffManagePage.vue';
+import ProgfilePage from '@/pages/ProfilePage.vue';
 import DepartmentManagePage from '@/pages/DepartmentManagePage.vue';
 
 const router = createRouter({
@@ -82,6 +83,18 @@ const router = createRouter({
                     component: PlaceholderPage,
                     meta: { title: 'Invoices' },
                     props: { title: 'Client invoices', subtitle: 'Clients, projects, invoices, payments.' },
+                },
+                // {
+                //     path: '/profile',
+                //     name: 'profile',
+                //     component: ProgfilePage,
+                //     meta: { requiresAuth: true },
+                // },
+                {
+                    path: 'profile', 
+                    name: 'profile',
+                    component: ProgfilePage,
+                    meta: { title: 'Account Profile' },
                 },
             ],
         },

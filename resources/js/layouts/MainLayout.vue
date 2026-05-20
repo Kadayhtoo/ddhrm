@@ -15,18 +15,19 @@
                     D
                 </v-avatar>
                 <div v-if="!rail || !mdAndUp" class="ms-3">
-                    <div class="text-subtitle-1 font-weight-bold">DDHRM</div>
-                    <div class="text-caption text-medium-emphasis">HR + Payroll + Invoices</div>
+                    <div class="text-subtitle-1 font-weight-bold text-white">DDHRM</div>
+                    <div class="text-caption text-medium-emphasis te">HR + Payroll + Invoices</div>
                 </div>
             </div>
 
-            <v-list density="comfortable" nav class="px-2">
-                <v-list-item
+            <v-list density="comfortable" nav class="px-2 text-white">
+                <v-list-item 
+                    v-if="auth.can('dashboard.view')"
+                    exact
                     prepend-icon="mdi-view-dashboard-outline"
                     title="Dashboard"
                     :to="{ name: 'dashboard' }"
                     rounded="lg"
-                    color="primary"
                 />
                 <v-list-item
                     v-if="auth.can('admin.access')"
@@ -68,7 +69,7 @@
                     :to="{ name: 'invoices' }"
                     rounded="lg"
                 />
-                <v-list-group value="system-management">
+                <v-list-group value="system-management" v-if="showSystemManageMenu">
                     <template #activator="{ props }">
                         <v-list-item
                             v-bind="props"
@@ -77,7 +78,6 @@
                             rounded="lg"
                         />
                     </template>
-
                     <v-list-item
                         v-if="showRolesMenu"
                         prepend-icon="mdi-shield-account-outline"
@@ -87,7 +87,6 @@
                     />
                 </v-list-group>
             </v-list>
-
             <template #append>
                 <div class="pa-2">
                     <v-btn
@@ -110,9 +109,7 @@
             <v-toolbar-title class="text-h6 font-weight-semibold">
                 {{ pageTitle }}
             </v-toolbar-title>
-
             <v-spacer />
-
             <v-menu>
                 <template #activator="{ props }">
                     <v-btn v-bind="props" variant="text" class="me-2">
@@ -123,10 +120,19 @@
                         <v-icon end>mdi-chevron-down</v-icon>
                     </v-btn>
                 </template>
+
                 <v-list density="compact" min-width="200">
-                    <v-list-item title="Profile" prepend-icon="mdi-account-outline" disabled />
+                    <v-list-item 
+                        title="Profile" 
+                        prepend-icon="mdi-account-outline" 
+                        to="/profile" />
                     <v-divider />
-                    <v-list-item title="Logout" prepend-icon="mdi-logout" @click="onLogout" />
+                    
+                    <v-list-item 
+                        title="Logout" 
+                        prepend-icon="mdi-logout" 
+                        @click="onLogout" 
+                    />
                 </v-list>
             </v-menu>
         </v-app-bar>
@@ -144,68 +150,74 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
-import { useDisplay } from 'vuetify';
-import { useAuthStore } from '@/stores/auth';
+    import { computed, ref, onMounted } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
+    import axios from 'axios';
+    import { useDisplay } from 'vuetify';
+    import { useAuthStore } from '@/stores/auth';
 
-const { mdAndUp } = useDisplay();
-const route = useRoute();
-const router = useRouter();
-const auth = useAuthStore();
+    const { mdAndUp } = useDisplay();
+    const route = useRoute();
+    const router = useRouter();
+    const auth = useAuthStore();
 
-const drawer = ref(true);
-const rail = ref(false);
-const roles = ref([]);
-const systemGroup = ref(true);
-const systemRolesGroup = ref(true);
+    const drawer = ref(true);
+    const rail = ref(false);
+    const roles = ref([]);
+    const systemGroup = ref(true);
+    const systemRolesGroup = ref(true);
 
-const showRolesMenu = computed(() => auth.can('roles.view') || auth.can('roles.manage') || auth.hasRoleSlug('admin'));
+    const showSystemManageMenu = computed(() => {
+        return auth.hasRoleSlug('admin') || auth.can('roles.view') || auth.can('roles.manage');
+    });
+    const showRolesMenu = computed(() => auth.can('roles.view') || auth.can('roles.manage') || auth.hasRoleSlug('admin'));
 
-const pageTitle = computed(() => route.meta.title ?? 'Dashboard');
+    const pageTitle = computed(() => route.meta.title ?? 'Dashboard');
 
-async function loadRoles() {
-    if (!showRolesMenu.value) {
-        return;
+    async function loadRoles() {
+        if (!showRolesMenu.value) {
+            return;
+        }
+
+        try {
+            const { data } = await axios.get('/api/roles');
+            roles.value = data.data ?? [];
+        } catch {
+            roles.value = [];
+        }
     }
 
-    try {
-        const { data } = await axios.get('/api/roles');
-        roles.value = data.data ?? [];
-    } catch {
-        roles.value = [];
+    function openRole(role) {
+        router.push({ name: 'roles.detail', params: { id: role.id } });
     }
-}
 
-function openRole(role) {
-    router.push({ name: 'roles.detail', params: { id: role.id } });
-}
+    function isSelectedRole(role) {
+        return route.name === 'roles.detail' && Number(route.params.id) === role.id;
+    }
 
-function isSelectedRole(role) {
-    return route.name === 'roles.detail' && Number(route.params.id) === role.id;
-}
+    onMounted(loadRoles);
 
-onMounted(loadRoles);
+    const initials = computed(() => {
+        const name = auth.user?.name ?? '?';
+        return name
+            .split(' ')
+            .map((p) => p[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase();
+    });
 
-const initials = computed(() => {
-    const name = auth.user?.name ?? '?';
-    return name
-        .split(' ')
-        .map((p) => p[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase();
-});
-
-async function onLogout() {
-    await auth.logout();
-    await router.push({ name: 'login' });
-}
+    async function onLogout() {
+        await auth.logout();
+        await router.push({ name: 'login' });
+    }
 </script>
 
 <style scoped>
 .bg-navi {
-    background-color:#DAE9F8 !important; 
+    background-color:#3B4860 !important; 
+}
+.text-caption{
+    color: #FFFFFF!important;
 }
 </style>
