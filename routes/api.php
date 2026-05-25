@@ -3,6 +3,10 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\LeaveBalanceController;
+use App\Http\Controllers\Api\LeaveRequestController;
+use App\Http\Controllers\Api\LeaveRuleController;
+use App\Http\Controllers\APi\PositionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StaffController;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +16,8 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::get('admin/profile', [AuthController::class, 'profile']); 
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 
     Route::get('/dashboard/summary', [DashboardController::class, 'summary'])
         ->middleware('permission:dashboard.view');
@@ -21,9 +27,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('roles/{role}', [RoleController::class, 'show'])->middleware('permission:roles.view');
     Route::put('roles/{role}', [RoleController::class, 'update'])->middleware('permission:roles.manage');
 
-    Route::apiResource('staff', StaffController::class)->parameters(['staff' => 'user']);
-    Route::apiResource('department', DepartmentController::class);
+    Route::apiResource('staff', StaffController::class)->parameters(['staff' => 'user'])->middleware('permission:staff.view');
+    Route::get('staff/{user}', [StaffController::class, 'showDetail']); 
+    Route::get('staff/{user}/leave-balances', [StaffController::class, 'getLeaveBalances']);
+    Route::get('staff/{user}/leave-requests', [StaffController::class, 'getLeaveRequests']);
+    Route::get('/staff-dropdown', [StaffController::class, 'dropdownList']);
 
-    Route::get('admin/profile', [AuthController::class, 'profile']); 
-    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::get('staff/{user}/attendances', [StaffController::class, 'getAttendances']);
+
+    Route::apiResource('department', DepartmentController::class);
+    Route::apiResource('position', PositionController::class);
+    Route::get('department/{department}/positions', [DepartmentController::class, 'getPositions']); 
+       
+    Route::apiResource('leave-rules', LeaveRuleController::class);
+    Route::apiResource('leave-requests', LeaveRequestController::class);
+    Route::patch('/leave-requests/{id}/status', [LeaveRequestController::class, 'changeStatus']);
+    Route::post('leave-requests/{id}/cancel', [LeaveRequestController::class, 'cancel']);
+
+    Route::get('/leave-balances', [LeaveBalanceController::class, 'index']);
+
 });

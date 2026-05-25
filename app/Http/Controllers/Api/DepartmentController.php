@@ -30,6 +30,20 @@ class DepartmentController extends Controller
         );
     }
 
+    public function getPositions(Department $department): JsonResponse
+    {
+        if (!$department instanceof Department) {
+        $department = Department::findOrFail($department);
+        }
+
+        $positions = $department->positions; 
+
+        return response()->json([
+            'success' => true,
+            'data'    => $positions
+        ], 200);
+    }
+
     public function store(StoreDepartmentRequest $request): JsonResponse
     {
         $department = $this->departmentService->create($request->validated());

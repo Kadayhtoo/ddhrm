@@ -25,6 +25,7 @@ class UpdateStaffRequest extends FormRequest
             'password' => ['sometimes', 'nullable', 'string', 'min:8'],
             'role_id' => ['sometimes', 'integer', 'exists:roles,id'],
             'department_id' => ['sometimes', 'nullable', 'integer'],
+            'position_id' => ['sometimes', 'nullable', 'integer'],
             'salary' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'shift_id' => ['sometimes', 'nullable', 'integer'],
             'is_active' => ['sometimes', 'boolean'],

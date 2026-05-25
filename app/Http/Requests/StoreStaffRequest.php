@@ -23,6 +23,7 @@ class StoreStaffRequest extends FormRequest
             'password' => ['required', 'string', 'min:8'],
             'role_id' => ['required', 'integer', 'exists:roles,id'],
             'department_id' => ['nullable', 'integer'],
+            'position_id'   => ['nullable', 'integer'],            
             'salary' => ['nullable', 'numeric', 'min:0'],
             'shift_id' => ['nullable', 'integer'],
             'is_active' => ['sometimes', 'boolean'],

@@ -2,8 +2,8 @@
     <div>
         <v-row class="mb-4" align="center">
             <v-col cols="12" md="6">
-                <div class="text-h4 font-weight-bold">Deprtment</div>
-                <div class="text-body-2 text-medium-emphasis">Users and role assignment</div>
+                <div class="text-h4 font-weight-bold">Position Management</div>
+                <div class="text-body-2 text-medium-emphasis">Manage company job positions and link them to departments.</div>
             </v-col>
             <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end">
                 <v-text-field
@@ -11,16 +11,22 @@
                     density="comfortable"
                     variant="outlined"
                     hide-details
-                    label="Search"
+                    label="Search Position"
                     prepend-inner-icon="mdi-magnify"
                     clearable
                     class="custom-search-btn-width"
                     @keyup.enter="applySearch"
                 />
                 
-                <v-btn color="primary" rounded="lg" size="large" class="custom-search-btn-width h-12"  :disabled="!auth.can('departments.create')" @click="openCreate"
+                <v-btn 
+                    color="primary" 
+                    rounded="lg" 
+                    size="large" 
+                    class="custom-search-btn-width h-12"  
+                    @click="openCreate"
+                    :disabled="!auth.can('positions.create')"
                 >
-                    Add Department
+                    Add Position
                 </v-btn>
             </v-col>
         </v-row>
@@ -37,11 +43,17 @@
             :items-length="total"
             :loading="loading"
             item-value="id"
-            class="rounded-lg"
+            class="rounded-lg border"
             @update:options="loadItems"
         >
+            <template #item.department="{ item }">
+                <v-chip color="secondary" size="small" variant="tonal" class="text-capitalize">
+                    {{ item.department?.name ?? 'No Department' }}
+                </v-chip>
+            </template>
+
             <template #item.actions="{ item }">
-                <v-btn icon variant="text" size="small" :disabled="!auth.can('departments.update')" @click="openEdit(item)">
+                <v-btn icon variant="text" size="small" :disabled="!auth.can('positions.update')" @click="openEdit(item)" >
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
                 <v-btn
@@ -49,7 +61,7 @@
                     variant="text"
                     size="small"
                     color="error"
-                    :disabled="!auth.can('departments.delete')"
+                    :disabled="!auth.can('positions.delete')"
                     @click="confirmDelete(item)"
                 >
                     <v-icon>mdi-delete</v-icon>
@@ -59,10 +71,34 @@
 
         <v-dialog v-model="dialog" max-width="520" persistent>
             <v-card rounded="lg">
-                <v-card-title>{{ editingId ? 'Edit department' : 'Add department' }}</v-card-title>
-                <v-card-text>
-                    <v-alert v-if="formError" type="error" variant="tonal" class="mb-4" rounded="lg">{{ formError }}</v-alert>
-                    <v-text-field v-model="form.name" label="Name" variant="outlined" class="mb-3" />   
+                <v-card-title class="px-6 pt-4 font-weight-bold">
+                    {{ editingId ? 'Edit Position' : 'Add New Position' }}
+                </v-card-title>
+                <v-card-text class="px-6">
+                    <v-alert v-if="formError" type="error" variant="tonal" class="mb-4" rounded="lg">
+                        {{ formError }}
+                    </v-alert>
+                    
+                    <v-text-field 
+                        v-model="form.name" 
+                        label="Position Name" 
+                        variant="outlined" 
+                        class="mb-3" 
+                        hide-details="auto"
+                    />
+
+                    <v-select
+                        v-model="form.department_id"
+                        :items="departmentOptions"
+                        item-title="name"
+                        item-value="id"
+                        label="Select Department"
+                        variant="outlined"
+                        class="mb-3"
+                        hide-details="auto"
+                        :loading="loadingDepartments"
+                        no-data-text="No departments found"
+                    />
                 </v-card-text>
                 <v-card-actions class="px-6 pb-4">
                     <v-spacer />
@@ -74,9 +110,9 @@
 
         <v-dialog v-model="deleteDialog" max-width="420">
             <v-card rounded="lg">
-                <v-card-title>Delete department?</v-card-title>
-                <v-card-text>This cannot be undone.</v-card-text>
-                <v-card-actions>
+                <v-card-title class="px-6 pt-4 font-weight-bold">Delete position?</v-card-title>
+                <v-card-text class="px-6">This action cannot be undone and will detach from any linked staff.</v-card-text>
+                <v-card-actions class="px-6 pb-4">
                     <v-spacer />
                     <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
                     <v-btn color="error" :loading="deleting" @click="doDelete">Delete</v-btn>
@@ -101,10 +137,8 @@
     const searchInput = ref('');
     const search = ref('');
 
-    const headers = [
-        { title: 'Name', key: 'name', sortable: false },
-        { title: '', key: 'actions', sortable: false, align: 'end' },
-    ];
+    const departmentOptions = ref([]);
+    const loadingDepartments = ref(false);
 
     const dialog = ref(false);
     const deleteDialog = ref(false);
@@ -115,24 +149,36 @@
     const notificationType = ref('success');
     const saving = ref(false);
     const deleting = ref(false);
-    const roleOptions = ref([]);
+
+    const headers = [
+        { title: 'Position Name', key: 'name', sortable: false },
+        { title: 'Department', key: 'department', sortable: false },
+        { title: '', key: 'actions', sortable: false, align: 'end' },
+    ];
 
     const form = reactive({
         name: '',
+        department_id: null,
     });
 
-    async function loadAssignableRoles() {
-        const { data } = await axios.get('/api/roles/assignable');
-
-        roleOptions.value = data.data ?? [];
+    async function loadDepartmentOptions() {
+        loadingDepartments.value = true;
+        try {
+            const { data } = await axios.get('/api/department', { params: { per_page: 100 } });
+            departmentOptions.value = data.data ?? [];
+        } catch (e) {
+            console.error('Failed to load departments', e);
+        } finally {
+            loadingDepartments.value = false;
+        }
     }
-
     async function loadItems(options) {
         loading.value = true;
         try {
             const p = options?.page ?? page.value;
             const per = options?.itemsPerPage ?? itemsPerPage.value;
-            const { data } = await axios.get('/api/department', {
+            
+            const { data } = await axios.get('/api/position', {
                 params: {
                     page: p,
                     per_page: per,
@@ -140,9 +186,11 @@
                 },
             });
             items.value = data.data ?? [];
-            total.value = data.meta?.total ?? 0;
+            total.value = data.meta?.total ?? data.data?.length ?? 0;
             page.value = data.meta?.current_page ?? p;
             itemsPerPage.value = data.meta?.per_page ?? per;
+        } catch (e) {
+            console.error('Failed to load positions', e);
         } finally {
             loading.value = false;
         }
@@ -156,20 +204,22 @@
 
     function resetForm() {
         form.name = '';
+        form.department_id = null;
         formError.value = '';
     }
 
     async function openCreate() {
-        await loadAssignableRoles();
+        await loadDepartmentOptions();
         editingId.value = null;
         resetForm();
         dialog.value = true;
     }
 
     async function openEdit(row) {
-        await loadAssignableRoles();
+        await loadDepartmentOptions();
         editingId.value = row.id;
         form.name = row.name;
+        form.department_id = row.department_id;
         formError.value = '';
         dialog.value = true;
     }
@@ -193,25 +243,25 @@
         try {
             const payload = {
                 name: form.name,
+                department_id: form.department_id,
             };
 
             if (editingId.value) {
-                await axios.patch(`/api/department/${editingId.value}`, payload);
-                setNotification('Department updated successfully.', 'success');
+                await axios.put(`/api/position/${editingId.value}`, payload);
+                setNotification('Position updated successfully.', 'success');
             } else {
-                await axios.post('/api/department', payload);
-                setNotification('Department created successfully.', 'success');
+                await axios.post('/api/position', payload);
+                setNotification('Position created successfully.', 'success');
             }
 
             dialog.value = false;
-            await auth.fetchMe();
             await loadItems({ page: page.value, itemsPerPage: itemsPerPage.value });
         } catch (e) {
             const msg = e?.response?.data?.message;
             const errs = e?.response?.data?.errors;
             formError.value = msg
                 ?? (errs && Object.values(errs).flat().join(' '))
-                ?? 'Unable to save.';
+                ?? 'Unable to save position.';
         } finally {
             saving.value = false;
         }
@@ -220,12 +270,12 @@
     async function doDelete() {
         deleting.value = true;
         try {
-            await axios.delete(`/api/department/${deleteId.value}`);
+            await axios.delete(`/api/position/${deleteId.value}`);
             deleteDialog.value = false;
-            setNotification('Department deleted successfully.', 'success');
+            setNotification('Position deleted successfully.', 'success');
             await loadItems({ page: page.value, itemsPerPage: itemsPerPage.value });
         } catch (e) {
-            const msg = e?.response?.data?.message ?? 'Unable to delete department.';
+            const msg = e?.response?.data?.message ?? 'Unable to delete position.';
             setNotification(msg, 'error');
         } finally {
             deleting.value = false;
@@ -233,6 +283,6 @@
     }
 
     onMounted(() => {
-        loadAssignableRoles();
+        loadItems();
     });
 </script>

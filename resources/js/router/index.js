@@ -8,8 +8,13 @@ import PlaceholderPage from '@/pages/PlaceholderPage.vue';
 import RoleDetailPage from '@/pages/RoleDetailPage.vue';
 import RoleListViewPage from '@/pages/RoleListViewPage.vue';
 import StaffManagePage from '@/pages/StaffManagePage.vue';
-import ProgfilePage from '@/pages/ProfilePage.vue';
+import ProfilePage from '@/pages/ProfilePage.vue';
 import DepartmentManagePage from '@/pages/DepartmentManagePage.vue';
+import LeaveRuleManagePage from '@/pages/LeaveRuleManagePage.vue';
+import LeaveRequestManagePage from '@/pages/LeaveRequestManagePage.vue';
+import LeaveBalancePage from '@/pages/LeaveBalancePage.vue';
+import PositionManagePage from '@/pages/PositionManagePage.vue';
+import StaffDetailPage from '@/pages/StaffDetailPage.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -44,17 +49,28 @@ const router = createRouter({
                     meta: { title: 'Department', permission: 'departments.view' },
                 },
                 {
+                    path: 'position',
+                    name: 'position',
+                    component: PositionManagePage,
+                    meta: { title: 'Position' },
+                },
+                {
                     path: 'roles',
                     name: 'roles',
                     component: RoleListViewPage,
                     meta: { title: 'Roles', permission: 'roles.view' },
                 },
-
                 {
                     path: 'staff',
                     name: 'staff',
                     component: StaffManagePage,
                     meta: { title: 'Staff', permission: 'staff.view' },
+                },
+                {
+                    path: '/staff/:user', 
+                    name: 'staff.detail', 
+                    component:StaffDetailPage, 
+                    meta: { requiresAuth: true }
                 },
                 {
                     path: 'attendance',
@@ -71,11 +87,23 @@ const router = createRouter({
                     props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
                 },
                 {
-                    path: 'leave',
-                    name: 'leave',
-                    component: PlaceholderPage,
-                    meta: { title: 'Leave' },
+                    path: 'leave-rules',
+                    name: 'leave-rules',
+                    component: LeaveRuleManagePage,
+                    meta: { title: 'Leave Rule' },
                     props: { title: 'Leave', subtitle: 'Leave rules, applications, approvals.' },
+                },
+                {
+                    path: 'leave-requests',
+                    name: 'leave-requests',
+                    component: LeaveRequestManagePage,
+                    meta: { title: 'Leave Request' },
+                },
+                {
+                    path: 'leave-balances',
+                    name: 'leave-balances',
+                    component: LeaveBalancePage,
+                    meta: { title: 'Leave Balance' },
                 },
                 {
                     path: 'invoices',
@@ -84,21 +112,16 @@ const router = createRouter({
                     meta: { title: 'Invoices' },
                     props: { title: 'Client invoices', subtitle: 'Clients, projects, invoices, payments.' },
                 },
-                // {
-                //     path: '/profile',
-                //     name: 'profile',
-                //     component: ProgfilePage,
-                //     meta: { requiresAuth: true },
-                // },
                 {
                     path: 'profile', 
                     name: 'profile',
-                    component: ProgfilePage,
+                    component: ProfilePage,
                     meta: { title: 'Account Profile' },
                 },
             ],
         },
     ],
+
 });
 
 router.beforeEach(async (to, _from, next) => {
