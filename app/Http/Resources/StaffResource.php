@@ -14,12 +14,24 @@ class StaffResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
             'department_id' => $this->department_id,
+            'department' => $this->whenLoaded('department', fn () => [
+                'id' => $this->department->id,
+                'name' => $this->department->name,
+            ]),
+            
+            'position_id'   => $this->position_id,
+            'position'      => [
+                'id'   => $this->position?->id,
+                'name' => $this->position?->name,
+            ],
             'salary' => $this->salary,
             'shift_id' => $this->shift_id,
+            'position' => $this->position,
             'is_active' => $this->is_active,
             'roles' => $this->whenLoaded('roles', fn () => $this->roles->map(fn ($r) => [
                 'id' => $r->id,
@@ -28,6 +40,7 @@ class StaffResource extends JsonResource
             ])),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
+
         ];
     }
 }

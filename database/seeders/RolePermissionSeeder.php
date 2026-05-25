@@ -23,8 +23,20 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Create department', 'slug' => 'departments.create'],
             ['name' => 'Update department', 'slug' => 'departments.update'],
             ['name' => 'Delete department', 'slug' => 'departments.delete'],
+            ['name' => 'View positions', 'slug' => 'positions.view'],
+            ['name' => 'Create position', 'slug' => 'positions.create'],
+            ['name' => 'Update position', 'slug' => 'positions.update'],
+            ['name' => 'Delete position', 'slug' => 'positions.delete'],
             ['name' => 'view attendance', 'slug' => 'attendance.view'],
             ['name' => 'Manage attendance', 'slug' => 'attendance.manage'],  
+            ['name' => 'View leave rules', 'slug' => 'leave-rules.view'],
+            ['name' => 'Ceate leave rules', 'slug' => 'leave-rules.create'],
+            ['name' => 'Update leave rules', 'slug' => 'leave-rules.update'],
+            ['name' => 'Delete leave rules', 'slug' => 'leave-rules.delete'],
+            ['name' => 'View leave requests', 'slug' => 'leave-requests.view'],
+            ['name' => 'Manage leave requests', 'slug' => 'leave-requests.manage'],
+            ['name' => 'View leave balances', 'slug' => 'leave-balances.view'],
+            ['name' => 'Manage leave balances', 'slug' => 'leave-balances.manage'],
         ];
 
         $permissions = collect($definitions)->map(fn (array $row) => Permission::query()->firstOrCreate(

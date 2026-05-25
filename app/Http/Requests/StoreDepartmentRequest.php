@@ -11,7 +11,8 @@ class StoreDepartmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-return $this->user()?->can('create', \App\Models\Department::class) ?? false;    }
+        return $this->user()?->can('create', \App\Models\Department::class) ?? false;    
+    }
 
     /**
      * Get the validation rules that apply to the request.

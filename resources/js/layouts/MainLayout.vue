@@ -36,14 +36,20 @@
                     :to="{ name: 'admin' }"
                     rounded="lg"
                 />
-                 <v-list-item
+                <v-list-item
                     v-if="auth.can('departments.view')"
                     prepend-icon="mdi-office-building-outline"
                     title="Department"
                     :to="{ name: 'department' }"
                     rounded="lg"
                 />
-
+                <v-list-item
+                    v-if="auth.can('positions.view')"
+                    prepend-icon="mdi-sitemap-outline"
+                    title="Position"
+                    :to="{ name: 'position' }"
+                    rounded="lg"
+                />
                 <v-list-item
                     v-if="auth.can('staff.view')"
                     prepend-icon="mdi-account-group-outline"
@@ -57,12 +63,24 @@
                     :to="{ name: 'attendance' }"
                     rounded="lg"
                 />
-                <v-list-item
-                    prepend-icon="mdi-beach"
-                    title="Leave"
-                    :to="{ name: 'leave' }"
-                    rounded="lg"
-                />
+                <v-list-group value="leave_management">
+                    <template #activator="{ props }">
+                        <v-list-item v-bind="props" prepend-icon="mdi-palm-tree" title="Leave Manage"></v-list-item>
+                    </template>
+
+                    <v-list-item 
+                        prepend-icon="mdi-cog-outline" 
+                        title="Leave Rules" 
+                        :to="{ name: 'leave-rules' }"
+                    ></v-list-item>
+                    
+                    <v-list-item 
+                        prepend-icon="mdi-file-document-edit-outline" 
+                        title="Leave Requests" 
+                        :to="{ name: 'leave-requests' }"
+                    ></v-list-item>                 
+                </v-list-group>
+
                 <v-list-item
                     prepend-icon="mdi-file-document-outline"
                     title="Invoices"
@@ -124,8 +142,8 @@
                     <v-list-item 
                         title="Profile" 
                         prepend-icon="mdi-account-outline" 
-                        to="/profile" />
-                    <v-divider />
+                        to="/profile" 
+                    />
                     
                     <v-list-item 
                         title="Logout" 

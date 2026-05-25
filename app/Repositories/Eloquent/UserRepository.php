@@ -47,14 +47,14 @@ class UserRepository implements UserRepositoryInterface
     public function paginateStaff(int $perPage = 15, ?string $search = null): LengthAwarePaginator
     {
         $query = $this->model->newQuery()
-            ->with('roles')
+            ->with('roles', 'department', 'position')
             ->orderByDesc('id');
 
         if ($search) {
             $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $search).'%';
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', $term)
-                    ->orWhere('email', 'like', $term);
+                ->orWhere('email', 'like', $term);
             });
         }
 

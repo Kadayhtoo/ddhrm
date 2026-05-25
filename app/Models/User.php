@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'department_id',
+        'position_id',
         'salary',
         'shift_id',
         'is_active',
@@ -123,11 +124,22 @@ class User extends Authenticatable
             'name' => $this->name,
             'email' => $this->email,
             'department_id' => $this->department_id,
+            'position_id' => $this->position_id,
             'salary' => $this->salary,
             'shift_id' => $this->shift_id,
             'is_active' => $this->is_active,
             'roles' => $this->rolesPayload(),
             'permissions' => $this->permissionSlugs(),
         ];
+    }
+    
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class, 'position_id');
     }
 }

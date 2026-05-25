@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
 use App\Http\Resources\StaffResource;
+use App\Models\LeaveBalance;
+use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Services\StaffService;
 use Illuminate\Http\JsonResponse;
@@ -39,12 +41,29 @@ class StaffController extends Controller
             ->setStatusCode(201);
     }
 
-    public function show(User $user): StaffResource
+    public function showDetail($id): JsonResponse
     {
-        $this->authorize('view', $user);
-        $user->load('roles');
+        $staff = User::with(['department', 'roles'])->findOrFail($id);
+        return response()->json(['data' => $staff]);
+    }
+    
+    public function getLeaveBalances($id): JsonResponse
+    {
+        $balances = LeaveBalance::with('leaveRule')
+            ->where('user_id', $id)
+            ->get();
+            
+        return response()->json(['data' => $balances]);
+    }
 
-        return new StaffResource($user);
+    public function getLeaveRequests($id): JsonResponse
+    {
+        $requests = LeaveRequest::with('leaveRule')
+            ->where('user_id', $id)
+            ->orderByDesc('id')
+            ->get();
+            
+        return response()->json(['data' => $requests]);
     }
 
     public function update(UpdateStaffRequest $request, User $user): StaffResource
@@ -61,5 +80,16 @@ class StaffController extends Controller
         $this->staffService->delete($user, $request->user());
 
         return response()->json(['message' => 'User deleted']);
+    }
+
+    public function dropdownList(): JsonResponse
+    {
+        $staff = User::query()
+            ->select(['id', 'name', 'department_id'])
+            ->with(['department:id,name'])
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($staff);
     }
 }
