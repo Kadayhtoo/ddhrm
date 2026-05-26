@@ -161,6 +161,16 @@
                         :loading="loadingPositions"
                         no-data-text="Please select department first / No positions found"
                     />
+                    <v-text-field
+                        v-model.number="form.salary"
+                        label="Monthly Salary"
+                        variant="outlined"
+                        density="comfortable"
+                        type="number"
+                        suffix="MMK"
+                        prepend-inner-icon="mdi-cash"
+                        class="mb-1"
+                    />
                     <v-select
                         v-model="form.role_id"
                         :items="assignableRoles"
@@ -278,9 +288,11 @@
         password: '',
         department_id: null, 
         position_id: null, 
+        salary: null,
         role_id: null,
         is_active: true,
     });
+
     function setNotification(message, type = 'success') {
         notification.value = message;
         notificationType.value = type;
@@ -288,6 +300,7 @@
             notification.value = '';
         }, 4000);
     }
+
     async function loadAssignableRoles() {
         try {
             const response = await axios.get('/api/roles/assignable');
@@ -298,6 +311,7 @@
             console.error('Failed to load assignable roles:', e);
         }
     }
+
     async function loadDepartments() {
         try {
             const response = await axios.get('/api/department');
@@ -306,6 +320,7 @@
             console.error('Failed to load departments:', e);
         }
     }
+
     async function onDepartmentChange(departmentId) {
         form.position_id = null;
         positionOptions.value = [];
@@ -321,6 +336,7 @@
             loadingPositions.value = false;
         }
     }
+
     async function loadItems({ page: targetPage, itemsPerPage: targetLimit }) {
         loading.value = true;
         try {
@@ -344,10 +360,12 @@
             loading.value = false;
         }
     }
+
     function applySearch() {
         activeSearch.value = searchInput.value ?? '';
         loadItems({ page: 1, itemsPerPage: itemsPerPage.value });
     }
+
     function openCreate() {
         isEdit.value = false;
         formError.value = '';
@@ -355,12 +373,14 @@
         form.email = '';
         form.password = '';
         form.department_id = null;
-        form.position_id = null;        
+        form.position_id = null;   
+        form.salary = null;     
         form.role_id = assignableRoles.value[0]?.id ?? null;
         form.is_active = true;
         positionOptions.value = [];
         dialog.value = true;
     }
+
     async function openEdit(item) {
         isEdit.value = true;
         editId.value = item.id;
@@ -374,15 +394,18 @@
             await onDepartmentChange(item.department_id);
         }
         
-        form.position_id = item.position_id ?? null;            
+        form.position_id = item.position_id ?? null; 
+        form.salary = item.salary ?? null;           
         form.role_id = item.roles[0]?.id ?? null;
         form.is_active = !!item.is_active;
         dialog.value = true;
     }
+
     function openDelete(item) {
         deleteId.value = item.id;
         deleteDialog.value = true;
     }
+
     async function save() {
         formError.value = '';
         saving.value = true;
@@ -393,6 +416,7 @@
             password: form.password,
             department_id: form.department_id,
             position_id: form.position_id, 
+            salary: form.salary,
             role_id: form.role_id,
             is_active: form.is_active,
         };
@@ -423,6 +447,7 @@
             saving.value = false;
         }
     }
+
     async function doDelete() {
         deleting.value = true;
         try {
@@ -437,6 +462,7 @@
             deleting.value = false;
         }
     }
+    
     onMounted(() => {
         loadAssignableRoles();
         loadDepartments(); 

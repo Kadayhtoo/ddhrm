@@ -4,28 +4,69 @@
         
         <template v-else-if="staff">
             <v-card variant="outlined" class="rounded-lg mb-6 border-thin bg-white elevation-0">
-                <v-card-text class="d-flex flex-wrap align-center pa-6 ga-4">
-                    <v-avatar color="primary" size="72" class="elevation-1">
-                        <span class="text-h4 text-white font-weight-bold">
-                            {{ staff.name?.charAt(0).toUpperCase() }}
-                        </span>
-                    </v-avatar>
-                    <div>
-                        <div class="text-h5 font-weight-bold text-grey-darken-4 mb-1">{{ staff.name }}</div>
-                        <div class="text-body-2 text-medium-emphasis mb-3 d-flex align-center">
-                            <v-icon size="small" class="mr-1">mdi-email-outline</v-icon>{{ staff.email }}
-                        </div>
-                        <div class="d-flex flex-wrap ga-2">
-                            <v-chip size="small" color="indigo" variant="tonal" prepend-icon="mdi-domain" class="font-weight-bold">
-                                {{ staff.department?.name || 'No Department' }}
-                            </v-chip>
-                            <v-chip size="small" color="success" variant="tonal" prepend-icon="mdi-shield-account" class="font-weight-bold text-capitalize">
-                                {{ staff.roles?.[0]?.name || 'Staff' }}
-                            </v-chip>
+                <v-card-text class="d-flex flex-wrap align-center justify-space-between pa-6 ga-4">
+                    
+                    <div class="d-flex align-center ga-4">
+                        <v-avatar color="primary" size="72" class="elevation-1">
+                            <span class="text-h4 text-white font-weight-bold">
+                                {{ staff.name?.charAt(0).toUpperCase() }}
+                            </span>
+                        </v-avatar>
+                        
+                        <div>
+                            <div class="text-h5 font-weight-bold text-grey-darken-4 mb-1">{{ staff.name }}</div>
+                            <div class="text-body-2 text-medium-emphasis mb-3 d-flex align-center">
+                                <v-icon size="small" class="mr-1" color="grey-darken-1">mdi-email-outline</v-icon>
+                                {{ staff.email }}
+                            </div>
+                            <div class="d-flex flex-wrap ga-2">
+                                <v-chip size="small" color="indigo" variant="tonal" prepend-icon="mdi-domain" class="font-weight-bold">
+                                    {{ staff.department?.name || 'No Department' }}
+                                </v-chip>
+                                <v-chip size="small" color="indigo" variant="tonal" prepend-icon="mdi-domain" class="font-weight-bold">
+                                   Salary ~ {{ staff.salary || 'N/A' }} MMK
+                                </v-chip>
+                                <v-chip size="small" color="success" variant="tonal" prepend-icon="mdi-shield-account" class="font-weight-bold text-capitalize">
+                                    {{ staff.roles?.[0]?.name || 'Staff' }}
+                                </v-chip>
+                            </div>
                         </div>
                     </div>
+
+                    <div>
+                        <v-btn
+                            variant="outlined"
+                            color="primary"
+                            prepend-icon="mdi-account-outline"
+                            to="/profile"
+                            class="text-none font-weight-medium px-4 rounded-lg"
+                        >
+                            View Profile
+                        </v-btn>
+                    </div>
+
                 </v-card-text>
             </v-card>
+
+            <v-row class="mb-4" align="center">
+                <v-col cols="12" sm="6" md="4">
+                    <v-select
+                        v-model="selectedYear"
+                        :items="yearOptions"
+                        label="Filter By Calendar Year"
+                        density="comfortable"
+                        variant="outlined"
+                        prepend-inner-icon="mdi-calendar-filter"
+                        hide-details
+                        class="bg-white rounded-lg"
+                    ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="8" class="text-sm-right">
+                    <span class="text-body-2 text-medium-emphasis font-weight-medium">
+                        Showing results for year: <v-chip size="small" color="primary" class="font-weight-bold px-3">{{ selectedYear }}</v-chip>
+                    </span>
+                </v-col>
+            </v-row>
 
             <v-tabs v-model="activeTab" color="primary" class="mb-4 border-b">
                 <v-tab value="balance"><v-icon start>mdi-scale-balance</v-icon> Leave Balance</v-tab>
@@ -36,43 +77,120 @@
             <v-window v-model="activeTab" class="pt-2">  
                 
                 <v-window-item value="balance">
-                    <v-row v-if="leaveBalances.length > 0">
-                        <v-col v-for="bal in leaveBalances" :key="bal.id" cols="12" sm="6" md="4">
-                            <v-card variant="outlined" class="rounded-lg border-thin bg-white">
-                                <v-card-text class="pa-4">
-                                    <div class="text-subtitle-1 font-weight-bold text-primary mb-1">
+                    <v-card 
+                        v-if="leaveBalances.length > 0"
+                        :loading="loadingDetails"
+                        variant="outlined" 
+                        class="rounded-lg border-thin elevation-0 bg-white"
+                    >
+                        <v-table density="comfortable">
+                            <thead>
+                                <tr class="bg-grey-lighten-4">
+                                    <th class="text-subtitle-2 font-weight-bold">Leave Type</th>
+                                    <th class="text-subtitle-2 font-weight-bold text-center">Total Allowed</th>
+                                    <th class="text-subtitle-2 font-weight-bold text-center">Used</th>
+                                    <th class="text-subtitle-2 font-weight-bold text-center">Available Balance</th>
+                                    <th class="text-subtitle-2 font-weight-bold text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="bal in leaveBalances" :key="bal.id">
+                                    <td class="font-weight-bold text-primary text-capitalize">
                                         {{ bal.leave_rule?.name || 'Leave Type' }}
-                                    </div>
-                                    <v-divider class="my-2" />
-                                    <div class="d-flex justify-space-between text-body-2 py-1">
-                                        <span class="text-medium-emphasis">Total Allocated:</span>
-                                        <span class="font-weight-bold">{{ bal.total_allowed_days }} Days</span>
-                                    </div>
-                                    <div class="d-flex justify-space-between text-body-2 py-1">
-                                        <span class="text-medium-emphasis">Used / Taken:</span>
-                                        <span class="font-weight-bold text-error">{{ bal.used_days }} Days</span>
-                                    </div>
-                                    <v-divider class="my-2" />
-                                    <div class="d-flex justify-space-between text-subtitle-2 py-1.5 bg-grey-lighten-5 px-2 rounded">
-                                        <span class="font-weight-bold text-grey-darken-2">Available Balance:</span>
-                                        <span class="font-weight-bold text-success">{{ bal.total_allowed_days - bal.used_days }} Days</span>
-                                    </div>
-                                </v-card-text>
-                            </v-card>
-                        </v-col>
-                    </v-row>
+                                    </td>
+                                    <td class="text-center font-weight-semibold">
+                                        {{ bal.total_allowed_days }} Days
+                                    </td>
+                                    <td class="text-center">
+                                        <v-chip size="x-small" :color="bal.used_days > 0 ? 'error' : 'grey'" variant="flat" class="font-weight-bold">
+                                            {{ bal.used_days }} Days
+                                        </v-chip>
+                                    </td>
+                                    <td class="text-center font-weight-bold text-success text-subtitle-1">
+                                        {{ bal.total_allowed_days - bal.used_days }} Days
+                                    </td>
+                                    <td class="text-center">
+                                        <v-btn
+                                            size="x-small"
+                                            color="info"
+                                            variant="tonal"
+                                            prepend-icon="mdi-eye-outline"
+                                            class="font-weight-bold"
+                                            @click="openLeaveDetail(bal)"
+                                        >
+                                            View Detail
+                                        </v-btn>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
+                    </v-card>
 
-                    <v-card v-else variant="flat" class="rounded-lg bg-transparent py-12 text-center d-flex flex-column align-center justify-center">
-                        <v-avatar color="blue-lighten-5" size="70" class="mb-3">
-                            <v-icon size="36" color="blue-darken-1">mdi-scale-balance</v-icon>
+                    <div v-else-if="!loadingDetails" class="d-flex flex-column align-center justify-center py-12 px-4 text-center">
+                        <v-avatar color="red-lighten-5" size="70" class="mb-3">
+                            <v-icon size="36" color="error">mdi-scale-balance</v-icon>
                         </v-avatar>
                         <div class="text-subtitle-1 font-weight-bold text-grey-darken-3 mb-1">
-                            No Leave Balance Allocated
+                            No Leave Balance Allocated for {{ selectedYear }}
                         </div>
-                        <div class="text-body-2 text-medium-emphasis" style="max-width: 380px;">
-                            There are no active leave allocation or balance records set up for this employee yet.
+                        <div class="text-body-2 text-medium-emphasis mx-auto px-4" style="max-width: 420px;">
+                            There are no active leave allocation records assigned to this employee for the selected year <strong class="text-grey-darken-4">{{ selectedYear }}</strong>.
                         </div>
-                    </v-card>
+                    </div>
+                    
+                    <div v-if="loadingDetails" class="d-flex justify-center py-12">
+                        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                    </div>
+
+                    <v-dialog v-model="detailDialog" max-width="700px">
+                        <v-card rounded="lg" class="pa-2">
+                            <v-card-title class="d-flex justify-space-between align-center font-weight-bold text-h6 text-grey-darken-4">
+                                <span>
+                                    <v-icon color="primary" class="mr-1">mdi-calendar-check</v-icon> 
+                                    {{ selectedLeaveType }} - Approved History ({{ selectedYear }})
+                                </span>
+                                <v-btn icon="mdi-close" variant="text" size="small" @click="detailDialog = false"></v-btn>
+                            </v-card-title>
+                            <v-divider></v-divider>
+                            
+                            <v-card-text class="pa-4">
+                                <v-row v-if="loadingApprovedDetail" justify="center" class="my-4">
+                                    <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                                </v-row>
+                                
+                                <v-table v-else density="comfortable" class="border rounded-lg">
+                                    <thead>
+                                        <tr class="bg-grey-lighten-4">
+                                            <th class="text-subtitle-2 font-weight-bold">Duration Period</th>
+                                            <th class="text-subtitle-2 font-weight-bold text-center">Session</th>
+                                            <th class="text-subtitle-2 font-weight-bold text-center">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="req in filteredApprovedRequests" :key="req.id">
+                                            <td class="font-weight-medium py-2">
+                                                <v-icon size="small" color="grey" class="mr-1">mdi-calendar-range</v-icon>
+                                                {{ req.start_date?.substring(0,10) }} <span class="text-grey mx-1">→</span> {{ req.end_date?.substring(0,10) }}
+                                            </td>
+                                            <td class="text-center text-capitalize">
+                                                <v-chip size="x-small" variant="flat" color="indigo-lighten-5" class="text-indigo font-weight-bold">
+                                                    {{ req.leave_session?.replace('_', ' ') || 'Full Day' }}
+                                                </v-chip>
+                                            </td>
+                                            <td class="text-center font-weight-bold text-primary">
+                                                {{ req.total_days }} {{ req.total_days > 1 ? 'Days' : 'Day' }}
+                                            </td>
+                                        </tr>
+                                        <tr v-if="filteredApprovedRequests.length === 0">
+                                            <td colspan="4" class="text-center text-medium-emphasis py-8 font-italic">
+                                                No approved leave consumption logs found for this type in year {{ selectedYear }}.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </v-table>
+                            </v-card-text>
+                        </v-card>
+                    </v-dialog>
                 </v-window-item>
 
                 <v-window-item value="requests">
@@ -87,6 +205,7 @@
                             density="comfortable"
                             class="bg-transparent text-none"
                             :hide-default-header="leaveRequests.length === 0" >
+                            
                             <template #[`item.id`]="{ item }">
                                 <v-chip size="small" variant="tonal" class="font-weight-bold">#{{ item.id }}</v-chip>
                             </template>
@@ -128,10 +247,10 @@
                                         <v-icon size="36" color="primary">mdi-text-box-remove-outline</v-icon>
                                     </v-avatar>
                                     <div class="text-subtitle-1 font-weight-bold text-grey-darken-3 mb-1">
-                                        No Leave History Found
+                                        No Leave History Applications Found
                                     </div>
-                                    <div class="text-body-2 text-medium-emphasis" style="max-width: 360px;">
-                                        This employee hasn't submitted any leave request application records yet.
+                                    <div class="text-body-2 text-medium-emphasis mx-auto" style="max-width: 400px;">
+                                        This staff member has not submitted or processed any leave request applications during the calendar year <strong class="text-primary">{{ selectedYear }}</strong>.
                                     </div>
                                 </div>
                             </template>
@@ -151,6 +270,7 @@
                             density="comfortable"
                             class="bg-transparent text-none"
                             :hide-default-header="attendances.length === 0" >
+                            
                             <template #[`item.date`]="{ item }">
                                 <span class="font-weight-bold text-grey-darken-3">{{ item.date }}</span>
                             </template>
@@ -183,13 +303,13 @@
                             <template #no-data>
                                 <div class="d-flex flex-column align-center justify-center py-12 px-4 text-center">
                                     <v-avatar color="amber-lighten-5" size="70" class="mb-3">
-                                        <v-icon size="36" color="amber-darken-2">mdi-calendar-blank-outline</v-icon>
+                                        <v-icon size="36" color="amber-darken-3">mdi-calendar-blank-outline</v-icon>
                                     </v-avatar>
                                     <div class="text-subtitle-1 font-weight-bold text-grey-darken-3 mb-1">
-                                        No Attendance Tracked
+                                        No Shift Attendance Logs Generated
                                     </div>
-                                    <div class="text-body-2 text-medium-emphasis" style="max-width: 360px;">
-                                        There are no check-in, check-out or working shift logs generated for this month.
+                                    <div class="text-body-2 text-medium-emphasis mx-auto" style="max-width: 400px;">
+                                        There are no recorded punch logs, biometric check-ins, or shift duties detected for this profile in <strong class="text-amber-darken-4">{{ selectedYear }}</strong>.
                                     </div>
                                 </div>
                             </template>
@@ -202,7 +322,7 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, watch } from 'vue';
+    import { ref, onMounted, watch } from 'vue'; 
     import { useRoute, useRouter } from 'vue-router';
     import axios from 'axios';
 
@@ -212,6 +332,9 @@
     const staffId = route.params.user; 
     const activeTab = ref('balance');
 
+    const currentYear = new Date().getFullYear(); 
+    const selectedYear = ref(currentYear);
+    const yearOptions = ref(Array.from({ length: 5 }, (_, i) => currentYear - i));
     const staff = ref(null);
     const leaveBalances = ref([]);
     const leaveRequests = ref([]);
@@ -219,6 +342,12 @@
 
     const loadingStaff = ref(true);
     const loadingDetails = ref(false);
+
+    const detailDialog = ref(false);
+    const selectedLeaveType = ref('');
+    const filteredApprovedRequests = ref([]);
+    const loadingApprovedDetail = ref(false);
+    const currentActiveBalanceItem = ref(null); 
 
     const leaveHeaders = [
         { title: 'ID', key: 'id', width: '80px' },
@@ -252,20 +381,50 @@
     async function fetchTabData() {
         loadingDetails.value = true;
         try {
+            const params = { year: selectedYear.value };
+
             if (activeTab.value === 'balance') {
-                const { data } = await axios.get(`/api/staff/${staffId}/leave-balances`);
-                leaveBalances.value = data.data || data || [];
+                const { data } = await axios.get(`/api/staff/${staffId}/leave-balances`, { params });
+                leaveBalances.value = data.data || [];
+                
             } else if (activeTab.value === 'requests') {
-                const { data } = await axios.get(`/api/staff/${staffId}/leave-requests`);
-                leaveRequests.value = data.data || data || [];
+                const { data } = await axios.get(`/api/staff/${staffId}/leave-requests`, { params });
+                leaveRequests.value = data.data?.data || data.data || [];
+                
             } else if (activeTab.value === 'attendance') {
-                const { data } = await axios.get(`/api/staff/${staffId}/attendances`);
-                attendances.value = data.data || data || [];
+                const { data } = await axios.get(`/api/staff/${staffId}/attendances`, { params });
+                attendances.value = data.data?.data || data.data || [];
             }
         } catch (e) {
             console.error(`Tab fetch data error:`, e);
+            leaveBalances.value = [];
         } finally {
             loadingDetails.value = false;
+        }
+    }
+
+    async function openLeaveDetail(balanceItem) {
+        currentActiveBalanceItem.value = balanceItem; 
+        selectedLeaveType.value = balanceItem.leave_rule?.name || 'Leave Type';
+        detailDialog.value = true;
+        loadingApprovedDetail.value = true;
+        
+        try {
+            const { data } = await axios.get(`/api/staff/${staffId}/leave-requests`, {
+                params: { year: selectedYear.value }
+            });
+            const allRequests = data.data?.data || data.data || [];
+            
+            filteredApprovedRequests.value = allRequests.filter(req => {
+                const reqYear = req.year || req.start_date?.substring(0, 4);
+                return req.leave_rule_id === balanceItem.leave_rule_id && 
+                       req.status === 'approved' && 
+                       String(reqYear) === String(selectedYear.value);
+            });
+        } catch (error) {
+            console.error("Error filtering approved requests:", error);
+        } finally {
+            loadingApprovedDetail.value = false;
         }
     }
 
@@ -273,8 +432,11 @@
         return s === 'approved' ? 'success' : (s === 'rejected' ? 'error' : (s === 'pending_hr' ? 'info' : 'warning'));
     }
     
-    watch(activeTab, () => {
+    watch([activeTab, selectedYear], () => {
         fetchTabData();
+        if (detailDialog.value && currentActiveBalanceItem.value) {
+            openLeaveDetail(currentActiveBalanceItem.value);
+        }
     });
 
     onMounted(() => {

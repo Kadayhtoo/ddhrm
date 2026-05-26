@@ -14,6 +14,7 @@ class LeaveRequest extends Model
         'leave_rule_id', 
         'start_date',
         'end_date', 
+        'year',
         'total_days', 
         'leave_session', 
         'reason', 

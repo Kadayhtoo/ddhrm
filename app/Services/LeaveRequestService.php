@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Repositories\Contracts\LeaveRequestRepositoryInterface;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -25,6 +26,13 @@ class LeaveRequestService
         if (empty($data['user_id'])) {
             $data['user_id'] = $actor->id;
         }
+
+        if (!empty($data['start_date'])) {
+            $data['year'] = Carbon::parse($data['start_date'])->format('Y');
+        } else {
+            $data['year'] = Carbon::now()->format('Y'); 
+        }
+        
         if ($attachment) {
             $data['attachment'] = $attachment->store('leave_attachments', 'public');
         }

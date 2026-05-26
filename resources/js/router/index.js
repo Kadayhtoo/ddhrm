@@ -52,7 +52,7 @@ const router = createRouter({
                     path: 'position',
                     name: 'position',
                     component: PositionManagePage,
-                    meta: { title: 'Position' },
+                    meta: { title: 'Position', permission: 'positions.view' },
                 },
                 {
                     path: 'roles',
@@ -83,7 +83,7 @@ const router = createRouter({
                     path: 'payroll',
                     name: 'payroll',
                     component: PlaceholderPage,
-                    meta: { title: 'Payroll' },
+                    meta: { title: 'Payroll', permission: ['payroll.view'] },
                     props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
                 },
                 {
@@ -109,7 +109,7 @@ const router = createRouter({
                     path: 'invoices',
                     name: 'invoices',
                     component: PlaceholderPage,
-                    meta: { title: 'Invoices' },
+                    meta: { title: 'Invoices', permission: ['invoices.view'] },
                     props: { title: 'Client invoices', subtitle: 'Clients, projects, invoices, payments.' },
                 },
                 {
