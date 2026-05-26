@@ -67,24 +67,29 @@
                     <template #activator="{ props }">
                         <v-list-item v-bind="props" prepend-icon="mdi-palm-tree" title="Leave Manage"></v-list-item>
                     </template>
-
                     <v-list-item 
                         prepend-icon="mdi-cog-outline" 
                         title="Leave Rules" 
                         :to="{ name: 'leave-rules' }"
-                    ></v-list-item>
-                    
+                    ></v-list-item>  
                     <v-list-item 
                         prepend-icon="mdi-file-document-edit-outline" 
                         title="Leave Requests" 
                         :to="{ name: 'leave-requests' }"
                     ></v-list-item>                 
                 </v-list-group>
-
                 <v-list-item
+                    v-if="auth.can('invoices.view')"
                     prepend-icon="mdi-file-document-outline"
                     title="Invoices"
                     :to="{ name: 'invoices' }"
+                    rounded="lg"
+                />
+                <v-list-item
+                    v-if="auth.can('payroll.view')"
+                    prepend-icon="mdi-file-document-outline"
+                    title="Payroll"
+                    :to="{ name: 'payroll' }"
                     rounded="lg"
                 />
                 <v-list-group value="system-management" v-if="showSystemManageMenu">
@@ -140,11 +145,11 @@
 
                 <v-list density="compact" min-width="200">
                     <v-list-item 
+                        v-if="auth.user?.id" 
                         title="Profile" 
                         prepend-icon="mdi-account-outline" 
-                        to="/profile" 
+                        :to="{ name: 'staff.detail', params: { user: auth.user.id } }"
                     />
-                    
                     <v-list-item 
                         title="Logout" 
                         prepend-icon="mdi-logout" 

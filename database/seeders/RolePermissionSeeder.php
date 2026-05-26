@@ -37,6 +37,10 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Manage leave requests', 'slug' => 'leave-requests.manage'],
             ['name' => 'View leave balances', 'slug' => 'leave-balances.view'],
             ['name' => 'Manage leave balances', 'slug' => 'leave-balances.manage'],
+            ['name' => 'View payroll', 'slug' => 'payroll.view'],
+            ['name' => 'Manage payroll', 'slug' => 'payroll.manage'],
+            ['name' => 'View invoices','slug' => 'invoices.view'],
+            ['name' => 'Manage invoices', 'slug' => 'invoices.manage'],
         ];
 
         $permissions = collect($definitions)->map(fn (array $row) => Permission::query()->firstOrCreate(

@@ -26,4 +26,8 @@ class LeaveRule extends Model
             }
         });
     }
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class, 'leave_rule_id');
+    }
 }

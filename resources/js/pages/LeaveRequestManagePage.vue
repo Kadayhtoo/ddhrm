@@ -521,6 +521,7 @@
             { title: 'ID', key: 'id', sortable: false },
             { title: 'Leave Type', key: 'leave_rule', sortable: false },
             { title: 'Duration', key: 'duration', sortable: false },
+            { title: 'Year', key: 'year', sortable: false },
             { title: 'Total', key: 'total_days', sortable: false },
             { title: 'Attachment', key: 'attachment', sortable: false },
             { title: 'Status', key: 'status', sortable: false },

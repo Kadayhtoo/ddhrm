@@ -47,25 +47,34 @@ class StaffController extends Controller
         return response()->json(['data' => $staff]);
     }
     
-    public function getLeaveBalances($id): JsonResponse
+    public function getLeaveBalances(Request $request, $id): JsonResponse
     {
-        $balances = LeaveBalance::with('leaveRule')
+        $year = $request->query('year', date('Y'));
+
+        $balances = LeaveBalance::with(['leaveRule'])
             ->where('user_id', $id)
+            ->whereHas('leaveRule.leaveRequests', function($query) use ($id, $year) {
+                $query->where('user_id', $id)
+                    ->where('year', $year); 
+        })
             ->get();
             
         return response()->json(['data' => $balances]);
     }
 
-    public function getLeaveRequests($id): JsonResponse
+    public function getLeaveRequests(Request $request, $id): JsonResponse
     {
+        $year = $request->query('year', date('Y'));
+
         $requests = LeaveRequest::with('leaveRule')
             ->where('user_id', $id)
+            ->whereYear('start_date', $year) 
             ->orderByDesc('id')
             ->get();
             
         return response()->json(['data' => $requests]);
     }
-
+    
     public function update(UpdateStaffRequest $request, User $user): StaffResource
     {
         $updated = $this->staffService->update($user, $request->validated(), $request->user());

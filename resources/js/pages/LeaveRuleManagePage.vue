@@ -11,13 +11,12 @@
                     density="comfortable"
                     variant="outlined"
                     hide-details
-                    label="Search"
+                    label="Search Rules"
                     prepend-inner-icon="mdi-magnify"
                     clearable
                     class="custom-search-btn-width"
                     @keyup.enter="applySearch"
                 />
-                
                 <v-btn 
                     color="primary" 
                     rounded="lg" 
