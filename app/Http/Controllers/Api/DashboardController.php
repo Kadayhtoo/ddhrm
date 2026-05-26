@@ -28,8 +28,8 @@ class DashboardController extends Controller
             'welcome' => 'DDHRM',
             'role_slugs' => $user->roles->pluck('slug')->values()->all(),
             'modules' => [
-                'staff' => ['label' => 'Active staff', 'value' => $activeStaff],
                 'attendance' => ['label' => 'Attendance', 'value' => 'Clock in / out'],
+                'staff' => ['label' => 'Active staff', 'value' => $activeStaff],
                 'payroll' => ['label' => 'Payroll', 'value' => 'Generate & payslips'],
                 'leave' => ['label' => 'Leave', 'value' => 'Rules & approvals'],
                 'invoices' => ['label' => 'Client invoices', 'value' => 'Projects & PDF'],

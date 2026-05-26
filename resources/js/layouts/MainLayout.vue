@@ -58,6 +58,7 @@
                     rounded="lg"
                 />
                 <v-list-item
+                    v-if="auth.can('attendance.view')"
                     prepend-icon="mdi-clock-outline"
                     title="Attendance"
                     :to="{ name: 'attendance' }"

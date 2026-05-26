@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\AttendanceReportController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\LeaveBalanceController;
@@ -34,6 +36,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/staff-dropdown', [StaffController::class, 'dropdownList']);
 
     Route::get('staff/{user}/attendances', [StaffController::class, 'getAttendances']);
+
+    Route::prefix('attendance')->middleware('permission:attendance.view')->group(function () {
+        Route::get('/', [AttendanceController::class, 'index']);
+        Route::get('/today', [AttendanceController::class, 'today']);
+        Route::post('/check-in', [AttendanceController::class, 'checkIn']);
+        Route::post('/check-out', [AttendanceController::class, 'checkOut']);
+        Route::get('/requests', [AttendanceController::class, 'requests']);
+        Route::post('/requests', [AttendanceController::class, 'storeRequest']);
+        Route::patch('/requests/{attendanceRequest}/review', [AttendanceController::class, 'reviewRequest'])
+            ->middleware('permission:attendance.manage');
+        Route::get('/reports/widgets', [AttendanceReportController::class, 'widgets']);
+        Route::get('/reports/daily', [AttendanceReportController::class, 'daily']);
+        Route::get('/reports/monthly', [AttendanceReportController::class, 'monthly']);
+        Route::get('/reports/employee/{user}', [AttendanceReportController::class, 'employee']);
+        Route::get('/{attendance}', [AttendanceController::class, 'show']);
+    });
 
     Route::apiResource('department', DepartmentController::class);
     Route::apiResource('position', PositionController::class);

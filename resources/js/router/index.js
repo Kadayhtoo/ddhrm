@@ -2,6 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import MainLayout from '@/layouts/MainLayout.vue';
 import AdminPanelPage from '@/pages/AdminPanelPage.vue';
+import AdminAttendanceTablePage from '@/pages/AdminAttendanceTablePage.vue';
+import AttendanceDetailPage from '@/pages/AttendanceDetailPage.vue';
+import AttendanceHistoryPage from '@/pages/AttendanceHistoryPage.vue';
+import AttendanceReportsPage from '@/pages/AttendanceReportsPage.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
 import PlaceholderPage from '@/pages/PlaceholderPage.vue';
@@ -75,9 +79,32 @@ const router = createRouter({
                 {
                     path: 'attendance',
                     name: 'attendance',
-                    component: PlaceholderPage,
-                    meta: { title: 'Attendance' },
-                    props: { title: 'Attendance', subtitle: 'Clock in/out, reports, and rules (per your PDF MVP).' },
+                    component: AttendanceHistoryPage,
+                    meta: { title: 'Attendance', permission: 'attendance.view' },
+                },
+                {
+                    path: 'attendance/history',
+                    name: 'attendance.history',
+                    component: AttendanceHistoryPage,
+                    meta: { title: 'Attendance History', permission: 'attendance.view' },
+                },
+                {
+                    path: 'attendance/admin/table',
+                    name: 'attendance.admin',
+                    component: AdminAttendanceTablePage,
+                    meta: { title: 'Admin Attendance', permission: 'attendance.manage' },
+                },
+                {
+                    path: 'attendance/reports',
+                    name: 'attendance.reports',
+                    component: AttendanceReportsPage,
+                    meta: { title: 'Attendance Reports', permission: 'attendance.manage' },
+                },
+                {
+                    path: 'attendance/:id',
+                    name: 'attendance.details',
+                    component: AttendanceDetailPage,
+                    meta: { title: 'Attendance Details', permission: 'attendance.view' },
                 },
                 {
                     path: 'payroll',

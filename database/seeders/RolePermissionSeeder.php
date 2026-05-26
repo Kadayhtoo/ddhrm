@@ -27,7 +27,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Create position', 'slug' => 'positions.create'],
             ['name' => 'Update position', 'slug' => 'positions.update'],
             ['name' => 'Delete position', 'slug' => 'positions.delete'],
-            ['name' => 'view attendance', 'slug' => 'attendance.view'],
+            ['name' => 'View attendance', 'slug' => 'attendance.view'],
             ['name' => 'Manage attendance', 'slug' => 'attendance.manage'],  
             ['name' => 'View leave rules', 'slug' => 'leave-rules.view'],
             ['name' => 'Ceate leave rules', 'slug' => 'leave-rules.create'],
@@ -47,13 +47,15 @@ class RolePermissionSeeder extends Seeder
         $bySlug = $permissions->keyBy('slug');
 
         $roleConfigs = [
-            ['name' => 'Staff', 'slug' => 'staff', 'permissions' => ['dashboard.view']],
-            ['name' => 'HR', 'slug' => 'hr', 'permissions' => ['dashboard.view', 'staff.view', 'staff.create', 'staff.update']],
+            ['name' => 'Staff', 'slug' => 'staff', 'permissions' => ['dashboard.view', 'attendance.view']],
+            ['name' => 'HR', 'slug' => 'hr', 'permissions' => ['dashboard.view', 'staff.view', 'staff.create', 'staff.update', 'attendance.view', 'attendance.manage']],
             ['name' => 'Admin', 'slug' => 'admin', 'permissions' => [
                 'dashboard.view', 'admin.access', 'staff.view', 'staff.create', 'staff.update', 'staff.delete', 'roles.view', 'roles.manage',
+                'attendance.view', 'attendance.manage',
             ]],
             ['name' => 'CEO', 'slug' => 'ceo', 'permissions' => [
                 'dashboard.view', 'admin.access', 'staff.view', 'staff.create', 'staff.update', 'staff.delete', 'roles.view', 'roles.manage',
+                'attendance.view', 'attendance.manage',
             ]],
         ];
 
