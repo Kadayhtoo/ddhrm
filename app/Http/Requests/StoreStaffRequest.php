@@ -2,14 +2,17 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Department;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreStaffRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('create', \App\Models\User::class) ?? false;
-        return $this->user()?->can('create', \App\Models\Department::class) ?? false;
+        return $this->user()?->can('create', User::class) ?? false;
+
+        return $this->user()?->can('create', Department::class) ?? false;
     }
 
     /**
@@ -23,7 +26,7 @@ class StoreStaffRequest extends FormRequest
             'password' => ['required', 'string', 'min:8'],
             'role_id' => ['required', 'integer', 'exists:roles,id'],
             'department_id' => ['nullable', 'integer'],
-            'position_id'   => ['nullable', 'integer'],            
+            'position_id' => ['nullable', 'integer'],
             'salary' => ['nullable', 'numeric', 'min:0'],
             'shift_id' => ['nullable', 'integer'],
             'is_active' => ['sometimes', 'boolean'],

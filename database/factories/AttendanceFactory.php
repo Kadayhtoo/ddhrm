@@ -14,13 +14,13 @@ class AttendanceFactory extends Factory
             ->format('Y-m-d');
 
         $clockIn = fake()->dateTimeBetween(
-            $date . ' 08:45:00',
-            $date . ' 09:45:00'
+            $date.' 08:45:00',
+            $date.' 09:45:00'
         );
 
         $clockOut = fake()->dateTimeBetween(
-            $date . ' 17:30:00',
-            $date . ' 18:45:00'
+            $date.' 17:30:00',
+            $date.' 18:45:00'
         );
 
         $workMinutes = max(
@@ -30,7 +30,7 @@ class AttendanceFactory extends Factory
             )
         );
 
-        $lateLimit = strtotime($date . ' 09:15:00');
+        $lateLimit = strtotime($date.' 09:15:00');
 
         $lateMinutes = $clockIn->getTimestamp() > $lateLimit
             ? (int) (

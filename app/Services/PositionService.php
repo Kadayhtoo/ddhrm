@@ -20,6 +20,7 @@ class PositionService
     {
         return $this->positionRepo->paginatePositions($perPage, $search);
     }
+
     public function getAllPositions(): Collection
     {
         return $this->positionRepo->all();

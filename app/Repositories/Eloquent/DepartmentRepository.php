@@ -31,13 +31,13 @@ class DepartmentRepository implements DepartmentRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function paginateDepartment(int $perPage = 15,?string $search = null): LengthAwarePaginator
+    public function paginateDepartment(int $perPage = 15, ?string $search = null): LengthAwarePaginator
     {
         $query = $this->model->newQuery()
             ->orderByDesc('id');
 
         if ($search) {
-            $term = '%' . str_replace( ['%', '_'], ['\\%', '\\_'], $search) . '%';
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $search).'%';
 
             $query->where('name', 'like', $term);
         }

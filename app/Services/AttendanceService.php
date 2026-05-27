@@ -15,8 +15,11 @@ use Illuminate\Validation\ValidationException;
 class AttendanceService
 {
     public const OFFICE_START = '09:00:00';
+
     public const OFFICE_END = '18:30:00';
+
     public const GRACE_MINUTES = 15;
+
     public const MINIMUM_WORK_MINUTES = 240;
 
     public function __construct(
@@ -37,7 +40,7 @@ class AttendanceService
         array $filters,
         int $perPage
     ): LengthAwarePaginator {
-        if (!$this->canManage($actor)) {
+        if (! $this->canManage($actor)) {
             $filters['user_id'] = $actor->id;
         }
 
@@ -50,12 +53,12 @@ class AttendanceService
     {
         $attendance = $this->attendances->findById($id);
 
-        if (!$attendance) {
+        if (! $attendance) {
             abort(404, 'Attendance not found');
         }
 
         if (
-            !$this->canManage($actor) &&
+            ! $this->canManage($actor) &&
             (int) $attendance->user_id !== (int) $actor->id
         ) {
             abort(
@@ -149,7 +152,7 @@ class AttendanceService
         User $actor,
         array $data
     ): AttendanceRequest {
-        $userId = $this->canManage($actor) && !empty($data['user_id'])
+        $userId = $this->canManage($actor) && ! empty($data['user_id'])
             ? (int) $data['user_id']
             : $actor->id;
 
@@ -184,7 +187,7 @@ class AttendanceService
         array $filters,
         int $perPage
     ): LengthAwarePaginator {
-        if (!$this->canManage($actor)) {
+        if (! $this->canManage($actor)) {
             $filters['user_id'] = $actor->id;
         }
 
@@ -197,7 +200,7 @@ class AttendanceService
         ?string $note,
         User $actor
     ): AttendanceRequest {
-        if (!$this->canManage($actor)) {
+        if (! $this->canManage($actor)) {
             abort(
                 403,
                 'You are not allowed to review attendance requests.'
@@ -212,7 +215,7 @@ class AttendanceService
         ) {
             $request = $this->requests->findById($id);
 
-            if (!$request) {
+            if (! $request) {
                 abort(404, 'Attendance request not found');
             }
 
@@ -242,7 +245,7 @@ class AttendanceService
 
     public function dailyReport(User $actor, array $filters): array
     {
-        if (!$this->canManage($actor)) {
+        if (! $this->canManage($actor)) {
             $filters['user_id'] = $actor->id;
         }
 
@@ -259,7 +262,7 @@ class AttendanceService
 
     public function monthlyReport(User $actor, array $filters): array
     {
-        if (!$this->canManage($actor)) {
+        if (! $this->canManage($actor)) {
             $filters['user_id'] = $actor->id;
         }
 
@@ -286,7 +289,7 @@ class AttendanceService
         array $filters
     ): array {
         if (
-            !$this->canManage($actor) &&
+            ! $this->canManage($actor) &&
             (int) $actor->id !== $userId
         ) {
             abort(
@@ -322,7 +325,7 @@ class AttendanceService
             'date' => $date ?? now()->toDateString(),
         ];
 
-        if (!$this->canManage($actor)) {
+        if (! $this->canManage($actor)) {
             $filters['user_id'] = $actor->id;
         }
 
@@ -348,8 +351,8 @@ class AttendanceService
         foreach ($this->attendances->openBefore($today) as $attendance) {
             $checkout = Carbon::parse(
                 $attendance->attendance_date->toDateString()
-                . ' '
-                . self::OFFICE_END
+                .' '
+                .self::OFFICE_END
             );
 
             $workMinutes = max(
@@ -380,8 +383,8 @@ class AttendanceService
 
         $limit = Carbon::parse(
             $clockIn->toDateString()
-            . ' '
-            . self::OFFICE_START
+            .' '
+            .self::OFFICE_START
         )->addMinutes(self::GRACE_MINUTES);
 
         return $clockIn->greaterThan($limit)
@@ -414,7 +417,7 @@ class AttendanceService
             now()->toDateString()
         );
 
-        if (!$attendance || !$attendance->clock_in_at) {
+        if (! $attendance || ! $attendance->clock_in_at) {
             throw ValidationException::withMessages([
                 'attendance' => [
                     'You must check in before this action.',

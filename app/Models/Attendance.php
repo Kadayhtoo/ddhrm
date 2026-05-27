@@ -17,7 +17,7 @@ class Attendance extends Model
         'attendance_date',
         'clock_in_at',
         'clock_out_at',
-            'work_minutes',
+        'work_minutes',
         'late_minutes',
         'status',
         'source',

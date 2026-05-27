@@ -18,8 +18,8 @@ class AttendanceRequestFactory extends Factory
             'requested_by' => User::factory(),
             'type' => 'full_day',
             'requested_date' => $date,
-            'requested_clock_in_at' => $date . ' 09:00:00',
-            'requested_clock_out_at' => $date . ' 18:30:00',
+            'requested_clock_in_at' => $date.' 09:00:00',
+            'requested_clock_out_at' => $date.' 18:30:00',
             'reason' => fake()->sentence(),
             'status' => 'pending',
         ];

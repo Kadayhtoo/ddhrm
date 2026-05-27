@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Models\LeaveRule; 
+use App\Models\LeaveRule;
 use App\Repositories\Contracts\LeaveRuleRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -22,7 +22,7 @@ class LeaveRuleRepository implements LeaveRuleRepositoryInterface
         $query = $this->model->newQuery()->orderByDesc('id');
 
         if ($search) {
-            $term = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $search) . '%';
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $search).'%';
             $query->where('name', 'like', $term);
         }
 

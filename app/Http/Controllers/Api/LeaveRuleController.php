@@ -39,8 +39,8 @@ class LeaveRuleController extends Controller
     public function show($id): LeaveRuleResource
     {
         $leaveRule = $this->leaveRuleService->findById($id);
-        
-        if (!$leaveRule) {
+
+        if (! $leaveRule) {
             abort(404, 'Leave rule not found');
         }
 
@@ -51,7 +51,7 @@ class LeaveRuleController extends Controller
     {
         $leaveRule = $this->leaveRuleService->findById($id);
 
-        if (!$leaveRule) {
+        if (! $leaveRule) {
             abort(404, 'Leave rule not found');
         }
 
@@ -64,7 +64,7 @@ class LeaveRuleController extends Controller
     {
         $leaveRule = $this->leaveRuleService->findById($id);
 
-        if (!$leaveRule) {
+        if (! $leaveRule) {
             abort(404, 'Leave rule not found');
         }
 

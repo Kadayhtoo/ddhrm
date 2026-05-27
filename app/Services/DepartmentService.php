@@ -17,7 +17,7 @@ class DepartmentService
         return $this->departments->paginateDepartment($perPage, $search);
     }
 
-   public function create(array $data): Department
+    public function create(array $data): Department
     {
         return $this->departments->create([
             'name' => $data['name'],

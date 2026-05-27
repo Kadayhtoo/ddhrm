@@ -53,7 +53,6 @@ class AttendanceRepository implements AttendanceRepositoryInterface
         return $attendance->refresh()->load(['user.department']);
     }
 
-
     public function dailyRecords(string $date, array $filters = []): Collection
     {
         $query = $this->model->newQuery()
@@ -91,32 +90,32 @@ class AttendanceRepository implements AttendanceRepositoryInterface
 
     protected function applyFilters($query, array $filters): void
     {
-        if (!empty($filters['user_id'])) {
+        if (! empty($filters['user_id'])) {
             $query->where('user_id', (int) $filters['user_id']);
         }
 
-        if (!empty($filters['department_id'])) {
+        if (! empty($filters['department_id'])) {
             $query->whereHas('user', fn ($q) => $q->where('department_id', (int) $filters['department_id']));
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['date'])) {
+        if (! empty($filters['date'])) {
             $query->whereDate('attendance_date', $filters['date']);
         }
 
-        if (!empty($filters['from'])) {
+        if (! empty($filters['from'])) {
             $query->whereDate('attendance_date', '>=', $filters['from']);
         }
 
-        if (!empty($filters['to'])) {
+        if (! empty($filters['to'])) {
             $query->whereDate('attendance_date', '<=', $filters['to']);
         }
 
-        if (!empty($filters['search'])) {
-            $term = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $filters['search']) . '%';
+        if (! empty($filters['search'])) {
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['search']).'%';
             $query->whereHas('user', fn ($q) => $q->where('name', 'like', $term)->orWhere('email', 'like', $term));
         }
     }

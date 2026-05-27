@@ -18,20 +18,20 @@ class AttendanceRequestRepository implements AttendanceRequestRepositoryInterfac
             ->with(['user.department', 'attendance', 'requestedBy', 'reviewedBy'])
             ->orderByDesc('id');
 
-        if (!empty($filters['user_id'])) {
+        if (! empty($filters['user_id'])) {
             $query->where('user_id', (int) $filters['user_id']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        if (!empty($filters['date'])) {
+        if (! empty($filters['date'])) {
             $query->whereDate('requested_date', $filters['date']);
         }
 
-        if (!empty($filters['search'])) {
-            $term = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $filters['search']) . '%';
+        if (! empty($filters['search'])) {
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['search']).'%';
             $query->whereHas('user', fn ($q) => $q->where('name', 'like', $term)->orWhere('email', 'like', $term));
         }
 

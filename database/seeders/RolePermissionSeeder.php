@@ -28,7 +28,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Update position', 'slug' => 'positions.update'],
             ['name' => 'Delete position', 'slug' => 'positions.delete'],
             ['name' => 'View attendance', 'slug' => 'attendance.view'],
-            ['name' => 'Manage attendance', 'slug' => 'attendance.manage'],  
+            ['name' => 'Manage attendance', 'slug' => 'attendance.manage'],
             ['name' => 'View leave rules', 'slug' => 'leave-rules.view'],
             ['name' => 'Ceate leave rules', 'slug' => 'leave-rules.create'],
             ['name' => 'Update leave rules', 'slug' => 'leave-rules.update'],
@@ -82,8 +82,8 @@ class RolePermissionSeeder extends Seeder
                     ->whereNotIn('slug', $currentSlugs)
                     ->pluck('id')
                     ->all();
-                
-                if (!empty($removedPermissionIds)) {
+
+                if (! empty($removedPermissionIds)) {
                     $role->permissions()->detach($removedPermissionIds);
                 }
             }

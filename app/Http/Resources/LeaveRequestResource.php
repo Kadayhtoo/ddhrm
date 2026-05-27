@@ -28,8 +28,8 @@ class LeaveRequestResource extends JsonResource
             'status' => $this->status,
             'is_approve' => $this->is_approve,
             'is_approve_hr' => $this->is_approve_hr,
-            
-            'attachment' => $this->attachment, 
+
+            'attachment' => $this->attachment,
 
             'user' => [
                 'id' => $this->user?->id,

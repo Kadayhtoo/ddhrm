@@ -50,7 +50,7 @@ class AuthController extends Controller
     public function profile(Request $request): JsonResponse
     {
         return response()->json([
-            'data' => $request->user()->toApiArray()
+            'data' => $request->user()->toApiArray(),
         ]);
     }
 
@@ -59,8 +59,8 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validatedData = $request->validate([
-            'name'  => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 

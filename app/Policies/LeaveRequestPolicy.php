@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\LeaveRequest;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class LeaveRequestPolicy
 {
@@ -19,11 +18,12 @@ class LeaveRequestPolicy
     public function scopeForUser($query, $user)
     {
         if ($user->hasRole('admin') || $user->hasRole('hr')) {
-            return $query; 
+            return $query;
         }
 
-        return $query->where('user_id', $user->id); 
+        return $query->where('user_id', $user->id);
     }
+
     /**
      * Determine whether the user can view the model.
      */

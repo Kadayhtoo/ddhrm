@@ -45,15 +45,16 @@ class StaffController extends Controller
     public function showDetail($id): JsonResponse
     {
         $staff = User::with(['department', 'roles'])->findOrFail($id);
+
         return response()->json(['data' => $staff]);
     }
-    
+
     public function getLeaveBalances($id): JsonResponse
     {
         $balances = LeaveBalance::with('leaveRule')
             ->where('user_id', $id)
             ->get();
-            
+
         return response()->json(['data' => $balances]);
     }
 
@@ -63,7 +64,7 @@ class StaffController extends Controller
             ->where('user_id', $id)
             ->orderByDesc('id')
             ->get();
-            
+
         return response()->json(['data' => $requests]);
     }
 
