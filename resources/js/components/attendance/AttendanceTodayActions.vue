@@ -35,8 +35,14 @@
                 </v-row>
 
                 <div class="d-flex flex-wrap ga-2">
-                    <v-btn color="success" prepend-icon="mdi-login" :loading="attendance.actionLoading" :disabled="attendance.hasCheckedIn" @click="runAction('checkIn')">Check In</v-btn>
-                    <v-btn color="primary" prepend-icon="mdi-logout" :loading="attendance.actionLoading" :disabled="!attendance.hasCheckedIn || attendance.hasCheckedOut" @click="runAction('checkOut')">Check Out</v-btn>
+                    <v-btn
+                        :color="buttonColor"
+                        :prepend-icon="buttonIcon"
+                        :loading="attendance.actionLoading"
+                        :disabled="buttonDisabled"
+                        @click="runAction(buttonAction)">
+                        {{ buttonLabel }}
+                    </v-btn>
                 </div>
             </template>
         </v-card-text>
@@ -53,6 +59,24 @@ const messageType = ref('success');
 
 const todayDate = computed(() => new Date().toLocaleDateString());
 const todayStatus = computed(() => attendance.today?.status ?? 'absent');
+
+const buttonLabel = computed(() => {
+    if (!attendance.hasCheckedIn) return 'Check In';
+    if (attendance.hasCheckedIn && !attendance.hasCheckedOut) return 'Check Out';
+    return 'Checked Out';
+});
+
+const buttonAction = computed(() => {
+    if (!attendance.hasCheckedIn) return 'checkIn';
+    if (attendance.hasCheckedIn && !attendance.hasCheckedOut) return 'checkOut';
+    return null;
+});
+
+const buttonDisabled = computed(() => attendance.actionLoading || (attendance.hasCheckedIn && attendance.hasCheckedOut) || !buttonAction.value);
+
+const buttonColor = computed(() => (!attendance.hasCheckedIn ? 'success' : (!attendance.hasCheckedOut ? 'primary' : 'grey')));
+
+const buttonIcon = computed(() => (!attendance.hasCheckedIn ? 'mdi-login' : (!attendance.hasCheckedOut ? 'mdi-logout' : 'mdi-check')));
 
 onMounted(async () => {
     await Promise.all([attendance.fetchToday(), attendance.fetchWidgets()]);
