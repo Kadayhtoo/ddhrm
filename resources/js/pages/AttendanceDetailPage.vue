@@ -5,7 +5,7 @@
                 <div class="text-h5 font-weight-bold">Attendance Details</div>
                 <div class="text-body-2 text-medium-emphasis">Daily clock, and status information.</div>
             </div>
-            <v-btn variant="tonal" color="primary" prepend-icon="mdi-arrow-left" :to="{ name: 'attendance.history' }">Back</v-btn>
+            <v-btn variant="tonal" color="primary" prepend-icon="mdi-arrow-left" :to="{ name: 'attendance' }">Back</v-btn>
         </div>
 
         <v-alert v-if="error" type="error" variant="tonal" class="mb-4">{{ error }}</v-alert>
@@ -73,7 +73,7 @@ onMounted(async () => {
 
 function formatDateTime(value) {
     if (!value) return '-';
-    return new Date(value).toLocaleString();
+    return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function statusColor(status) {

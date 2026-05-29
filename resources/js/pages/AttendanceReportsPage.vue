@@ -5,7 +5,6 @@
                 <div class="text-h5 font-weight-bold">Attendance Reports</div>
                 <div class="text-body-2 text-medium-emphasis">Daily, monthly, and employee attendance summaries.</div>
             </div>
-            <v-btn variant="tonal" color="primary" prepend-icon="mdi-table-account" :to="{ name: 'attendance.admin' }">Admin Table</v-btn>
         </div>
 
         <AttendanceStatCards :widgets="widgets" class="mb-5" />

@@ -36,7 +36,7 @@
                 sm="6"
                 md="4"
             >
-                <AttendanceTodayActions v-if="card.label === 'Attendance' && auth.can('attendance.view')" />
+                <AttendanceTodayActions v-if="card.label === 'Attendance' && auth.can('attendance.view') && auth.user?.email !== 'ceo@ddhrm.local'" />
                 <v-card v-else rounded="lg" class="pa-5 h-100">
                     <div class="text-caption text-medium-emphasis text-uppercase">{{ card.label }}</div>
                     <div class="text-h5 font-weight-semibold mt-2">{{ card.value }}</div>
