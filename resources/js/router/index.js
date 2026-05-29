@@ -4,7 +4,6 @@ import MainLayout from '@/layouts/MainLayout.vue';
 import AdminPanelPage from '@/pages/AdminPanelPage.vue';
 import AdminAttendanceTablePage from '@/pages/AdminAttendanceTablePage.vue';
 import AttendanceDetailPage from '@/pages/AttendanceDetailPage.vue';
-import AttendanceHistoryPage from '@/pages/AttendanceHistoryPage.vue';
 import AttendanceReportsPage from '@/pages/AttendanceReportsPage.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
