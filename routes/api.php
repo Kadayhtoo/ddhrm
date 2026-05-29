@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AttendanceReportController;
+use App\Http\Controllers\Api\AttendanceSettingsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DepartmentController;
@@ -46,6 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reports/daily', [AttendanceReportController::class, 'daily']);
         Route::get('/reports/monthly', [AttendanceReportController::class, 'monthly']);
         Route::get('/reports/employee/{user}', [AttendanceReportController::class, 'employee']);
+        Route::get('/settings', [AttendanceSettingsController::class, 'show'])->middleware('permission:attendance.manage');
+        Route::put('/settings', [AttendanceSettingsController::class, 'update'])->middleware('permission:attendance.manage');
         Route::get('/{attendance}', [AttendanceController::class, 'show']);
     });
 

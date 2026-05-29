@@ -63,6 +63,13 @@
                     :to="{ name: 'attendance' }"
                     rounded="lg"
                 />
+                <v-list-item
+                    v-if="auth.can('attendance.manage')"
+                    prepend-icon="mdi-clock-settings"
+                    title="Attendance Settings"
+                    :to="{ name: 'attendance.settings' }"
+                    rounded="lg"
+                />
                 <v-list-group value="leave_management">
                     <template #activator="{ props }">
                         <v-list-item v-bind="props" prepend-icon="mdi-palm-tree" title="Leave Manage"></v-list-item>

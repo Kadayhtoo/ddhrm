@@ -5,6 +5,7 @@ import AdminPanelPage from '@/pages/AdminPanelPage.vue';
 import AdminAttendanceTablePage from '@/pages/AdminAttendanceTablePage.vue';
 import AttendanceDetailPage from '@/pages/AttendanceDetailPage.vue';
 import AttendanceReportsPage from '@/pages/AttendanceReportsPage.vue';
+import AttendanceSettingsPage from '@/pages/AttendanceSettingsPage.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
 import PlaceholderPage from '@/pages/PlaceholderPage.vue';
@@ -80,6 +81,12 @@ const router = createRouter({
                     name: 'attendance',
                     component: AdminAttendanceTablePage,
                     meta: { title: 'Attendance', permission: 'attendance.view' },
+                },
+                {
+                    path: 'attendance/settings',
+                    name: 'attendance.settings',
+                    component: AttendanceSettingsPage,
+                    meta: { title: 'Attendance Settings', permission: 'attendance.manage' },
                 },
                 {
                     path: 'attendance/reports',

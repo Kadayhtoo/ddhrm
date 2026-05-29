@@ -3,22 +3,65 @@
 namespace App\Services;
 
 use App\Models\Attendance;
+use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 class AttendanceService
 {
-    public const OFFICE_START = '09:00:00';
+    public const OFFICE_START = '09:00';
 
-    public const OFFICE_END = '18:30:00';
+    public const OFFICE_END = '18:30';
 
     public const GRACE_MINUTES = 15;
 
     public const MINIMUM_WORK_MINUTES = 240;
+
+    protected static function settingValue(string $key, mixed $default = null): mixed
+    {
+        if (! Schema::hasTable('settings')) {
+            return $default;
+        }
+
+        return Setting::getValue($key, $default);
+    }
+
+    protected static function officeStart(): string
+    {
+        return (string) self::settingValue(
+            'attendance.office_start',
+            config('attendance.office_start', self::OFFICE_START)
+        );
+    }
+
+    protected static function officeEnd(): string
+    {
+        return (string) self::settingValue(
+            'attendance.office_end',
+            config('attendance.office_end', self::OFFICE_END)
+        );
+    }
+
+    protected static function graceMinutes(): int
+    {
+        return (int) self::settingValue(
+            'attendance.grace_minutes',
+            config('attendance.grace_minutes', self::GRACE_MINUTES)
+        );
+    }
+
+    protected static function minimumWorkMinutes(): int
+    {
+        return (int) self::settingValue(
+            'attendance.minimum_work_minutes',
+            config('attendance.minimum_work_minutes', self::MINIMUM_WORK_MINUTES)
+        );
+    }
 
     public function __construct(
         protected AttendanceRepositoryInterface $attendances,
@@ -254,7 +297,7 @@ class AttendanceService
             $checkout = Carbon::parse(
                 $attendance->attendance_date->toDateString()
                 .' '
-                .self::OFFICE_END
+                .self::officeEnd()
             );
 
             $workMinutes = max(
@@ -286,8 +329,8 @@ class AttendanceService
         $limit = Carbon::parse(
             $clockIn->toDateString()
             .' '
-            .self::OFFICE_START
-        )->addMinutes(self::GRACE_MINUTES);
+            .self::officeStart()
+        )->addMinutes(self::graceMinutes());
 
         return $clockIn->greaterThan($limit)
             ? $limit->diffInMinutes($clockIn)
@@ -305,7 +348,7 @@ class AttendanceService
         Carbon|string $clockIn,
         int $workMinutes
     ): string {
-        if ($workMinutes < self::MINIMUM_WORK_MINUTES) {
+        if ($workMinutes < self::minimumWorkMinutes()) {
             return 'half_day';
         }
 
