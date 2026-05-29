@@ -29,75 +29,106 @@
             </v-card-text>
         </v-card>
 
-        <v-tabs v-model="tab" color="primary" class="mb-4 border-b">
-            <v-tab value="records">Records</v-tab>
-            <v-tab value="requests">Correction Requests</v-tab>
-        </v-tabs>
+        <template v-if="showTabs">
+            <v-tabs v-model="tab" color="primary" class="mb-4 border-b">
+                <v-tab value="records">Records</v-tab>
+                <v-tab value="requests">Correction Requests</v-tab>
+            </v-tabs>
 
-        <v-window v-model="tab">
-            <v-window-item value="records">
-                <v-card variant="outlined" class="rounded-lg bg-white">
-                    <v-data-table-server
-                        v-model:items-per-page="itemsPerPage"
-                        v-model:page="page"
-                        :headers="recordHeaders"
-                        :items="records"
-                        :items-length="total"
-                        :loading="loading"
-                        item-value="id"
-                        density="comfortable"
-                        @update:options="loadRecords"
-                    >
-                        <template #[`item.user`]="{ item }">
-                            <div class="py-2">
+            <v-window v-model="tab">
+                <v-window-item value="records">
+                    <v-card variant="outlined" class="rounded-lg bg-white">
+                        <v-data-table-server
+                            v-model:items-per-page="itemsPerPage"
+                            v-model:page="page"
+                            :headers="recordHeaders"
+                            :items="records"
+                            :items-length="total"
+                            :loading="loading"
+                            item-value="id"
+                            density="comfortable"
+                            @update:options="loadRecords"
+                        >
+                            <template #[`item.user`]="{ item }">
+                                <div class="py-2">
+                                    <div class="font-weight-bold">{{ item.user?.name }}</div>
+                                    <div class="text-caption text-medium-emphasis">{{ item.user?.department?.name || 'No Department' }}</div>
+                                </div>
+                            </template>
+                            <template #[`item.status`]="{ item }">
+                                <v-chip :color="statusColor(item.status)" size="small" variant="flat" class="text-capitalize font-weight-bold">{{ item.status?.replace('_', ' ') }}</v-chip>
+                            </template>
+                            <template #[`item.actions`]="{ item }">
+                                <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-eye-outline" :to="{ name: 'attendance.details', params: { id: item.id } }">View</v-btn>
+                            </template>
+                        </v-data-table-server>
+                    </v-card>
+                </v-window-item>
+
+                <v-window-item value="requests">
+                    <v-card variant="outlined" class="rounded-lg bg-white">
+                        <v-data-table-server
+                            v-model:items-per-page="requestItemsPerPage"
+                            v-model:page="requestPage"
+                            :headers="requestHeaders"
+                            :items="requests"
+                            :items-length="requestTotal"
+                            :loading="requestLoading"
+                            item-value="id"
+                            density="comfortable"
+                            @update:options="loadRequests"
+                        >
+                            <template #[`item.user`]="{ item }">
                                 <div class="font-weight-bold">{{ item.user?.name }}</div>
-                                <div class="text-caption text-medium-emphasis">{{ item.user?.department?.name || 'No Department' }}</div>
-                            </div>
-                        </template>
-                        <template #[`item.status`]="{ item }">
-                            <v-chip :color="statusColor(item.status)" size="small" variant="flat" class="text-capitalize font-weight-bold">{{ item.status?.replace('_', ' ') }}</v-chip>
-                        </template>
-                        <template #[`item.actions`]="{ item }">
-                            <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-eye-outline" :to="{ name: 'attendance.details', params: { id: item.id } }">View</v-btn>
-                        </template>
-                    </v-data-table-server>
-                </v-card>
-            </v-window-item>
+                            </template>
+                            <template #[`item.status`]="{ item }">
+                                <v-chip :color="item.status === 'approved' ? 'success' : item.status === 'rejected' ? 'error' : 'warning'" size="small" variant="flat" class="text-capitalize font-weight-bold">{{ item.status }}</v-chip>
+                            </template>
+                            <template #[`item.actions`]="{ item }">
+                                <div class="d-flex ga-1 justify-end">
+                                    <v-btn v-if="item.status === 'pending'" size="small" color="success" variant="flat" :loading="reviewingId === item.id" @click="review(item.id, 'approved')">Approve</v-btn>
+                                    <v-btn v-if="item.status === 'pending'" size="small" color="error" variant="tonal" :loading="reviewingId === item.id" @click="review(item.id, 'rejected')">Reject</v-btn>
+                                </div>
+                            </template>
+                        </v-data-table-server>
+                    </v-card>
+                </v-window-item>
+            </v-window>
+        </template>
 
-            <v-window-item value="requests">
-                <v-card variant="outlined" class="rounded-lg bg-white">
-                    <v-data-table-server
-                        v-model:items-per-page="requestItemsPerPage"
-                        v-model:page="requestPage"
-                        :headers="requestHeaders"
-                        :items="requests"
-                        :items-length="requestTotal"
-                        :loading="requestLoading"
-                        item-value="id"
-                        density="comfortable"
-                        @update:options="loadRequests"
-                    >
-                        <template #[`item.user`]="{ item }">
+        <template v-else>
+            <v-card variant="outlined" class="rounded-lg bg-white">
+                <v-data-table-server
+                    v-model:items-per-page="itemsPerPage"
+                    v-model:page="page"
+                    :headers="recordHeaders"
+                    :items="records"
+                    :items-length="total"
+                    :loading="loading"
+                    item-value="id"
+                    density="comfortable"
+                    @update:options="loadRecords"
+                >
+                    <template #[`item.user`]="{ item }">
+                        <div class="py-2">
                             <div class="font-weight-bold">{{ item.user?.name }}</div>
-                        </template>
-                        <template #[`item.status`]="{ item }">
-                            <v-chip :color="item.status === 'approved' ? 'success' : item.status === 'rejected' ? 'error' : 'warning'" size="small" variant="flat" class="text-capitalize font-weight-bold">{{ item.status }}</v-chip>
-                        </template>
-                        <template #[`item.actions`]="{ item }">
-                            <div class="d-flex ga-1 justify-end">
-                                <v-btn v-if="item.status === 'pending'" size="small" color="success" variant="flat" :loading="reviewingId === item.id" @click="review(item.id, 'approved')">Approve</v-btn>
-                                <v-btn v-if="item.status === 'pending'" size="small" color="error" variant="tonal" :loading="reviewingId === item.id" @click="review(item.id, 'rejected')">Reject</v-btn>
-                            </div>
-                        </template>
-                    </v-data-table-server>
-                </v-card>
-            </v-window-item>
-        </v-window>
+                            <div class="text-caption text-medium-emphasis">{{ item.user?.department?.name || 'No Department' }}</div>
+                        </div>
+                    </template>
+                    <template #[`item.status`]="{ item }">
+                        <v-chip :color="statusColor(item.status)" size="small" variant="flat" class="text-capitalize font-weight-bold">{{ item.status?.replace('_', ' ') }}</v-chip>
+                    </template>
+                    <template #[`item.actions`]="{ item }">
+                        <v-btn size="small" variant="text" color="primary" prepend-icon="mdi-eye-outline" :to="{ name: 'attendance.details', params: { id: item.id } }">View</v-btn>
+                    </template>
+                </v-data-table-server>
+            </v-card>
+        </template>
     </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import axios from 'axios';
 
 const tab = ref('records');
@@ -115,6 +146,8 @@ const reviewingId = ref(null);
 const notice = ref('');
 const noticeType = ref('success');
 const filters = ref({ search: '', date: '', status: '' });
+
+const showTabs = computed(() => requestTotal.value > 0);
 
 const statusOptions = [
     { title: 'Present', value: 'present' },
@@ -151,6 +184,17 @@ watch(tab, () => {
     }
 });
 
+watch(showTabs, (value) => {
+    if (!value && tab.value === 'requests') {
+        tab.value = 'records';
+    }
+});
+
+onMounted(async () => {
+    await loadRecords();
+    await loadRequests({ page: 1, itemsPerPage: 1, countOnly: true });
+});
+
 async function loadRecords(options = {}) {
     loading.value = true;
     try {
@@ -179,6 +223,7 @@ async function loadRequests(options = {}) {
     try {
         const p = options.page ?? requestPage.value;
         const per = options.itemsPerPage ?? requestItemsPerPage.value;
+        const countOnly = options.countOnly ?? false;
         const { data } = await axios.get('/api/attendance/requests', {
             params: {
                 page: p,
@@ -187,10 +232,15 @@ async function loadRequests(options = {}) {
                 date: filters.value.date || undefined,
             },
         });
-        requests.value = data.data ?? [];
+        if (!countOnly) {
+            requests.value = data.data ?? [];
+        }
         requestTotal.value = data.meta?.total ?? 0;
         requestPage.value = data.meta?.current_page ?? p;
         requestItemsPerPage.value = data.meta?.per_page ?? per;
+        if (countOnly) {
+            requests.value = [];
+        }
     } finally {
         requestLoading.value = false;
     }

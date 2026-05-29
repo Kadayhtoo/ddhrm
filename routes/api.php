@@ -42,10 +42,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/today', [AttendanceController::class, 'today']);
         Route::post('/check-in', [AttendanceController::class, 'checkIn']);
         Route::post('/check-out', [AttendanceController::class, 'checkOut']);
-        Route::get('/requests', [AttendanceController::class, 'requests']);
-        Route::post('/requests', [AttendanceController::class, 'storeRequest']);
-        Route::patch('/requests/{attendanceRequest}/review', [AttendanceController::class, 'reviewRequest'])
-            ->middleware('permission:attendance.manage');
         Route::get('/reports/widgets', [AttendanceReportController::class, 'widgets']);
         Route::get('/reports/daily', [AttendanceReportController::class, 'daily']);
         Route::get('/reports/monthly', [AttendanceReportController::class, 'monthly']);

@@ -148,9 +148,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
-
-    public function attendanceRequests(): HasMany
-    {
-        return $this->hasMany(AttendanceRequest::class);
-    }
 }

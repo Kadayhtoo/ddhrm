@@ -8,19 +8,18 @@
             color="surface"
             border="end"
             app
-            class="bg-navi"
         >
             <div class="pa-4 d-flex align-center">
-                <v-avatar color="primary" size="36" rounded="lg" class="text-white font-weight-bold">
+                <v-avatar color="primary" size="36" rounded="lg" class=" font-weight-bold">
                     D
                 </v-avatar>
                 <div v-if="!rail || !mdAndUp" class="ms-3">
-                    <div class="text-subtitle-1 font-weight-bold text-white">DDHRM</div>
-                    <div class="text-caption text-medium-emphasis te">HR + Payroll + Invoices</div>
+                    <div class="text-subtitle-1 font-weight-bold ">DDHRM</div>
+                    <div class=" text-medium-emphasis te">HR + Payroll + Invoices</div>
                 </div>
             </div>
 
-            <v-list density="comfortable" nav class="px-2 text-white">
+            <v-list density="comfortable" nav class="px-2 ">
                 <v-list-item 
                     v-if="auth.can('dashboard.view')"
                     exact
@@ -131,7 +130,7 @@
             <v-menu>
                 <template #activator="{ props }">
                     <v-btn v-bind="props" variant="text" class="me-2">
-                        <v-avatar color="primary" size="32" class="text-white me-2">
+                        <v-avatar color="primary" size="32" class=" me-2">
                             {{ initials }}
                         </v-avatar>
                         <span class="d-none d-sm-inline text-body-2">{{ auth.user?.name }}</span>
@@ -161,8 +160,8 @@
             </v-container>
         </v-main>
 
-        <v-footer app border class="bg-white text-caption text-medium-emphasis justify-center">
-            {{ new Date().getFullYear() }} — DDHRM (Laravel + Vue 3 + Vuetify · Sail)
+        <v-footer app border class=" text-medium-emphasis justify-center">
+            Copyright @{{ new Date().getFullYear() }} — All rights reserved.
         </v-footer>
     </div>
 </template>

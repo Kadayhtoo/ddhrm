@@ -61,50 +61,12 @@
                     </v-card-text>
                 </v-card>
             </v-col>
-
-            <v-col cols="12" md="7">
-                <v-card variant="outlined" class="rounded-lg bg-white">
-                    <v-card-title class="d-flex align-center">
-                        <v-icon color="primary" class="mr-2">mdi-file-document-edit-outline</v-icon>
-                        Correction Request
-                    </v-card-title>
-                    <v-card-text>
-                        <v-form ref="requestForm">
-                            <v-row dense>
-                                <v-col cols="12" sm="6">
-                                    <v-select v-model="correction.type" :items="requestTypes" label="Request Type" variant="outlined" density="comfortable" :rules="[rules.required]" />
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field v-model="correction.requested_date" type="date" label="Date" variant="outlined" density="comfortable" :rules="[rules.required]" />
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field v-model="correction.requested_clock_in_at" type="datetime-local" label="Clock In" variant="outlined" density="comfortable" />
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field v-model="correction.requested_clock_out_at" type="datetime-local" label="Clock Out" variant="outlined" density="comfortable" />
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-select v-model="correction.requested_status" :items="statusOptions" label="Requested Status" variant="outlined" density="comfortable" clearable />
-                                </v-col>
-                                <v-col cols="12">
-                                    <v-textarea v-model="correction.reason" label="Reason" rows="3" variant="outlined" density="comfortable" :rules="[rules.required]" />
-                                </v-col>
-                            </v-row>
-                        </v-form>
-                    </v-card-text>
-                    <v-card-actions class="px-4 pb-4">
-                        <v-spacer />
-                        <v-btn color="primary" prepend-icon="mdi-send-outline" :loading="submittingRequest" @click="submitCorrection">Submit Request</v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-col>
         </v-row>
     </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import axios from 'axios';
 import AttendanceStatCards from '@/components/attendance/AttendanceStatCards.vue';
 import { useAttendanceStore } from '@/stores/attendance';
 import { useAuthStore } from '@/stores/auth';
@@ -113,34 +75,6 @@ const attendance = useAttendanceStore();
 const auth = useAuthStore();
 const message = ref('');
 const messageType = ref('success');
-const submittingRequest = ref(false);
-const requestForm = ref(null);
-
-const correction = ref({
-    type: 'full_day',
-    requested_date: new Date().toISOString().substring(0, 10),
-    requested_clock_in_at: '',
-    requested_clock_out_at: '',
-    requested_status: null,
-    reason: '',
-});
-
-const requestTypes = [
-    { title: 'Clock In', value: 'clock_in' },
-    { title: 'Clock Out', value: 'clock_out' },
-    { title: 'Status', value: 'status' },
-    { title: 'Full Day', value: 'full_day' },
-];
-
-const statusOptions = [
-    { title: 'Present', value: 'present' },
-    { title: 'Absent', value: 'absent' },
-    { title: 'Late', value: 'late' },
-    { title: 'Half Day', value: 'half_day' },
-    { title: 'Holiday', value: 'holiday' },
-    { title: 'Weekend', value: 'weekend' },
-    { title: 'On Leave', value: 'on_leave' },
-];
 
 const rules = {
     required: (value) => !!value || 'This field is required',
@@ -160,22 +94,6 @@ async function runAction(action) {
         setMessage('Attendance updated successfully.', 'success');
     } catch (error) {
         setMessage(error?.response?.data?.message || firstValidationError(error) || 'Attendance action failed.', 'error');
-    }
-}
-
-async function submitCorrection() {
-    const result = await requestForm.value.validate();
-    if (!result.valid) return;
-
-    submittingRequest.value = true;
-    try {
-        await axios.post('/api/attendance/requests', correction.value);
-        setMessage('Attendance correction request submitted.', 'success');
-        correction.value.reason = '';
-    } catch (error) {
-        setMessage(error?.response?.data?.message || firstValidationError(error) || 'Request submission failed.', 'error');
-    } finally {
-        submittingRequest.value = false;
     }
 }
 

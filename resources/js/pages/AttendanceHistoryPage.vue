@@ -5,7 +5,6 @@
                 <div class="text-h5 font-weight-bold">Attendance</div>
                 <div class="text-body-2 text-medium-emphasis">Review attendance records and history.</div>
             </div>
-            <v-btn color="primary" variant="tonal" prepend-icon="mdi-view-dashboard-outline" :to="{ name: 'dashboard' }">Dashboard</v-btn>
         </div>
 
         <v-alert v-if="error" type="error" variant="tonal" class="mb-4" closable>{{ error }}</v-alert>

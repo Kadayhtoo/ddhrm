@@ -5,9 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ClockInRequest;
 use App\Http\Requests\ClockOutRequest;
-use App\Http\Requests\ReviewAttendanceRequestRequest;
-use App\Http\Requests\StoreAttendanceRequestRequest;
-use App\Http\Resources\AttendanceRequestResource;
 use App\Http\Resources\AttendanceResource;
 use App\Services\AttendanceService;
 use Illuminate\Http\JsonResponse;
@@ -58,38 +55,6 @@ class AttendanceController extends Controller
     {
         return new AttendanceResource(
             $this->attendanceService->checkOut($request->user(), $request->validated('notes'))
-        );
-    }
-
-    public function storeRequest(StoreAttendanceRequestRequest $request): JsonResponse
-    {
-        $attendanceRequest = $this->attendanceService->createCorrectionRequest($request->user(), $request->validated());
-
-        return (new AttendanceRequestResource($attendanceRequest))
-            ->response()
-            ->setStatusCode(201);
-    }
-
-    public function requests(Request $request): AnonymousResourceCollection
-    {
-        $perPage = min((int) $request->query('per_page', 15), 100);
-
-        return AttendanceRequestResource::collection(
-            $this->attendanceService->correctionRequests($request->user(), $this->filters($request), $perPage)
-        );
-    }
-
-    public function reviewRequest(ReviewAttendanceRequestRequest $request, int $attendanceRequest): AttendanceRequestResource
-    {
-        $validated = $request->validated();
-
-        return new AttendanceRequestResource(
-            $this->attendanceService->reviewCorrectionRequest(
-                $attendanceRequest,
-                $validated['status'],
-                $validated['reviewer_note'] ?? null,
-                $request->user()
-            )
         );
     }
 

@@ -79,20 +79,8 @@ const router = createRouter({
                 {
                     path: 'attendance',
                     name: 'attendance',
-                    component: AttendanceHistoryPage,
-                    meta: { title: 'Attendance', permission: 'attendance.view' },
-                },
-                {
-                    path: 'attendance/history',
-                    name: 'attendance.history',
-                    component: AttendanceHistoryPage,
-                    meta: { title: 'Attendance History', permission: 'attendance.view' },
-                },
-                {
-                    path: 'attendance/admin/table',
-                    name: 'attendance.admin',
                     component: AdminAttendanceTablePage,
-                    meta: { title: 'Admin Attendance', permission: 'attendance.manage' },
+                    meta: { title: 'Attendance', permission: 'attendance.view' },
                 },
                 {
                     path: 'attendance/reports',

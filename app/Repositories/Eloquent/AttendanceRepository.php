@@ -28,7 +28,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
     public function findById(int $id): ?Attendance
     {
         return $this->model->newQuery()
-            ->with(['user.department', 'requests'])
+            ->with(['user.department'])
             ->find($id);
     }
 

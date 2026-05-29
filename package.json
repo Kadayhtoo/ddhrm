@@ -4,7 +4,9 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "lint": "eslint --ext .js,.vue resources/js",
+        "preview": "vite preview"
     },
     "dependencies": {
         "@mdi/font": "^7.4.47",
@@ -16,6 +18,9 @@
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.1",
+        "eslint": "^10.4.0",
+        "eslint-plugin-vue": "^10.9.1",
+        "globals": "^17.6.0",
         "laravel-vite-plugin": "^2.0.0",
         "sass-embedded": "^1.93.3",
         "vite": "^7.0.7",

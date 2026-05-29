@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Models\Attendance;
-use App\Models\AttendanceRequest;
 use App\Models\User;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
-use App\Repositories\Contracts\AttendanceRequestRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +22,6 @@ class AttendanceService
 
     public function __construct(
         protected AttendanceRepositoryInterface $attendances,
-        protected AttendanceRequestRepositoryInterface $requests,
     ) {}
 
     public function today(User $actor): ?Attendance
@@ -145,101 +142,6 @@ class AttendanceService
                 'notes' => $notes ?? $attendance->notes,
                 'updated_by' => $actor->id,
             ]);
-        });
-    }
-
-    public function createCorrectionRequest(
-        User $actor,
-        array $data
-    ): AttendanceRequest {
-        $userId = $this->canManage($actor) && ! empty($data['user_id'])
-            ? (int) $data['user_id']
-            : $actor->id;
-
-        $attendance = $this->attendances->findByUserAndDate(
-            $userId,
-            $data['requested_date']
-        );
-
-        return $this->requests->create([
-            'attendance_id' => $attendance?->id,
-            'user_id' => $userId,
-            'requested_by' => $actor->id,
-            'type' => $data['type'],
-            'requested_date' => $data['requested_date'],
-            'requested_clock_in_at' => $data['requested_clock_in_at'] ?? null,
-            'requested_clock_out_at' => $data['requested_clock_out_at'] ?? null,
-            'requested_status' => $data['requested_status'] ?? null,
-            'reason' => $data['reason'],
-            'status' => 'pending',
-            'created_by' => $actor->id,
-            'updated_by' => $actor->id,
-        ])->load([
-            'user.department',
-            'attendance',
-            'requestedBy',
-            'reviewedBy',
-        ]);
-    }
-
-    public function correctionRequests(
-        User $actor,
-        array $filters,
-        int $perPage
-    ): LengthAwarePaginator {
-        if (! $this->canManage($actor)) {
-            $filters['user_id'] = $actor->id;
-        }
-
-        return $this->requests->paginate($filters, $perPage);
-    }
-
-    public function reviewCorrectionRequest(
-        int $id,
-        string $status,
-        ?string $note,
-        User $actor
-    ): AttendanceRequest {
-        if (! $this->canManage($actor)) {
-            abort(
-                403,
-                'You are not allowed to review attendance requests.'
-            );
-        }
-
-        return DB::transaction(function () use (
-            $id,
-            $status,
-            $note,
-            $actor
-        ) {
-            $request = $this->requests->findById($id);
-
-            if (! $request) {
-                abort(404, 'Attendance request not found');
-            }
-
-            if ($request->status !== 'pending') {
-                throw ValidationException::withMessages([
-                    'status' => [
-                        'This request has already been reviewed.',
-                    ],
-                ]);
-            }
-
-            $updated = $this->requests->update($request, [
-                'status' => $status,
-                'reviewed_by' => $actor->id,
-                'reviewed_at' => now(),
-                'reviewer_note' => $note,
-                'updated_by' => $actor->id,
-            ]);
-
-            if ($status === 'approved') {
-                $this->applyCorrection($updated, $actor);
-            }
-
-            return $this->requests->findById($id);
         });
     }
 
@@ -426,58 +328,6 @@ class AttendanceService
         }
 
         return $attendance;
-    }
-
-    protected function applyCorrection(
-        AttendanceRequest $request,
-        User $actor
-    ): void {
-        $attendance = $request->attendance
-            ?: $this->attendances->create([
-                'user_id' => $request->user_id,
-                'attendance_date' => $request->requested_date,
-                'source' => 'manual',
-                'created_by' => $actor->id,
-                'updated_by' => $actor->id,
-            ]);
-
-        $clockIn = $request->requested_clock_in_at
-            ?? $attendance->clock_in_at;
-
-        $clockOut = $request->requested_clock_out_at
-            ?? $attendance->clock_out_at;
-
-        $workMinutes = (
-            $clockIn && $clockOut
-        )
-            ? max(
-                0,
-                Carbon::parse($clockIn)
-                    ->diffInMinutes(Carbon::parse($clockOut))
-            )
-            : $attendance->work_minutes;
-
-        $status = $request->requested_status
-            ?: (
-                $clockIn
-                    ? $this->statusFromMetrics(
-                        $clockIn,
-                        $workMinutes
-                    )
-                    : 'absent'
-            );
-
-        $this->attendances->update($attendance, [
-            'clock_in_at' => $clockIn,
-            'clock_out_at' => $clockOut,
-            'work_minutes' => $workMinutes,
-            'late_minutes' => $clockIn
-                ? $this->lateMinutes($clockIn)
-                : 0,
-            'status' => $status,
-            'source' => 'manual',
-            'updated_by' => $actor->id,
-        ]);
     }
 
     protected function summaryFromRecords($records): array

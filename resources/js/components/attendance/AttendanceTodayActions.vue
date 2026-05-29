@@ -74,7 +74,7 @@ const buttonAction = computed(() => {
 
 const buttonDisabled = computed(() => attendance.actionLoading || (attendance.hasCheckedIn && attendance.hasCheckedOut) || !buttonAction.value);
 
-const buttonColor = computed(() => (!attendance.hasCheckedIn ? 'success' : (!attendance.hasCheckedOut ? 'primary' : 'grey')));
+const buttonColor = computed(() => (!attendance.hasCheckedIn ? 'primary' : (!attendance.hasCheckedOut ? 'secondary' : 'grey')));
 
 const buttonIcon = computed(() => (!attendance.hasCheckedIn ? 'mdi-login' : (!attendance.hasCheckedOut ? 'mdi-logout' : 'mdi-check')));
 
