@@ -8,6 +8,8 @@ import AttendanceReportsPage from '@/pages/AttendanceReportsPage.vue';
 import AttendanceSettingsPage from '@/pages/AttendanceSettingsPage.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
+import PayrollPage from '@/pages/PayrollPage.vue';
+import PayrollDetailPage from '@/pages/PayrollDetailPage.vue';
 import PlaceholderPage from '@/pages/PlaceholderPage.vue';
 import RoleDetailPage from '@/pages/RoleDetailPage.vue';
 import RoleListViewPage from '@/pages/RoleListViewPage.vue';
@@ -103,9 +105,14 @@ const router = createRouter({
                 {
                     path: 'payroll',
                     name: 'payroll',
-                    component: PlaceholderPage,
-                    meta: { title: 'Payroll' },
-                    props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
+                    component: PayrollPage,
+                    meta: { title: 'Payroll', permission: 'payroll.view' },
+                },
+                {
+                    path: 'payroll/:id',
+                    name: 'payroll.detail',
+                    component: PayrollDetailPage,
+                    meta: { title: 'Payroll Detail', permission: 'payroll.view' },
                 },
                 {
                     path: 'leave-rules',

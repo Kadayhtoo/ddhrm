@@ -9,12 +9,13 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\LeaveBalanceController;
 use App\Http\Controllers\Api\LeaveRequestController;
 use App\Http\Controllers\Api\LeaveRuleController;
+use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\APi\PositionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StaffController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login'])->name('login');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -62,5 +63,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('leave-requests/{id}/cancel', [LeaveRequestController::class, 'cancel']);
 
     Route::get('/leave-balances', [LeaveBalanceController::class, 'index']);
+
+    Route::prefix('payroll')->middleware('permission:payroll.view')->group(function () {
+        Route::get('/', [PayrollController::class, 'index']);
+        Route::get('/stats', [PayrollController::class, 'stats']);
+        Route::get('/employees', [PayrollController::class, 'employees']);
+        Route::get('/settings', [PayrollController::class, 'settings'])->middleware('permission:payroll.manage');
+        Route::put('/settings', [PayrollController::class, 'settings'])->middleware('permission:payroll.manage');
+        Route::post('/calculate', [PayrollController::class, 'calculate'])->middleware('permission:payroll.manage');
+        Route::post('/{id}/mark-paid', [PayrollController::class, 'markPaid'])->middleware('permission:payroll.manage');
+        Route::get('/{id}', [PayrollController::class, 'show']);
+    });
 
 });

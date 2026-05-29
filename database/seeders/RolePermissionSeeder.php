@@ -29,6 +29,11 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Delete position', 'slug' => 'positions.delete'],
             ['name' => 'View attendance', 'slug' => 'attendance.view'],
             ['name' => 'Manage attendance', 'slug' => 'attendance.manage'],
+            ['name' => 'View attendance reports', 'slug' => 'attendance-reports.view'],
+            ['name' => 'View attendance settings', 'slug' => 'attendance-settings.view'],
+            ['name' => 'Manage attendance settings', 'slug' => 'attendance-settings.manage'],
+            ['name' => 'View payroll', 'slug' => 'payroll.view'],
+            ['name' => 'Manage payroll', 'slug' => 'payroll.manage'],
             ['name' => 'View leave rules', 'slug' => 'leave-rules.view'],
             ['name' => 'Ceate leave rules', 'slug' => 'leave-rules.create'],
             ['name' => 'Update leave rules', 'slug' => 'leave-rules.update'],
@@ -37,6 +42,8 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Manage leave requests', 'slug' => 'leave-requests.manage'],
             ['name' => 'View leave balances', 'slug' => 'leave-balances.view'],
             ['name' => 'Manage leave balances', 'slug' => 'leave-balances.manage'],
+            ['name' => 'View payroll', 'slug' => 'payroll.view'],
+            ['name' => 'Manage payroll', 'slug' => 'payroll.manage'],
         ];
 
         $permissions = collect($definitions)->map(fn (array $row) => Permission::query()->firstOrCreate(
@@ -48,14 +55,14 @@ class RolePermissionSeeder extends Seeder
 
         $roleConfigs = [
             ['name' => 'Staff', 'slug' => 'staff', 'permissions' => ['dashboard.view', 'attendance.view']],
-            ['name' => 'HR', 'slug' => 'hr', 'permissions' => ['dashboard.view', 'staff.view', 'staff.create', 'staff.update', 'attendance.view', 'attendance.manage']],
+            ['name' => 'HR', 'slug' => 'hr', 'permissions' => ['dashboard.view', 'staff.view', 'staff.create', 'staff.update', 'attendance.view', 'attendance.manage', 'payroll.view', 'payroll.manage']],
             ['name' => 'Admin', 'slug' => 'admin', 'permissions' => [
                 'dashboard.view', 'admin.access', 'staff.view', 'staff.create', 'staff.update', 'staff.delete', 'roles.view', 'roles.manage',
-                'attendance.view', 'attendance.manage',
+                'attendance.view', 'attendance.manage', 'payroll.view', 'payroll.manage',
             ]],
             ['name' => 'CEO', 'slug' => 'ceo', 'permissions' => [
                 'dashboard.view', 'admin.access', 'staff.view', 'staff.create', 'staff.update', 'staff.delete', 'roles.view', 'roles.manage',
-                'attendance.view', 'attendance.manage',
+                'attendance.view', 'attendance.manage', 'payroll.view', 'payroll.manage',
             ]],
         ];
 

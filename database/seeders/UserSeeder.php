@@ -21,12 +21,21 @@ class UserSeeder extends Seeder
         foreach ($users as $row) {
             $role = Role::query()->where('slug', $row['role'])->firstOrFail();
 
+            $salary = match ($row['role']) {
+                'ceo' => 50000000,
+                'admin' => 15000000,
+                'hr' => 12000000,
+                'staff' => 7000000,
+                default => 5000000,
+            };
+
             $user = User::query()->updateOrCreate(
                 ['email' => $row['email']],
                 [
                     'name' => $row['name'],
                     'password' => Hash::make('password'),
                     'is_active' => true,
+                    'salary' => $salary,
                 ],
             );
 
