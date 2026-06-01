@@ -114,10 +114,8 @@ class PayrollService
 
     public function calculateMonthly(int $userId, int $year, int $month): Payroll
     {
-        dd($userId, $year, $month);
         $user = User::query()->findOrFail($userId);
-        // $salary = (float) ($user->salary ?? 0);
-        $salary = (float) 1000000; // for test
+        $salary = (float) ($user->salary ?? 0);
 
         $periodStart = Carbon::create($year, $month, 1)->startOfDay();
         $periodEnd = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
