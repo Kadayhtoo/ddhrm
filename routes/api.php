@@ -71,7 +71,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/settings', [PayrollController::class, 'settings'])->middleware('permission:payroll.manage');
         Route::put('/settings', [PayrollController::class, 'settings'])->middleware('permission:payroll.manage');
         Route::post('/calculate', [PayrollController::class, 'calculate'])->middleware('permission:payroll.manage');
-        Route::post('/{id}/mark-paid', [PayrollController::class, 'markPaid'])->middleware('permission:payroll.manage');
+        Route::post('/{id}/mark-paid    ', [PayrollController::class, 'markPaid'])->middleware('permission:payroll.manage');
+        Route::put('/{id}/override', [PayrollController::class, 'override'])->middleware('permission:payroll.manage');
+        Route::get('/{id}/payslip', [PayrollController::class, 'payslip']);
         Route::get('/{id}', [PayrollController::class, 'show']);
     });
 

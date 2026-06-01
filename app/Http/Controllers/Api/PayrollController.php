@@ -39,6 +39,53 @@ class PayrollController extends Controller
         return new PayrollResource($this->payrollService->show($id));
     }
 
+    public function override(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'base_salary' => 'nullable|numeric',
+            'gross_salary' => 'nullable|numeric',
+            'total_deductions' => 'nullable|numeric',
+            'net_salary' => 'nullable|numeric',
+            'late_penalty' => 'nullable|numeric',
+            'unpaid_leave_deduction' => 'nullable|numeric',
+            'paid_leave_deduction' => 'nullable|numeric',
+            'note' => 'nullable|string',
+        ]);
+
+        $user = $request->user();
+
+        if (! $user->hasRoleSlug('ceo') && ! $user->hasPermission('payroll.manage')) {
+            abort(403, 'Unauthorized');
+        }
+
+        $payroll = $this->payrollService->show($id);
+
+        $payroll->update(array_filter($validated, fn($v) => $v !== null));
+
+        return response()->json([
+            'data' => new PayrollResource($payroll->fresh()),
+            'message' => 'Payroll updated (override) successfully.',
+        ]);
+    }
+
+    public function payslip(Request $request, int $id)
+    {
+        $payroll = $this->payrollService->show($id);
+
+        $data = ['payroll' => $payroll];
+
+        if (! class_exists('\PDF')) {
+            // Fallback: return JSON if PDF package not installed
+            return response()->json(['data' => $data, 'warning' => 'PDF generator not installed.'], 200);
+        }
+
+        $pdf = \PDF::loadView('payslip', $data);
+
+        $filename = sprintf('payslip_%d_%s.pdf', $payroll->id, now()->format('Ymd'));
+
+        return $pdf->download($filename);
+    }
+
     public function calculate(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -120,7 +167,7 @@ class PayrollController extends Controller
 
         $validated = $request->validate([
             'daily_work_minutes' => 'integer|min:60|max:720',
-            'late_penalty_rate' => 'numeric|min:0|max:10',
+            'late_penalty_rate' => 'numeric|min:0|max:100000',
             'paid_leave_deduction_rate' => 'numeric|min:0|max:1',
             'days_per_month' => 'integer|min:20|max:31',
         ]);

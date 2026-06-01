@@ -21,12 +21,32 @@
                     </div>
                 </div>
                 <v-chip :color="statusColor" size="small">{{ payroll.status }}</v-chip>
-                <v-chip v-if="payroll.calculated_at" class="ml-2" size="small" variant="tonal">
-                    Calculated: {{ formatDate(payroll.calculated_at) }}
-                </v-chip>
-                <v-chip v-if="payroll.paid_at" class="ml-2" size="small" variant="tonal" color="primary">
-                    Paid: {{ formatDate(payroll.paid_at) }}
-                </v-chip>
+            </v-col>
+        </v-row>
+
+        <v-row class="mb-4">
+            <v-col cols="12" md="6">
+                <v-card rounded="lg" class="pa-4">
+                    <div class="text-subtitle-1 font-weight-bold mb-3">Employee Information</div>
+                    <v-list density="compact" lines="none">
+                        <v-list-item>
+                            <v-list-item-title class="text-caption text-medium-emphasis">Name</v-list-item-title>
+                            <v-list-item-subtitle class="font-weight-medium">{{ payroll.user?.name ?? '-' }}</v-list-item-subtitle>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-title class="text-caption text-medium-emphasis">Email</v-list-item-title>
+                            <v-list-item-subtitle class="font-weight-medium">{{ payroll.user?.email ?? '-' }}</v-list-item-subtitle>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-title class="text-caption text-medium-emphasis">Department</v-list-item-title>
+                            <v-list-item-subtitle class="font-weight-medium">{{ payroll.user?.department?.name ?? '-' }}</v-list-item-subtitle>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-title class="text-caption text-medium-emphasis">Employee ID</v-list-item-title>
+                            <v-list-item-subtitle class="font-weight-medium">{{ payroll.user?.id ?? '-' }}</v-list-item-subtitle>
+                        </v-list-item>
+                    </v-list>
+                </v-card>
             </v-col>
         </v-row>
 
@@ -40,7 +60,8 @@
                                 <v-icon color="primary">mdi-cash</v-icon>
                             </template>
                             <v-list-item-title>Base Salary (Monthly)</v-list-item-title>
-                            <v-list-item-subtitle class="text-medium-emphasis">Standard monthly rate</v-list-item-subtitle>
+                            <v-list-item-subtitle class="text-medium-emphasis">Standard monthly
+                                rate</v-list-item-subtitle>
                             <template #append>
                                 <span class="font-weight-medium">{{ formatCurrency(payroll.base_salary) }}</span>
                             </template>
@@ -66,7 +87,8 @@
                                 {{ payroll.total_late_minutes }} minutes late
                             </v-list-item-subtitle>
                             <template #append>
-                                <span class="text-error font-weight-medium">-{{ formatCurrency(payroll.late_penalty) }}</span>
+                                <span class="text-error font-weight-medium">-{{ formatCurrency(payroll.late_penalty)
+                                    }}</span>
                             </template>
                         </v-list-item>
                         <v-divider />
@@ -79,7 +101,8 @@
                                 {{ payroll.total_unpaid_leave_days }} day(s) unpaid
                             </v-list-item-subtitle>
                             <template #append>
-                                <span class="text-error font-weight-medium">-{{ formatCurrency(payroll.unpaid_leave_deduction) }}</span>
+                                <span class="text-error font-weight-medium">-{{
+                                    formatCurrency(payroll.unpaid_leave_deduction) }}</span>
                             </template>
                         </v-list-item>
                         <v-divider />
@@ -92,7 +115,8 @@
                                 {{ payroll.total_paid_leave_days }} day(s) paid leave
                             </v-list-item-subtitle>
                             <template #append>
-                                <span class="text-error font-weight-medium">-{{ formatCurrency(payroll.paid_leave_deduction) }}</span>
+                                <span class="text-error font-weight-medium">-{{
+                                    formatCurrency(payroll.paid_leave_deduction) }}</span>
                             </template>
                         </v-list-item>
                         <v-divider />
@@ -105,7 +129,8 @@
                                 After all deductions
                             </v-list-item-subtitle>
                             <template #append>
-                                <span class="text-success font-weight-bold text-h6">{{ formatCurrency(payroll.net_salary) }}</span>
+                                <span class="text-success font-weight-bold text-h6">{{
+                                    formatCurrency(payroll.net_salary) }}</span>
                             </template>
                         </v-list-item>
                     </v-list>
@@ -127,11 +152,13 @@
                             </tr>
                             <tr>
                                 <td class="text-medium-emphasis">Late Minutes</td>
-                                <td class="text-right font-weight-medium text-warning">{{ payroll.total_late_minutes }}</td>
+                                <td class="text-right font-weight-medium text-warning">{{ payroll.total_late_minutes }}
+                                </td>
                             </tr>
                             <tr>
                                 <td class="text-medium-emphasis">Unpaid Leave Days</td>
-                                <td class="text-right font-weight-medium text-error">{{ payroll.total_unpaid_leave_days }}</td>
+                                <td class="text-right font-weight-medium text-error">{{ payroll.total_unpaid_leave_days
+                                    }}</td>
                             </tr>
                             <tr>
                                 <td class="text-medium-emphasis">Paid Leave Days</td>
@@ -139,29 +166,83 @@
                             </tr>
                             <tr class="bg-grey-lighten-4">
                                 <td class="font-weight-bold">Total Deductions</td>
-                                <td class="text-right font-weight-bold text-error">{{ formatCurrency(payroll.total_deductions) }}</td>
+                                <td class="text-right font-weight-bold text-error">{{
+                                    formatCurrency(payroll.total_deductions) }}
+                                </td>
                             </tr>
                             <tr class="bg-grey-lighten-4">
                                 <td class="font-weight-bold">Net Salary</td>
-                                <td class="text-right font-weight-bold text-success">{{ formatCurrency(payroll.net_salary) }}</td>
+                                <td class="text-right font-weight-bold text-success">{{
+                                    formatCurrency(payroll.net_salary) }}</td>
                             </tr>
                         </tbody>
                     </v-table>
                 </v-card>
 
-                <v-card v-if="auth.can('payroll.manage') && payroll.status === 'calculated'" rounded="lg" class="pa-6">
-                    <v-btn
-                        block
-                        color="success"
-                        size="large"
-                        prepend-icon="mdi-check"
-                        @click="markPaid"
-                    >
-                        Mark as Paid
-                    </v-btn>
+                <v-card v-if="canOverride.value || (auth.can('payroll.manage'))" rounded="lg" class="pa-6">
+                    <v-row>
+                        <v-col cols="12" md="6">
+                            <v-btn block color="success" size="large" @click="markPaid"
+                                :disabled="payroll.status === 'paid'">
+                                {{ payroll.status === 'paid' ? 'Paid' : 'Mark as Paid' }}
+                            </v-btn>
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <v-btn block color="primary" size="large" class="mb-3" prepend-icon="mdi-download"
+                                @click="downloadPayslip">
+                                Download Payslip
+                            </v-btn>
+                            <v-btn block color="warning" size="large" prepend-icon="mdi-pencil"
+                                @click="openOverrideDialog">
+                                Override Payslip
+                            </v-btn>
+                        </v-col>
+                    </v-row>
                 </v-card>
             </v-col>
         </v-row>
+
+        <v-dialog v-model="overrideDialog" max-width="700">
+            <v-card>
+                <v-card-title>Override Payslip</v-card-title>
+                <v-card-text>
+                    <v-row>
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="overrideForm.base_salary" label="Base Salary" type="number" />
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="overrideForm.gross_salary" label="Gross Salary" type="number" />
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="overrideForm.late_penalty" label="Late Penalty" type="number" />
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="overrideForm.unpaid_leave_deduction" label="Unpaid Leave Deduction"
+                                type="number" />
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="overrideForm.paid_leave_deduction" label="Paid Leave Deduction"
+                                type="number" />
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="overrideForm.total_deductions" label="Total Deductions"
+                                type="number" />
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-text-field v-model="overrideForm.net_salary" label="Net Salary" type="number" />
+                        </v-col>
+                        <v-col cols="12">
+                            <v-textarea v-model="overrideForm.note" label="Note" rows="3" />
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer />
+                    <v-btn text @click="overrideDialog = false">Cancel</v-btn>
+                    <v-btn color="warning" @click="saveOverride">Save Override</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
         <v-card v-if="payroll.notes" rounded="lg" class="pa-6 mt-2">
             <div class="text-subtitle-1 font-weight-bold mb-2">Notes</div>
@@ -182,6 +263,18 @@ const auth = useAuthStore();
 
 const loading = ref(true);
 const payroll = ref(null);
+const overrideDialog = ref(false);
+const overrideForm = ref({
+    base_salary: 0,
+    gross_salary: 0,
+    total_deductions: 0,
+    net_salary: 0,
+    late_penalty: 0,
+    unpaid_leave_deduction: 0,
+    paid_leave_deduction: 0,
+    note: '',
+});
+const canOverride = computed(() => auth.can('payroll.manage'));
 
 const statusColor = computed(() => {
     switch (payroll.value?.status) {
@@ -208,6 +301,35 @@ function goBack() {
     router.push({ name: 'payroll' });
 }
 
+function openOverrideDialog() {
+    if (!payroll.value) return;
+
+    overrideForm.value = {
+        base_salary: payroll.value.base_salary || 0,
+        gross_salary: payroll.value.gross_salary || 0,
+        total_deductions: payroll.value.total_deductions || 0,
+        net_salary: payroll.value.net_salary || 0,
+        late_penalty: payroll.value.late_penalty || 0,
+        unpaid_leave_deduction: payroll.value.unpaid_leave_deduction || 0,
+        paid_leave_deduction: payroll.value.paid_leave_deduction || 0,
+        note: payroll.value.note || '',
+    };
+
+    overrideDialog.value = true;
+}
+
+async function saveOverride() {
+    if (!payroll.value) return;
+
+    try {
+        const { data } = await axios.put(`/api/payroll/${payroll.value.id}/override`, overrideForm.value);
+        payroll.value = data.data;
+        overrideDialog.value = false;
+    } catch (error) {
+        console.error('Override save failed', error);
+    }
+}
+
 async function markPaid() {
     try {
         await axios.post(`/api/payroll/${payroll.value.id}/mark-paid`);
@@ -215,6 +337,26 @@ async function markPaid() {
         payroll.value.paid_at = new Date().toISOString();
     } catch {
         // ignore
+    }
+}
+
+async function downloadPayslip() {
+    if (!payroll.value) return;
+
+    try {
+        const url = `/api/payroll/${payroll.value.id}/payslip`;
+        const response = await axios.get(url, { responseType: 'blob' });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `payslip_${payroll.value.id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+        console.error('Payslip download failed', error);
     }
 }
 

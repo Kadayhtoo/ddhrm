@@ -179,9 +179,9 @@
                             <v-text-field
                                 v-model.number="settings.late_penalty_rate"
                                 type="number"
-                                step="0.1"
-                                label="Late Penalty Rate"
-                                hint="Multiplier applied to late minute deductions"
+                                step="1"
+                                label="Late Penalty Amount per 30 min"
+                                hint="Amount in MMK to deduct for each 30 minutes late"
                                 persistent-hint
                             />
                         </v-col>

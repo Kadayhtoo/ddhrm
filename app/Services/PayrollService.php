@@ -15,7 +15,7 @@ class PayrollService
 {
     public const DAILY_WORK_MINUTES = 570;
 
-    public const LATE_PENALTY_RATE = 1.0;
+    public const LATE_PENALTY_RATE = 3500;
 
     public const PAID_LEAVE_DEDUCTION_RATE = 0;
 
@@ -112,6 +112,12 @@ class PayrollService
         ];
     }
 
+    /**
+     * Calculate monthly payroll for a employee by monthly.
+     * @return Payroll
+     * @author HHA
+     * @date 01/06/2026
+     */
     public function calculateMonthly(int $userId, int $year, int $month): Payroll
     {
         $user = User::query()->findOrFail($userId);
@@ -153,15 +159,23 @@ class PayrollService
                 }
             }
 
+            // Daily rate = salary / daysPerMonth (reference)
             $dailyRate = $salary / max($this->daysPerMonth(), 1);
+
+            // Minute rate = dailyRate / dailyWorkMinutes (kept for reference)
             $minuteRate = $dailyRate / max($this->dailyWorkMinutes(), 1);
 
-            $latePenalty = round($minuteRate * $totalLateMinutes * $this->latePenaltyRate(), 2);
+            // Late penalty = (late minutes / 30) * rate (MMK per 30 min)
+            $latePenalty = round(($totalLateMinutes / 30) * $this->latePenaltyRate(), 2);
+
             $unpaidDeduction = round($dailyRate * $totalUnpaidDays, 2);
             $paidDeduction = round($dailyRate * $totalPaidDays * $this->paidLeaveDeductionRate(), 2);
 
+            // Total deductions = late penalty + unpaid deduction + paid deduction
             $deductions = round($latePenalty + $unpaidDeduction + $paidDeduction, 2);
+            // e.g., $gross = $salary + $allowances - $otherEarnings (for future use)
             $gross = $salary;
+            // Net salary = gross - deductions
             $net = round($gross - $deductions, 2);
 
             $attributes = [
@@ -197,6 +211,12 @@ class PayrollService
         });
     }
 
+    /**
+     * Calculate daily payroll for a employee by daily.
+     * @return Payroll
+     * @author HHA
+     * @date 01/06/2026
+     */
     public function calculateDaily(int $userId, string $date): Payroll
     {
         $user = User::query()->findOrFail($userId);
@@ -237,15 +257,23 @@ class PayrollService
                 }
             }
 
+            // Daily rate = salary / daysPerMonth (reference)
             $dailyRate = $salary / max($this->daysPerMonth(), 1);
             $minuteRate = $dailyRate / max($this->dailyWorkMinutes(), 1);
 
-            $latePenalty = round($minuteRate * $lateMinutes * $this->latePenaltyRate(), 2);
+            // Late penalty = (late minutes / 30) * rate (MMK per 30 min)
+            $latePenalty = round(($lateMinutes / 30) * $this->latePenaltyRate(), 2);
+
             $unpaidDeduction = round($dailyRate * $unpaidDays, 2);
             $paidDeduction = round($dailyRate * $paidDays * $this->paidLeaveDeductionRate(), 2);
 
+            // Total deductions = late penalty + unpaid deduction + paid deduction
             $deductions = round($latePenalty + $unpaidDeduction + $paidDeduction, 2);
+
+            // e.g., $gross = $salary + $allowances - $otherEarnings (for future use)
             $gross = $salary;
+
+            // Net salary = gross - deductions
             $net = round($gross - $deductions, 2);
 
             $attributes = [
