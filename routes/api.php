@@ -67,7 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('payroll')->middleware('permission:payroll.view')->group(function () {
         Route::get('/', [PayrollController::class, 'index']);
         Route::get('/stats', [PayrollController::class, 'stats']);
-        Route::get('/employees', [PayrollController::class, 'employees']);
+        
         Route::get('/settings', [PayrollController::class, 'settings'])->middleware('permission:payroll.manage');
         Route::put('/settings', [PayrollController::class, 'settings'])->middleware('permission:payroll.manage');
         Route::post('/calculate', [PayrollController::class, 'calculate'])->middleware('permission:payroll.manage');

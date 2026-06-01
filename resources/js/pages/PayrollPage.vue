@@ -340,7 +340,7 @@ async function fetchStats() {
 
 async function fetchEmployees() {
     try {
-        const { data } = await axios.get('/api/payroll/employees');
+        const { data } = await axios.get('/api/staff-dropdown');
         employees.value = data ?? [];
     } catch {
         employees.value = [];
