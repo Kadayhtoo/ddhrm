@@ -5,7 +5,7 @@
                 <div class="text-h4 font-weight-bold">Position Management</div>
                 <div class="text-body-2 text-medium-emphasis">Manage company job positions and link them to departments.</div>
             </v-col>
-            <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end">
+            <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end align-center">
                 <v-text-field
                     v-model="searchInput"
                     density="comfortable"
@@ -18,15 +18,9 @@
                     @keyup.enter="applySearch"
                 />
                 
-                <v-btn 
-                    color="primary" 
-                    rounded="lg" 
-                    size="large" 
-                    class="custom-search-btn-width h-12"  
-                    @click="openCreate"
-                    :disabled="!auth.can('positions.create')"
+                <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('positions.create')"@click="openCreate"
                 >
-                    Add Position
+                    <v-icon start>mdi-plus</v-icon> Add Position
                 </v-btn>
             </v-col>
         </v-row>
@@ -102,8 +96,8 @@
                 </v-card-text>
                 <v-card-actions class="px-6 pb-4">
                     <v-spacer />
-                    <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                    <v-btn color="primary" :loading="saving" @click="save">Save</v-btn>
+                    <v-btn variant="text" class="text-none font-weight-bold" @click="dialog = false">Cancel</v-btn>
+                    <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="saving" @click="save">Save</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
