@@ -5,23 +5,24 @@
                 <div class="text-h4 font-weight-bold">Staff</div>
                 <div class="text-body-2 text-medium-emphasis">Users, departments and role assignment</div>
             </v-col>
-            <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end">
-                <v-text-field
-                    v-model="searchInput"
-                    density="comfortable"
-                    variant="outlined"
-                    hide-details
-                    label="Search"
-                    prepend-inner-icon="mdi-magnify"
-                    clearable
-                    class="custom-search-btn-width"
-                    @keyup.enter="applySearch"
-                />
-                
-                <v-btn color="primary" rounded="lg" size="large" class="custom-search-btn-width h-12"  :disabled="!auth.can('staff.create')" @click="openCreate"
-                >
-                    Add staff
-                </v-btn>
+            <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end align-center">
+            <v-text-field
+                v-model="searchInput"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+                label="Search"
+                prepend-inner-icon="mdi-magnify"
+                clearable
+                class="custom-search-btn-width"
+                @keyup.enter="applySearch"
+            />
+
+            <v-btn 
+                color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('staff.create')" @click="openCreate"
+            >
+                <v-icon start>mdi-plus</v-icon> Add Staff
+            </v-btn>
             </v-col>
         </v-row>
 
@@ -81,15 +82,16 @@
             </template>
 
             <template #[`item.actions`]="{ item }">
-                <v-btn
-                    color="info"
-                    variant="tonal"
-                    size="small"
-                    prepend-icon="mdi-eye"
-                    :to="{ name: 'staff.detail', params: { user: item.id } }"
+                <v-btn 
+                color="indigo-darken-2" 
+                variant="tonal" 
+                size="small" 
+                rounded="lg"
+               :to="{ name: 'staff.detail', params: { user: item.id } }"
                 >
-                view detail
+                View Details
                 </v-btn>
+                
                 <v-icon
                     size="small"
                     class="me-2"
@@ -210,11 +212,10 @@
                 <v-divider />
                 <v-card-actions class="pa-4 border-t">
                     <v-spacer />
-                    <v-btn variant="text" rounded="lg" class="text-none px-4" :disabled="saving" @click="dialog = false">
-                        Cancel
-                    </v-btn>
-                    <v-btn color="primary" variant="flat" rounded="lg" class="text-none px-6" :loading="saving" @click="save">
-                        {{ isEdit ? 'Save Changes' : 'Create Staff' }}
+                    
+                    <v-btn variant="text" rounded="lg" class="text-none px-5 font-weight-bold" :disabled="saving" @click="dialog = false">Cancel</v-btn>
+                    <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="saving" @click="save">
+                        {{ isEdit ? 'Update' : 'Save' }}
                     </v-btn>
                 </v-card-actions>
             </v-card>

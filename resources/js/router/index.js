@@ -15,6 +15,13 @@ import LeaveRequestManagePage from '@/pages/LeaveRequestManagePage.vue';
 import LeaveBalancePage from '@/pages/LeaveBalancePage.vue';
 import PositionManagePage from '@/pages/PositionManagePage.vue';
 import StaffDetailPage from '@/pages/StaffDetailPage.vue';
+import ClientManagePage from '@/pages/ClientManagePage.vue';
+import InvoiceManagePage from '@/pages/InvoiceManagePage.vue';
+import EstimateManagePage from '@/pages/EstimateManagePage.vue';
+import ClientDetailPage from '@/pages/ClientDetailPage.vue';
+import InvoicePreviewPage from '@/pages/InvoicePreviewPage.vue';
+import EstimatePreviewPage from '@/pages/EstimatePreviewPage.vue';
+import AboutUsPage from '@/pages/AboutUsPage.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -41,6 +48,13 @@ const router = createRouter({
                     name: 'admin',
                     component: AdminPanelPage,
                     meta: { title: 'Admin panel', permission: 'admin.access' },
+                },
+                {
+                    path: 'company-info',
+                    name: 'company-info',
+                    component: AboutUsPage,
+                    meta: { title: 'Company Info' },
+                    props: { title: 'Company Information', subtitle: 'Manage invoice company profile and contact details.' },
                 },
                 {
                     path: 'department',
@@ -70,7 +84,7 @@ const router = createRouter({
                     path: '/staff/:user', 
                     name: 'staff.detail', 
                     component:StaffDetailPage, 
-                    meta: { requiresAuth: true }
+                    meta: { title: 'Staff Detail' }
                 },
                 {
                     path: 'attendance',
@@ -106,11 +120,43 @@ const router = createRouter({
                     meta: { title: 'Leave Balance' },
                 },
                 {
+                    path: 'clients',
+                    name: 'clients',
+                    component: ClientManagePage,
+                    meta: { title: 'Clients' },
+                    props: { title: 'Client management', subtitle: 'Manage clients, projects, and related info.' },
+                },
+                {
+                    path: '/clients/:id', 
+                    name: 'clients-detail', 
+                    component: ClientDetailPage,
+                    meta:{ title: 'Client Detail' }, 
+                },
+                {
                     path: 'invoices',
                     name: 'invoices',
-                    component: PlaceholderPage,
+                    component: InvoiceManagePage,
                     meta: { title: 'Invoices', permission: ['invoices.view'] },
                     props: { title: 'Client invoices', subtitle: 'Clients, projects, invoices, payments.' },
+                },
+                {
+                    path:'estimates',
+                    name:'estimates',
+                    component: EstimateManagePage,
+                    meta: { title: 'Estimates', permission: ['estimates.view'] },
+                    props: { title: 'Estimates', subtitle: 'Client estimates, linked to projects and invoices.' },
+                },
+                {
+                    path: '/invoices/:id/preview',
+                    name: 'InvoicePreview',
+                    component: InvoicePreviewPage,
+                    meta: {title: 'Invoice Preview'}
+                },
+                {
+                    path: '/estimates/:id/preview',
+                    name: 'EstimatePreview',
+                    component: EstimatePreviewPage,
+                    meta: { title: 'Estimate Preview' }
                 },
                 {
                     path: 'profile', 

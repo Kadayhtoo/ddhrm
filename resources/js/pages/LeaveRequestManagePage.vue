@@ -38,15 +38,9 @@
                     @click:clear="clearSearch"
                 />
 
-                <v-btn
-                    color="primary"
-                    variant="flat"
-                    height="44"
-                    prepend-icon="mdi-plus"
-                    class="text-none font-weight-bold rounded-lg elevation-2"
-                    @click="openLeaveFormDialog()"
+                <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openLeaveFormDialog()"
                 >
-                    Apply Leave
+                    <v-icon start>mdi-plus</v-icon>Apply Leave
                 </v-btn>
             </v-col>
         </v-row>
@@ -407,12 +401,12 @@
                     </v-row>
                 </v-form>
                 </v-card-text>
-                <v-card-actions class="px-5 py-3 border-t bg-grey-lighten-5">
+               <v-card-actions class="px-5 py-3 border-t bg-grey-lighten-5">
                     <v-spacer />
-                    <v-btn variant="flat" color="grey-lighten-2" class="text-none font-weight-bold" @click="closeLeaveFormDialog">Cancel</v-btn>
-                    <v-btn variant="flat" color="primary" class="text-none font-weight-bold px-4 rounded-md elevation-1" :loading="submittingForm" @click="submitLeaveRequest">
-                        {{ isEditing ? 'Save Changes' : 'Submit Request' }}
-                    </v-btn>
+                    
+                    <v-btn variant="text"  rounded="lg" class="text-none font-weight-bold"  :disabled="submittingForm" @click="closeLeaveFormDialog">Cancel</v-btn>
+
+                    <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="submittingForm"  @click="submitLeaveRequest" >{{ isEditing ? 'Update' : 'Save' }} </v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -521,7 +515,6 @@
             { title: 'ID', key: 'id', sortable: false },
             { title: 'Leave Type', key: 'leave_rule', sortable: false },
             { title: 'Duration', key: 'duration', sortable: false },
-            { title: 'Year', key: 'year', sortable: false },
             { title: 'Total', key: 'total_days', sortable: false },
             { title: 'Attachment', key: 'attachment', sortable: false },
             { title: 'Status', key: 'status', sortable: false },

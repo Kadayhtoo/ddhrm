@@ -5,7 +5,7 @@
                 <div class="text-h4 font-weight-bold">Leave Rules</div>
                 <div class="text-body-2 text-medium-emphasis">Configure annual leave types and limits</div>
             </v-col>
-            <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end">
+            <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end align-center">
                 <v-text-field
                     v-model="searchInput"
                     density="comfortable"
@@ -17,15 +17,10 @@
                     class="custom-search-btn-width"
                     @keyup.enter="applySearch"
                 />
-                <v-btn 
-                    color="primary" 
-                    rounded="lg" 
-                    size="large"
-                    class="custom-search-btn-width h-12" 
-                    :disabled="!auth.can('leave-rules.create')"
-                    @click="openCreate"
+
+                <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('leave-rules.create')" @click="openCreate"
                 >
-                    Add Leave Rule
+                    <v-icon start>mdi-plus</v-icon> Add Leave Rule
                 </v-btn>
             </v-col>
         </v-row>
@@ -149,8 +144,9 @@
                 </v-card-text>
                 <v-card-actions class="px-6 pb-4">
                     <v-spacer />
-                    <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                    <v-btn color="primary" variant="flat" class="text-none px-4" :loading="saving" @click="save">
+                    
+                    <v-btn variant="text" rounded="lg" class="text-none px-5 font-weight-bold" :disabled="saving" @click="dialog = false">Cancel</v-btn>
+                    <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="saving" @click="save">
                         {{ editingId ? 'Update' : 'Save' }}
                     </v-btn>
                 </v-card-actions>
