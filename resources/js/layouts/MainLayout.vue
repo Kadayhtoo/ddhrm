@@ -7,6 +7,7 @@
             :temporary="!mdAndUp"
             color="surface"
             border="end"
+            v-if="!isPreviewPage"
             app
         >
             <div class="pa-4 d-flex align-center">
@@ -28,6 +29,7 @@
                     :to="{ name: 'dashboard' }"
                     rounded="lg"
                 />
+                
                 <v-list-item
                     v-if="auth.can('admin.access')"
                     prepend-icon="mdi-shield-crown-outline"
@@ -35,6 +37,15 @@
                     :to="{ name: 'admin' }"
                     rounded="lg"
                 />
+
+                <v-list-item
+                    v-if="auth.can('company-info.view')"
+                    prepend-icon="mdi-domain"
+                    title="Company Info"
+                    :to="{ name: 'company-info' }"
+                    rounded="lg"
+                />
+                
                 <v-list-item
                     v-if="auth.can('departments.view')"
                     prepend-icon="mdi-office-building-outline"
@@ -79,13 +90,11 @@
                     <template #activator="{ props }">
                         <v-list-item v-bind="props" prepend-icon="mdi-palm-tree" title="Leave Manage"></v-list-item>
                     </template>
-
                     <v-list-item 
                         prepend-icon="mdi-cog-outline" 
                         title="Leave Rules" 
                         :to="{ name: 'leave-rules' }"
-                    ></v-list-item>
-                    
+                    ></v-list-item>  
                     <v-list-item 
                         prepend-icon="mdi-file-document-edit-outline" 
                         title="Leave Requests" 
@@ -94,16 +103,32 @@
                 </v-list-group>
 
                 <v-list-item
-                    v-if="auth.can('payroll.view')"
-                    prepend-icon="mdi-currency-usd"
-                    title="Payroll"
-                    :to="{ name: 'payroll' }"
+                    v-if="auth.can('clients.view')"
+                    prepend-icon="mdi-account-group-outline"
+                    title="Clients"
+                    :to="{ name: 'clients' }"
+                    rounded="lg"
+                />
+                
+                <v-list-item
+                    v-if="auth.can('invoices.view')"
+                    prepend-icon="mdi-file-chart-outline"
+                    title="Invoices"
+                    :to="{ name: 'invoices' }"
                     rounded="lg"
                 />
                 <v-list-item
-                    prepend-icon="mdi-file-document-outline"
-                    title="Invoices"
-                    :to="{ name: 'invoices' }"
+                    v-if="auth.can('estimates.view')"
+                    prepend-icon="mdi-file-edit-outline"
+                    title="Estimates"
+                    :to="{ name: 'estimates' }"
+                    rounded="lg"
+                />
+                <v-list-item
+                    v-if="auth.can('payroll.view')"
+                    prepend-icon="mdi-cash-multiple"
+                    title="Payroll"
+                    :to="{ name: 'payroll' }"
                     rounded="lg"
                 />
                 <v-list-group value="system-management" v-if="showSystemManageMenu">
@@ -139,7 +164,7 @@
             </template>
         </v-navigation-drawer>
 
-        <v-app-bar flat color="white" border="b" elevation="0" height="72" app>
+        <v-app-bar flat color="white" border="b" elevation="0" height="72" app v-if="!isPreviewPage">
             <v-app-bar-nav-icon v-if="!mdAndUp" class="ms-1" @click="drawer = !drawer" />
 
             <v-toolbar-title class="text-h6 font-weight-semibold">
@@ -159,11 +184,11 @@
 
                 <v-list density="compact" min-width="200">
                     <v-list-item 
+                        v-if="auth.user?.id" 
                         title="Profile" 
                         prepend-icon="mdi-account-outline" 
-                        to="/profile" 
+                        :to="{ name: 'staff.detail', params: { user: auth.user.id } }"
                     />
-                    
                     <v-list-item 
                         title="Logout" 
                         prepend-icon="mdi-logout" 
@@ -191,6 +216,8 @@
     import axios from 'axios';
     import { useDisplay } from 'vuetify';
     import { useAuthStore } from '@/stores/auth';
+
+    const isPreviewPage = computed(() => route.name === 'InvoicePreview' || route.name === 'EstimatePreview');
 
     const { mdAndUp } = useDisplay();
     const route = useRoute();

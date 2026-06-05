@@ -36,7 +36,6 @@ class LeaveRequestController extends Controller
 
         return response()->json($requests);
     }
-
     public function store(StoreLeaveRequest $request): JsonResponse
     {
         try {
