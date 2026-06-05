@@ -13,6 +13,7 @@ class RolePermissionSeeder extends Seeder
         $definitions = [
             ['name' => 'View dashboard', 'slug' => 'dashboard.view'],
             ['name' => 'Admin panel', 'slug' => 'admin.access'],
+            ['name' => 'View company info', 'slug' => 'company-info.view'],
             ['name' => 'View staff', 'slug' => 'staff.view'],
             ['name' => 'Create staff', 'slug' => 'staff.create'],
             ['name' => 'Update staff', 'slug' => 'staff.update'],
@@ -37,6 +38,14 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Manage leave requests', 'slug' => 'leave-requests.manage'],
             ['name' => 'View leave balances', 'slug' => 'leave-balances.view'],
             ['name' => 'Manage leave balances', 'slug' => 'leave-balances.manage'],
+            ['name' => 'View payroll', 'slug' => 'payroll.view'],
+            ['name' => 'Manage payroll', 'slug' => 'payroll.manage'],
+            ['name' => 'View invoices','slug' => 'invoices.view'],
+            ['name' => 'Manage invoices', 'slug' => 'invoices.manage'],
+            ['name' => 'View estimates','slug' => 'estimates.view'],
+            ['name' => 'Manage estimates', 'slug' => 'estimates.manage'],
+            ['name' => 'View clients', 'slug' => 'clients.view'],
+            ['name' => 'Manage clients', 'slug' => 'clients.manage'],
         ];
 
         $permissions = collect($definitions)->map(fn (array $row) => Permission::query()->firstOrCreate(

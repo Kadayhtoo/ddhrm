@@ -4,17 +4,24 @@ use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AttendanceReportController;
 use App\Http\Controllers\Api\AttendanceSettingsController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\ContactPersonController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\EstimateController;
 use App\Http\Controllers\Api\LeaveBalanceController;
 use App\Http\Controllers\Api\LeaveRequestController;
 use App\Http\Controllers\Api\LeaveRuleController;
+use App\Http\Controllers\Api\AboutUsController;
 use App\Http\Controllers\APi\PositionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StaffController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
+// Public endpoint for invoice preview and unauthenticated consumers
+Route::get('public/about-us', [AboutUsController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -63,4 +70,29 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/leave-balances', [LeaveBalanceController::class, 'index']);
 
+    Route::get('locations/config', [ClientController::class, 'getLocationConfig']);
+
+    Route::get('/currencies', function () {
+    return response()->json(config('currency.supported'));
+    });
+
+    Route::apiResource('client', ClientController::class);  
+    Route::get('/client/{id}', [ClientController::class, 'show']);
+    Route::apiResource('about-us', AboutUsController::class)->only(['index', 'show', 'store', 'update']);
+    Route::get('clients/{client}/contacts', [ContactPersonController::class, 'index']);
+    Route::post('clients/{client}/contacts', [ContactPersonController::class, 'store']);
+    Route::put('contacts/{id}', [ContactPersonController::class, 'update']);
+    Route::delete('contacts/{id}', [ContactPersonController::class, 'destroy']);
+
+    Route::get('invoices/next-number', [InvoiceController::class, 'getNextInvoiceNumber']);
+    Route::apiResource('invoices', InvoiceController::class)->parameters([
+        'invoices' => 'invoice_id' 
+    ]);
+    Route::get('/clients/{client}/invoices', [InvoiceController::class, 'indexByClient']);
+    
+    Route::get('estimates/next-number', [EstimateController::class, 'getNextEstimateNumber']);
+    Route::apiResource('estimates', EstimateController::class)->parameters([
+        'estimates' => 'estimate_id'
+    ]);
+    Route::get('/clients/{client}/estimates', [EstimateController::class, 'indexByClient']);
 });
