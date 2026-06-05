@@ -6,7 +6,7 @@
         <p class="text-body-1 text-medium-emphasis mb-0">Manage your system clients, locations, and contact info.</p>
       </v-col>
       <v-col cols="12" sm="auto" class="text-sm-right">
-        <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openCreateDialog">
+        <v-btn color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openCreateDialog">
           <v-icon start>mdi-plus</v-icon> Add Client
         </v-btn>
       </v-col>
@@ -149,7 +149,7 @@
             
             <v-btn variant="text" rounded="lg" class="text-none px-5 font-weight-bold" :disabled="submitLoading" @click="closeDialog">Cancel</v-btn>
 
-            <v-btn  color="indigo-darken-2"  variant="flat"  rounded="lg" class="text-none px-6 elevation-2 font-weight-bold"  :loading="submitLoading"  @click="saveClient">{{ isEdit ? 'Update' : 'Save' }}</v-btn>
+            <v-btn  color="#702E62"  variant="flat"  rounded="lg" class="text-none px-6 elevation-2 font-weight-bold"  :loading="submitLoading"  @click="saveClient">{{ isEdit ? 'Update' : 'Save' }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -192,7 +192,7 @@
                 
                 <div class="d-flex justify-end gap-1">
                   <v-btn v-if="isContactEdit" variant="text" size="small" class="text-none rounded-lg font-weight-bold" @click="resetContactForm">Cancel</v-btn>
-                  <v-btn color="indigo-darken-2" size="comfortable" class="text-none rounded-lg font-weight-bold px-4" :loading="contactSubmitLoading" @click="saveContactPerson">
+                  <v-btn color="#702E62" size="comfortable" class="text-none rounded-lg font-weight-bold px-4" :loading="contactSubmitLoading" @click="saveContactPerson">
                     {{ isContactEdit ? 'Update' : 'Save Contact' }}
                   </v-btn>
                 </div>

@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\AttendanceReportController;
+use App\Http\Controllers\Api\AttendanceSettingsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\ContactPersonController;
@@ -23,7 +26,7 @@ Route::get('public/about-us', [AboutUsController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
-    Route::get('admin/profile', [AuthController::class, 'profile']); 
+    Route::get('admin/profile', [AuthController::class, 'profile']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 
     Route::get('/dashboard/summary', [DashboardController::class, 'summary'])
@@ -35,17 +38,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('roles/{role}', [RoleController::class, 'update'])->middleware('permission:roles.manage');
 
     Route::apiResource('staff', StaffController::class)->parameters(['staff' => 'user'])->middleware('permission:staff.view');
-    Route::get('staff/{user}', [StaffController::class, 'showDetail']); 
+    Route::get('staff/{user}', [StaffController::class, 'showDetail']);
     Route::get('staff/{user}/leave-balances', [StaffController::class, 'getLeaveBalances']);
     Route::get('staff/{user}/leave-requests', [StaffController::class, 'getLeaveRequests']);
     Route::get('/staff-dropdown', [StaffController::class, 'dropdownList']);
 
     Route::get('staff/{user}/attendances', [StaffController::class, 'getAttendances']);
 
+    Route::prefix('attendance')->middleware('permission:attendance.view')->group(function () {
+        Route::get('/', [AttendanceController::class, 'index']);
+        Route::get('/today', [AttendanceController::class, 'today']);
+        Route::post('/check-in', [AttendanceController::class, 'checkIn']);
+        Route::post('/check-out', [AttendanceController::class, 'checkOut']);
+        Route::get('/reports/widgets', [AttendanceReportController::class, 'widgets']);
+        Route::get('/reports/daily', [AttendanceReportController::class, 'daily']);
+        Route::get('/reports/monthly', [AttendanceReportController::class, 'monthly']);
+        Route::get('/reports/employee/{user}', [AttendanceReportController::class, 'employee']);
+        Route::get('/settings', [AttendanceSettingsController::class, 'show'])->middleware('permission:attendance.manage');
+        Route::put('/settings', [AttendanceSettingsController::class, 'update'])->middleware('permission:attendance.manage');
+        Route::get('/{attendance}', [AttendanceController::class, 'show']);
+    });
+
     Route::apiResource('department', DepartmentController::class);
     Route::apiResource('position', PositionController::class);
-    Route::get('department/{department}/positions', [DepartmentController::class, 'getPositions']); 
-       
+    Route::get('department/{department}/positions', [DepartmentController::class, 'getPositions']);
+
     Route::apiResource('leave-rules', LeaveRuleController::class);
     Route::apiResource('leave-requests', LeaveRequestController::class);
     Route::patch('/leave-requests/{id}/status', [LeaveRequestController::class, 'changeStatus']);

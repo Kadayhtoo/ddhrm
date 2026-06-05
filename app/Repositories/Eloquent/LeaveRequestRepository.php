@@ -2,8 +2,8 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Models\LeaveRequest;
 use App\Models\LeaveBalance;
+use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Repositories\Contracts\LeaveRequestRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -28,7 +28,7 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
         } else {
             if ($scope === 'approvals') {
                 $query->where('approver_id', $user->id)
-                      ->where('user_id', '!=', $user->id);
+                    ->where('user_id', '!=', $user->id);
             } else {
                 $query->where('user_id', $user->id);
             }
@@ -39,9 +39,9 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
         if ($search) {
             $query->where(function ($mainQuery) use ($search) {
                 $mainQuery->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
+                    $q->where('name', 'like', '%'.$search.'%');
                 })->orWhereHas('leaveRule', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%');
+                    $q->where('name', 'like', '%'.$search.'%');
                 });
             });
         }
@@ -62,6 +62,7 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
     public function update(LeaveRequest $leaveRequest, array $attributes): LeaveRequest
     {
         $leaveRequest->update($attributes);
+
         return $leaveRequest;
     }
 
@@ -69,6 +70,7 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
     {
         $request = $this->findById($id);
         $request->update(['status' => 'cancelled']);
+
         return $request;
     }
 
@@ -88,6 +90,7 @@ class LeaveRequestRepository implements LeaveRequestRepositoryInterface
     public function updateBalance(LeaveBalance $balance, array $attributes): LeaveBalance
     {
         $balance->update($attributes);
+
         return $balance;
     }
 }

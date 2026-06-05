@@ -46,7 +46,7 @@ class AuthService
 
     public function updateProfile(User $user, array $data): User
     {
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);

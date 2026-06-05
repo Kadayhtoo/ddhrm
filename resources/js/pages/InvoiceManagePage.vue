@@ -6,7 +6,7 @@
         <p class="text-body-1 text-medium-emphasis mb-0">Create, edit, manage and track your client invoices and billing status.</p>
       </v-col>
       <v-col cols="12" sm="auto" class="text-sm-right">
-        <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openCreateDialog(null)">
+        <v-btn color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openCreateDialog(null)">
           <v-icon start>mdi-plus</v-icon> Create Invoice
         </v-btn>
       </v-col>
@@ -128,10 +128,10 @@
 
        <template #item.actions="{ item }">
         <div class="d-flex justify-end gap-1">
-          <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="indigo-darken-2" title="Edit Invoice" @click="openEditDialog(item)"></v-btn>
+          <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="#702E62" title="Edit Invoice" @click="openEditDialog(item)"></v-btn>
           <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" title="Delete Invoice" @click="confirmDelete(item.invoice_id)"></v-btn>
           
-          <v-btn icon="mdi-eye-outline" variant="text" size="small" color="indigo-darken-2" title="Preview" @click="previewInvoice(item.invoice_id)"></v-btn>
+          <v-btn icon="mdi-eye-outline" variant="text" size="small" color="#702E62" title="Preview" @click="previewInvoice(item.invoice_id)"></v-btn>
           <!-- <v-btn icon="mdi-download" variant="text" size="small" color="success" title="Download PDF" @click="downloadInvoice(item.invoice_id)"></v-btn> -->
         </div>
       </template>
@@ -226,8 +226,8 @@
         <v-card-actions class="px-6 pb-4">
             <v-spacer />   
             <v-btn variant="text" rounded="lg" class="text-none px-5 font-weight-bold" :disabled="submitLoading" @click="closeDialog">Cancel</v-btn>
-            <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="submitLoading" @click="saveInvoice">
-                {{ isEditMode ? 'Update' : 'Create Invoice' }}
+            <v-btn color="#702E62" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="submitLoading" @click="saveInvoice">
+                {{ isEditMode ? 'Update' : 'Save' }}
             </v-btn>
         </v-card-actions>
       </v-card>

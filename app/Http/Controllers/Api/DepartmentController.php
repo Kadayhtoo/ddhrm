@@ -16,7 +16,7 @@ class DepartmentController extends Controller
 {
     public function __construct(
         protected DepartmentService $departmentService,
-    ){}
+    ) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -32,15 +32,15 @@ class DepartmentController extends Controller
 
     public function getPositions(Department $department): JsonResponse
     {
-        if (!$department instanceof Department) {
-        $department = Department::findOrFail($department);
+        if (! $department instanceof Department) {
+            $department = Department::findOrFail($department);
         }
 
-        $positions = $department->positions; 
+        $positions = $department->positions;
 
         return response()->json([
             'success' => true,
-            'data'    => $positions
+            'data' => $positions,
         ], 200);
     }
 
@@ -65,12 +65,12 @@ class DepartmentController extends Controller
         $this->authorize('update', $department);
 
         $updated = $this->departmentService->update($department, $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:departments,name,' . $department->id],
+            'name' => ['required', 'string', 'max:255', 'unique:departments,name,'.$department->id],
         ]));
 
         return new DepartmentResource($updated);
     }
-    
+
     public function destroy(Request $request, Department $department): JsonResponse
     {
         $this->authorize('delete', $department);

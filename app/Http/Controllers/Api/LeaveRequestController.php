@@ -20,23 +20,22 @@ class LeaveRequestController extends Controller
     {
         $perPage = (int) $request->query('per_page', 10);
         $search = $request->query('search');
-        
-        $scope = $request->query('scope', 'my_requests'); 
+
+        $scope = $request->query('scope', 'my_requests');
         $dateFilter = $request->query('date_filter');
 
         $currentUser = Auth::user();
-        
+
         $requests = $this->service->getPaginatedRequests(
-            $currentUser, 
-            $perPage, 
-            $search, 
-            $scope, 
+            $currentUser,
+            $perPage,
+            $search,
+            $scope,
             $dateFilter
         );
-        
+
         return response()->json($requests);
     }
-    
     public function store(StoreLeaveRequest $request): JsonResponse
     {
         try {
@@ -51,27 +50,27 @@ class LeaveRequestController extends Controller
 
             return response()->json([
                 'message' => 'Leave request submitted successfully.',
-                'data' => $leaveRequest
+                'data' => $leaveRequest,
             ], 201);
-            
+
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
     }
-    
+
     public function changeStatus(Request $request, $id): JsonResponse
     {
         $validated = $request->validate([
-            'status' => 'required|in:approved,rejected'
+            'status' => 'required|in:approved,rejected',
         ]);
 
         try {
             $currentUser = Auth::user();
             $updatedRequest = $this->service->handleApproval($id, $validated['status'], $currentUser);
-            
+
             return response()->json([
                 'message' => 'Leave request status updated successfully.',
-                'data' => $updatedRequest
+                'data' => $updatedRequest,
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 422);
@@ -86,7 +85,7 @@ class LeaveRequestController extends Controller
 
             return response()->json([
                 'message' => 'Leave request has been cancelled successfully.',
-                'data' => $cancelledRequest
+                'data' => $cancelledRequest,
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 422);
@@ -100,17 +99,17 @@ class LeaveRequestController extends Controller
             $currentUser = Auth::user();
 
             $updatedRequest = $this->service->updateLeaveRequest(
-                (int)$id, 
-                $validated, 
-                $request->file('attachment'), 
+                (int) $id,
+                $validated,
+                $request->file('attachment'),
                 $currentUser
             );
 
             return response()->json([
                 'message' => 'Leave request updated successfully.',
-                'data' => $updatedRequest
+                'data' => $updatedRequest,
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }

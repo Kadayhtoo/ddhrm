@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
 use App\Http\Resources\StaffResource;
+use App\Models\Attendance;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Models\User;
@@ -44,6 +45,7 @@ class StaffController extends Controller
     public function showDetail($id): JsonResponse
     {
         $staff = User::with(['department', 'roles'])->findOrFail($id);
+
         return response()->json(['data' => $staff]);
     }
     
@@ -58,7 +60,7 @@ class StaffController extends Controller
                     ->where('year', $year); 
         })
             ->get();
-            
+
         return response()->json(['data' => $balances]);
     }
 
@@ -71,10 +73,29 @@ class StaffController extends Controller
             ->whereYear('start_date', $year) 
             ->orderByDesc('id')
             ->get();
-            
+
         return response()->json(['data' => $requests]);
     }
-    
+
+    public function getAttendances($id): JsonResponse
+    {
+        $attendances = Attendance::query()
+            ->where('user_id', $id)
+            ->orderByDesc('attendance_date')
+            ->limit(60)
+            ->get()
+            ->map(fn (Attendance $attendance) => [
+                'id' => $attendance->id,
+                'date' => $attendance->attendance_date?->toDateString(),
+                'check_in' => $attendance->clock_in_at?->format('H:i'),
+                'check_out' => $attendance->clock_out_at?->format('H:i'),
+                'work_hours' => round(((int) $attendance->work_minutes) / 60, 2),
+                'status' => $attendance->status,
+            ]);
+
+        return response()->json(['data' => $attendances]);
+    }
+
     public function update(UpdateStaffRequest $request, User $user): StaffResource
     {
         $updated = $this->staffService->update($user, $request->validated(), $request->user());

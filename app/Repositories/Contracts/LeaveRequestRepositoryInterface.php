@@ -9,12 +9,13 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface LeaveRequestRepositoryInterface
 {
-public function paginateByRole(User $user, int $perPage = 15, ?string $search = null, ?string $scope = 'my_requests', ?string $dateFilter = null): LengthAwarePaginator;
+    public function paginateByRole(User $user, int $perPage = 15, ?string $search = null, ?string $scope = 'my_requests', ?string $dateFilter = null): LengthAwarePaginator;
+
     public function create(array $attributes): LeaveRequest;
 
     public function findById(int $id): LeaveRequest;
 
-    public function update(LeaveRequest $leaveRequest, array $attributes): LeaveRequest; 
+    public function update(LeaveRequest $leaveRequest, array $attributes): LeaveRequest;
 
     public function cancel(int $id): LeaveRequest;
 
@@ -22,5 +23,5 @@ public function paginateByRole(User $user, int $perPage = 15, ?string $search = 
 
     public function createBalance(array $attributes): LeaveBalance;
 
-    public function updateBalance(LeaveBalance $balance, array $attributes): LeaveBalance; 
+    public function updateBalance(LeaveBalance $balance, array $attributes): LeaveBalance;
 }

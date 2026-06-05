@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('leave_rule_id');
-            $table->decimal('total_allowed_days', 4, 1); 
-            $table->decimal('used_days', 4, 1)->default(0.0);       
+            $table->decimal('total_allowed_days', 4, 1);
+            $table->decimal('used_days', 4, 1)->default(0.0);
             $table->decimal('remaining_days', 4, 1);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('leave_rule_id')->references('id')->on('leave_rules')->onDelete('cascade');

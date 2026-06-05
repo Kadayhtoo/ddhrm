@@ -8,10 +8,10 @@ class LeaveBalance extends Model
 {
     protected $fillable = [
         'user_id',
-        'leave_rule_id', 
-        'total_allowed_days', 
-        'used_days', 
-        'remaining_days'
+        'leave_rule_id',
+        'total_allowed_days',
+        'used_days',
+        'remaining_days',
     ];
 
     public function leaveRule()

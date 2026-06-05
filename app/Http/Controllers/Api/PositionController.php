@@ -27,7 +27,7 @@ class PositionController extends Controller
         $search = $request->query('search');
 
         $positions = $this->positionService->paginate(
-            $perPage, 
+            $perPage,
             is_string($search) ? $search : null
         );
 
@@ -37,7 +37,7 @@ class PositionController extends Controller
     public function store(StorePositionRequest $request): JsonResponse
     {
         $position = $this->positionService->createPosition($request->validated());
-        
+
         return (new PositionResource($position))
             ->response()
             ->setStatusCode(201);
@@ -46,8 +46,8 @@ class PositionController extends Controller
     public function show(int $id): JsonResponse
     {
         $position = $this->positionService->getPositionById($id);
-        
-        if (!$position) {
+
+        if (! $position) {
             return response()->json(['success' => false, 'message' => 'Position not found'], 404);
         }
 
@@ -57,13 +57,14 @@ class PositionController extends Controller
     public function update(UpdatePositionRequest $request, Position $position): PositionResource
     {
         $updatedPosition = $this->positionService->updatePosition($position, $request->validated());
-        
+
         return new PositionResource($updatedPosition);
     }
 
     public function destroy(Position $position): JsonResponse
     {
         $this->positionService->deletePosition($position);
+
         return response()->json(['success' => true, 'message' => 'Position deleted successfully'], 200);
     }
 }

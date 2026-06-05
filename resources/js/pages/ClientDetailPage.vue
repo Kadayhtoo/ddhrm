@@ -79,7 +79,7 @@
                 <v-text-field v-model="contactForm.email" label="Email" variant="outlined" density="comfortable" rounded="lg" class="mb-2"></v-text-field>
                 <div class="d-flex align-center gap-2 mt-2">
                   <v-btn v-if="isContactEdit" variant="text" class="text-none rounded-lg" @click="resetContactForm">Cancel</v-btn>
-                  <v-btn color="indigo" @click="saveContactPerson" :loading="contactSubmitLoading" rounded="lg" class="px-6">{{ isContactEdit ? 'Update' : 'Add' }}</v-btn>
+                  <v-btn color="#702E62" @click="saveContactPerson" :loading="contactSubmitLoading" rounded="lg" class="px-6">{{ isContactEdit ? 'Update' : 'Add' }}</v-btn>
                 </div>
               </v-form>
             </v-col>
@@ -89,7 +89,7 @@
                   <v-list-item-title class="font-weight-bold">{{ contact.name }}</v-list-item-title>
                   <v-list-item-subtitle>{{ contact.phone }} | {{ contact.email }}</v-list-item-subtitle>
                   <template #append>
-                    <v-btn icon="mdi-pencil" size="small" variant="text" @click="editContact(contact)"></v-btn>
+                    <v-btn icon="mdi-pencil" color="#702E62" size="small" variant="text" @click="editContact(contact)"></v-btn>
                     <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="confirmDeleteContact(contact.id)"></v-btn>
                   </template>
                 </v-list-item>
@@ -103,7 +103,7 @@
         <v-card class="rounded-xl elevation-1 pa-4">
           <div class="d-flex justify-space-between align-center mb-4">
             <h3 class="text-h6 font-weight-bold">Invoice History</h3>
-            <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openCreateInvoiceForm(null)">
+            <v-btn color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openCreateInvoiceForm(null)">
               <v-icon start>mdi-plus</v-icon> Create Invoice
             </v-btn>
           </div>
@@ -178,9 +178,9 @@
 
             <template #item.actions="{ item }">
               <div class="d-flex justify-end gap-1">
-                <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="indigo-darken-2" title="Edit Invoice" @click="openEditDialog(item)"></v-btn>
+                <v-btn icon="mdi-pencil-outline" variant="text"  size="small" color="#702E62" title="Edit Invoice" @click="openEditDialog(item)"></v-btn>
                 <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" title="Delete Invoice" @click="confirmDelete(item.invoice_id)"></v-btn>
-                <v-btn icon="mdi-eye-outline" variant="text" size="small" color="indigo-darken-2" title="Preview" @click="previewInvoice(item.invoice_id)"></v-btn>
+                <v-btn icon="mdi-eye-outline" variant="text" size="small" color="#702E62" title="Preview" @click="previewInvoice(item.invoice_id)"></v-btn>
               </div>
             </template>
           </v-data-table>
@@ -271,7 +271,7 @@
         
         <v-btn variant="text" rounded="lg" class="text-none px-5 font-weight-bold" :disabled="clientSubmitLoading" @click="clientDialog = false">Cancel</v-btn>
 
-        <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="clientSubmitLoading" @click="updateClient">Save</v-btn>
+        <v-btn color="#702E62" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="clientSubmitLoading" @click="updateClient">Save</v-btn>
     </v-card-actions>
     </v-card>
   </v-dialog>

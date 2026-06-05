@@ -18,7 +18,7 @@
                     @keyup.enter="applySearch"
                 />
 
-                <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('leave-rules.create')" @click="openCreate"
+                <v-btn color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('leave-rules.create')" @click="openCreate"
                 >
                     <v-icon start>mdi-plus</v-icon> Add Leave Rule
                 </v-btn>
@@ -146,7 +146,7 @@
                     <v-spacer />
                     
                     <v-btn variant="text" rounded="lg" class="text-none px-5 font-weight-bold" :disabled="saving" @click="dialog = false">Cancel</v-btn>
-                    <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="saving" @click="save">
+                    <v-btn color="#702E62" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="saving" @click="save">
                         {{ editingId ? 'Update' : 'Save' }}
                     </v-btn>
                 </v-card-actions>

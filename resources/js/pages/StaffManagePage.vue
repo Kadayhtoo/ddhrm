@@ -19,7 +19,7 @@
             />
 
             <v-btn 
-                color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('staff.create')" @click="openCreate"
+                color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('staff.create')" @click="openCreate"
             >
                 <v-icon start>mdi-plus</v-icon> Add Staff
             </v-btn>
@@ -95,7 +95,7 @@
                 <v-icon
                     size="small"
                     class="me-2"
-                    color="primary"
+                    color="#702E62"
                     :disabled="!auth.can('staff.update')"
                     @click="openEdit(item)"
                 >
@@ -214,7 +214,7 @@
                     <v-spacer />
                     
                     <v-btn variant="text" rounded="lg" class="text-none px-5 font-weight-bold" :disabled="saving" @click="dialog = false">Cancel</v-btn>
-                    <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="saving" @click="save">
+                    <v-btn color="#702E62" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="saving" @click="save">
                         {{ isEdit ? 'Update' : 'Save' }}
                     </v-btn>
                 </v-card-actions>

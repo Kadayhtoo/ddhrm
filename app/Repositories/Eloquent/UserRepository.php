@@ -54,7 +54,7 @@ class UserRepository implements UserRepositoryInterface
             $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $search).'%';
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', $term)
-                ->orWhere('email', 'like', $term);
+                    ->orWhere('email', 'like', $term);
             });
         }
 

@@ -17,16 +17,16 @@ class PositionRepository implements PositionRepositoryInterface
     public function paginatePositions(int $perPage = 15, ?string $search = null): LengthAwarePaginator
     {
         $query = Position::with('department')
-            ->orderByDesc('id'); 
+            ->orderByDesc('id');
 
         if ($search) {
-            $term = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $search) . '%';
-            
+            $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $search).'%';
+
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', $term)
-                  ->orWhereHas('department', function ($depQuery) use ($term) {
-                      $depQuery->where('name', 'like', $term);
-                  });
+                    ->orWhereHas('department', function ($depQuery) use ($term) {
+                        $depQuery->where('name', 'like', $term);
+                    });
             });
         }
 
@@ -46,6 +46,7 @@ class PositionRepository implements PositionRepositoryInterface
     public function update(Position $position, array $data): Position
     {
         $position->update($data);
+
         return $position;
     }
 

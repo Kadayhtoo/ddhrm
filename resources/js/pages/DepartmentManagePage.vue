@@ -18,7 +18,7 @@
                     @keyup.enter="applySearch"
                 />
                 
-                <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold"  :disabled="!auth.can('departments.create')" @click="openCreate"
+                <v-btn color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold"  :disabled="!auth.can('departments.create')" @click="openCreate"
                 >
                     <v-icon start>mdi-plus</v-icon> Add Department
                 </v-btn>
@@ -41,7 +41,7 @@
             @update:options="loadItems"
         >
             <template #item.actions="{ item }">
-                <v-btn icon variant="text" size="small" :disabled="!auth.can('departments.update')" @click="openEdit(item)">
+                <v-btn icon variant="text"  color="#702E62" size="small" :disabled="!auth.can('departments.update')" @click="openEdit(item)">
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
                 <v-btn
@@ -66,7 +66,7 @@
                 </v-card-text>
                 <v-card-actions class="px-6 pb-4">
                     <v-spacer></v-spacer> <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-                    <v-btn color="indigo-darken-2" variant="elevated"  rounded="lg" class="text-none px-5 py-2 elevation-2 font-weight-bold" :loading="saving" @click="save">Save</v-btn>
+                    <v-btn color="#702E62" variant="elevated"  rounded="lg" class="text-none px-5 py-2 elevation-2 font-weight-bold" :loading="saving" @click="save">Save</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>

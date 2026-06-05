@@ -20,7 +20,7 @@ class LeaveRequestService
     {
         return $this->repository->paginateByRole($user, $perPage, $search, $scope, $dateFilter);
     }
-    
+
     public function applyLeave(array $data, $attachment, User $actor): LeaveRequest
     {
         if (empty($data['user_id'])) {
@@ -46,11 +46,10 @@ class LeaveRequestService
 
     public function handleApproval(int $id, string $action, User $actor): LeaveRequest
     {
-        return DB::transaction(function () use ($id, $action, $actor) 
-        {
-            
+        return DB::transaction(function () use ($id, $action, $actor) {
+
             $leaveRequest = $this->repository->findById($id);
-            if (!$leaveRequest) {
+            if (! $leaveRequest) {
                 throw new \Exception('Leave request not found.');
             }
 
@@ -59,9 +58,9 @@ class LeaveRequestService
             }
 
             $isHRorAdmin = $actor->hasRoleSlug('hr') || $actor->hasRoleSlug('admin');
-            $isAssignedApprover = ((int)$leaveRequest->approver_id === (int)$actor->id);
+            $isAssignedApprover = ((int) $leaveRequest->approver_id === (int) $actor->id);
 
-            if (!$isHRorAdmin && !$isAssignedApprover) {
+            if (! $isHRorAdmin && ! $isAssignedApprover) {
                 throw new \Exception('You do not have permission to review this leave request.');
             }
 
@@ -72,39 +71,40 @@ class LeaveRequestService
                 } else {
                     $updateData['is_approve'] = 2;
                 }
+
                 return $this->repository->update($leaveRequest, $updateData);
             }
 
             if ($action === 'approved') {
                 $updateData = [];
-                if ($isAssignedApprover && !$isHRorAdmin) {
+                if ($isAssignedApprover && ! $isHRorAdmin) {
                     $updateData['is_approve'] = 1;
                     $updateData['status'] = 'pending';
-                    
+
                     return $this->repository->update($leaveRequest, $updateData);
-                } 
+                }
                 if ($isHRorAdmin) {
                     $updateData['is_approve_hr'] = 1;
                     if ($leaveRequest->is_approve === 0) {
-                        $updateData['is_approve'] = 1; 
+                        $updateData['is_approve'] = 1;
                     }
                     $updateData['status'] = 'approved';
                     $leaveBalance = $this->repository->findBalance($leaveRequest->user_id, $leaveRequest->leave_rule_id);
-                    
+
                     if ($leaveBalance) {
                         $this->repository->updateBalance($leaveBalance, [
-                            'used_days'      => $leaveBalance->used_days + $leaveRequest->total_days,
+                            'used_days' => $leaveBalance->used_days + $leaveRequest->total_days,
                             'remaining_days' => $leaveBalance->remaining_days - $leaveRequest->total_days,
                         ]);
                     } else {
-                        $totalAllowedDays = $leaveRequest->leaveRule ? (float)$leaveRequest->leaveRule->days : 0.0;
-                        
+                        $totalAllowedDays = $leaveRequest->leaveRule ? (float) $leaveRequest->leaveRule->days : 0.0;
+
                         $this->repository->createBalance([
-                            'user_id'            => $leaveRequest->user_id,
-                            'leave_rule_id'      => $leaveRequest->leave_rule_id,
-                            'total_allowed_days' => $totalAllowedDays, 
-                            'used_days'          => $leaveRequest->total_days,
-                            'remaining_days'     => $totalAllowedDays - $leaveRequest->total_days
+                            'user_id' => $leaveRequest->user_id,
+                            'leave_rule_id' => $leaveRequest->leave_rule_id,
+                            'total_allowed_days' => $totalAllowedDays,
+                            'used_days' => $leaveRequest->total_days,
+                            'remaining_days' => $totalAllowedDays - $leaveRequest->total_days,
                         ]);
                     }
 
@@ -135,11 +135,11 @@ class LeaveRequestService
     {
         $leaveRequest = $this->repository->findById($id);
 
-        if (!$leaveRequest) {
+        if (! $leaveRequest) {
             throw new \Exception('Leave request not found.');
         }
 
-        if ((int)$leaveRequest->user_id !== (int)$actor->id) {
+        if ((int) $leaveRequest->user_id !== (int) $actor->id) {
             throw new \Exception('You are not authorized to modify this leave request.');
         }
 

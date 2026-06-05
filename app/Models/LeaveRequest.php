@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class LeaveRequest extends Model
 {
     protected $fillable = [
-        'user_id', 
-        'requested_by', 
-        'department_id', 
+        'user_id',
+        'requested_by',
+        'department_id',
         'approver_id',
-        'leave_rule_id', 
+        'leave_rule_id',
         'start_date',
         'end_date', 
         'year',
@@ -21,8 +21,8 @@ class LeaveRequest extends Model
         'attachment',
         'is_approve',
         'is_approve_hr',
-        'status'
-         ];
+        'status',
+    ];
 
     public function leaveRule()
     {
@@ -34,4 +34,3 @@ class LeaveRequest extends Model
         return $this->belongsTo(User::class);
     }
 }
-

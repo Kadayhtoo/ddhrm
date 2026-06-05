@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin \App\Models\User */
+/** @mixin User */
 class StaffResource extends JsonResource
 {
     /**
@@ -23,10 +24,10 @@ class StaffResource extends JsonResource
                 'id' => $this->department->id,
                 'name' => $this->department->name,
             ]),
-            
-            'position_id'   => $this->position_id,
-            'position'      => [
-                'id'   => $this->position?->id,
+
+            'position_id' => $this->position_id,
+            'position' => [
+                'id' => $this->position?->id,
                 'name' => $this->position?->name,
             ],
             'salary' => $this->salary,

@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Repositories\LeaveBalanceRepositoryInterface;
-use App\Models\User;
 use App\Models\LeaveRule;
+use App\Models\User;
+use App\Repositories\LeaveBalanceRepositoryInterface;
 
 class LeaveBalanceService
 {
@@ -19,10 +19,12 @@ class LeaveBalanceService
     {
         if ($user->hasPermissionTo('leave-balances.view') || $user->hasRole('admin') || $user->hasRole('hr')) {
             $balances = $this->leaveBalanceRepo->getAllBalancesWithFilter($search);
+
             return ['is_admin_view' => true, 'data' => $balances];
         }
 
         $myBalance = $this->leaveBalanceRepo->getBalanceByUserId($user->id);
+
         return ['is_admin_view' => false, 'data' => $myBalance];
     }
 
@@ -33,13 +35,13 @@ class LeaveBalanceService
         foreach ($paidRules as $rule) {
             $this->leaveBalanceRepo->firstOrCreateBalance(
                 [
-                    'user_id'       => $user->id,
+                    'user_id' => $user->id,
                     'leave_rule_id' => $rule->id,
                 ],
                 [
                     'total_allowed_days' => $rule->days ?? 0,
-                    'used_days'          => 0,
-                    'remaining_days'     => $rule->days ?? 0,
+                    'used_days' => 0,
+                    'remaining_days' => $rule->days ?? 0,
                 ]
             );
         }

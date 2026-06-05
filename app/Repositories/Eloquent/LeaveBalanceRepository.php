@@ -11,8 +11,8 @@ class LeaveBalanceRepository implements LeaveBalanceRepositoryInterface
         $query = LeaveBalance::with(['user.department', 'leaveRule']);
 
         if ($search) {
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', '%'.$search.'%');
             });
         }
 

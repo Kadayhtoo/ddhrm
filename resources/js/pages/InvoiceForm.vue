@@ -73,7 +73,7 @@
   
   <v-btn variant="text" rounded="lg" class="text-none font-weight-bold" :disabled="loading"@click="$emit('close')"> Cancel</v-btn>
 
-  <v-btn color="indigo-darken-2" variant="flat" rounded="lg" elevation="2"class="text-none px-6 font-weight-bold" :loading="loading" @click="submitForm"
+  <v-btn color="#702E62" variant="flat" rounded="lg" elevation="2"class="text-none px-6 font-weight-bold" :loading="loading" @click="submitForm"
   >
     {{ isEdit ? 'Update' : 'Create' }}
   </v-btn>
@@ -202,7 +202,6 @@ onMounted(async () => {
   if (!isEdit) {
     await fetchNextInvoiceNumber();
   }
-  //fetchClientData();
   
 });
 </script>

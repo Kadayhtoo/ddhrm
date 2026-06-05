@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\LeaveBalanceService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\JsonResponse;
 
 class LeaveBalanceController extends Controller
 {
@@ -24,17 +24,18 @@ class LeaveBalanceController extends Controller
 
         try {
             $result = $this->leaveBalanceService->getLeaveBalancesForUser($user, $search);
+
             return response()->json([
-                'success'       => true,
+                'success' => true,
                 'is_admin_view' => $result['is_admin_view'],
-                'data'          => $result['data']
+                'data' => $result['data'],
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching leave balances.',
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

@@ -38,7 +38,7 @@
                     @click:clear="clearSearch"
                 />
 
-                <v-btn color="indigo-darken-2" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openLeaveFormDialog()"
+                <v-btn color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" @click="openLeaveFormDialog()"
                 >
                     <v-icon start>mdi-plus</v-icon>Apply Leave
                 </v-btn>
@@ -406,7 +406,7 @@
                     
                     <v-btn variant="text"  rounded="lg" class="text-none font-weight-bold"  :disabled="submittingForm" @click="closeLeaveFormDialog">Cancel</v-btn>
 
-                    <v-btn color="indigo-darken-2" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="submittingForm"  @click="submitLeaveRequest" >{{ isEditing ? 'Update' : 'Save' }} </v-btn>
+                    <v-btn color="#702E62" variant="flat" rounded="lg" class="text-none px-6 elevation-2 font-weight-bold" :loading="submittingForm"  @click="submitLeaveRequest" >{{ isEditing ? 'Update' : 'Save' }} </v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
