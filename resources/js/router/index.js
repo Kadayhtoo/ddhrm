@@ -8,6 +8,8 @@ import AttendanceReportsPage from '@/pages/AttendanceReportsPage.vue';
 import AttendanceSettingsPage from '@/pages/AttendanceSettingsPage.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
+import PayrollPage from '@/pages/PayrollPage.vue';
+import PayrollDetailPage from '@/pages/PayrollDetailPage.vue';
 import PlaceholderPage from '@/pages/PlaceholderPage.vue';
 import RoleDetailPage from '@/pages/RoleDetailPage.vue';
 import RoleListViewPage from '@/pages/RoleListViewPage.vue';
