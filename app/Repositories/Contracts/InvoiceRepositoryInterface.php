@@ -19,6 +19,5 @@ interface InvoiceRepositoryInterface
     
     public function delete(Invoice $invoice): bool;
 
-// InvoiceRepositoryInterface.php
-public function getInvoicesByClient(int $clientId);
+    public function getInvoicesByClient(int $clientId);
 }

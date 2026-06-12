@@ -24,6 +24,7 @@ class Invoice extends Model
         'sub_total',
         'grand_total',
         'terms', 
+        'payment_attachment',
     ];
 
     public function client()

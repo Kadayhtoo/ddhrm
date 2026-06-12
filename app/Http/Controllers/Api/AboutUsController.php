@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAboutUsRequest;
 use App\Http\Requests\UpdateAboutUsRequest;
 use App\Http\Resources\AboutUsResource;
+use App\Models\AboutUs;
 use App\Services\AboutUsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +21,7 @@ class AboutUsController extends Controller
     }
 
     public function index(): JsonResponse
-    {
+    {      
         $aboutUs = $this->aboutUsService->getSettings();
 
         return response()->json([
@@ -30,8 +31,7 @@ class AboutUsController extends Controller
     }
 
     public function store(StoreAboutUsRequest $request): JsonResponse
-    {
-       // dd($request->all());
+    {        
         $data = $request->safe()->except(['logo']);
 
         if ($request->hasFile('logo')) {
@@ -49,6 +49,7 @@ class AboutUsController extends Controller
 
     public function show(int $id): JsonResponse
     {
+
         $aboutUs = $this->aboutUsService->getById($id);
 
         if (!$aboutUs) {

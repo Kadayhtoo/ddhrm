@@ -2,7 +2,7 @@
     <div>
         <v-row class="mb-4" align="center">
             <v-col cols="12" md="6">
-                <div class="text-h4 font-weight-bold">Deprtment</div>
+                <div class="text-h4 font-weight-bold">Department</div>
                 <div class="text-body-2 text-medium-emphasis">Users and role assignment</div>
             </v-col>
             <v-col cols="12" md="6" class="d-flex flex-wrap ga-2 justify-md-end">

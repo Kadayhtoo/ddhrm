@@ -2,7 +2,7 @@
     <div class="pa-2">
         <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-4">
             <div>
-                <div class="text-h5 font-weight-bold">Admin Attendance Table</div>
+                <div class="text-h5 font-weight-bold">Attendance Table</div>
                 <div class="text-body-2 text-medium-emphasis">Monitor employee attendance</div>
             </div>
             <v-btn v-if="auth.can('admin.access')" color="primary" variant="tonal" prepend-icon="mdi-chart-box-outline" :to="{ name: 'attendance.reports' }">Reports</v-btn>
