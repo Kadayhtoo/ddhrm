@@ -50,12 +50,20 @@
                         <v-list-item v-bind="props" :subtitle="item.raw.department?.name || '—'">
                             <template #append>
                                 <v-chip
-                                    v-if="!item.raw.has_salary"
+                                    v-if="!item.raw.salary"
                                     size="x-small"
                                     color="warning"
                                     variant="tonal"
                                 >
                                     no salary
+                                </v-chip>
+                                 <v-chip
+                                    v-else
+                                    size="x-small"
+                                    color="warning"
+                                    variant="tonal"
+                                >
+                                    {{ item.raw.salary }}
                                 </v-chip>
                             </template>
                         </v-list-item>
@@ -157,6 +165,15 @@
                     >
                         Mark Paid
                     </v-btn>
+                   <v-btn
+                    size="small"
+                    color="primary"
+                    variant="text"
+                    prepend-icon="mdi-eye"
+                    @click.stop="goToDetail($event, { item })"
+                >
+                    View
+                </v-btn>
                 </template>
             </v-data-table>
         </v-card>
@@ -304,7 +321,7 @@ const tableHeaders = [
 
 function formatCurrency(value) {
     const num = Number(value) || 0;
-    return new Intl.NumberFormat('my-MM', { style: 'currency', currency: 'MMK', minimumFractionDigits: 0 }).format(num);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'MMK', minimumFractionDigits: 0 }).format(num);
 }
 
 function statusColor(status) {
@@ -342,9 +359,11 @@ async function fetchEmployees() {
     try {
         const { data } = await axios.get('/api/staff-dropdown');
         employees.value = data ?? [];
+        
     } catch {
         employees.value = [];
     }
+    console.log(employees.value);
 }
 
 async function fetchSettings() {

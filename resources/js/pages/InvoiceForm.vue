@@ -31,6 +31,28 @@
       <v-col cols="12" sm="6" class="py-1">
         <v-select v-model="form.status" :items="['open', 'sent', 'paid', 'cancelled']" label="Status *" variant="outlined" density="comfortable" :rules="[v => !!v || 'Status is required']" class="text-capitalize" rounded="lg" color="indigo-lighten-1"></v-select>
       </v-col>
+      <v-col cols="12" class="py-1">
+        <v-file-input 
+          v-if="form.status === 'paid'" 
+          v-model="paymentFile" 
+          label="Upload Attachment" 
+          prepend-icon="mdi-camera" 
+          variant="outlined"
+          rounded="lg"
+          density="comfortable"
+        ></v-file-input>
+
+        <div v-if="imagePreview" class="mt-2 mb-4">
+          <div class="text-caption mb-1 font-weight-bold">Attachment:</div>
+          <v-img
+            :src="imagePreview"
+            max-width="300"
+            rounded="lg"
+            elevation="2"
+            class="border"
+          />
+        </div>
+      </v-col>
 
       <v-col cols="12" sm="6" class="py-1">
         <v-select v-model="form.discount_type" :items="[{title: 'Fixed Amount', value: 'fixed'}, {title: 'Percentage (%)', value: 'percentage'}]" item-title="title" item-value="value" label="Discount Type" variant="outlined" density="comfortable" rounded="lg" color="indigo-lighten-1"></v-select>
@@ -47,37 +69,47 @@
     </div>
 
     <div class="text-subtitle-1 font-weight-bold mb-2">Invoice Items</div>
-    <v-row v-for="(item, index) in form.items" :key="index" class="align-center">
-      <v-col cols="6">
-        <v-text-field v-model="item.name" label="Item Name" variant="outlined" density="compact" hide-details></v-text-field>
-      </v-col>
-      <v-col cols="6">
-        <v-text-field v-model="item.description" label="Item Description" variant="outlined" density="compact" hide-details></v-text-field>
-      </v-col>
-      <v-col cols="4">
-        <v-text-field v-model="item.item_type" label="Item Type" variant="outlined" density="compact" hide-details></v-text-field>
-      </v-col>
-      <v-col cols="3">
-        <v-text-field v-model.number="item.quantity" label="Qty" type="number" variant="outlined" density="compact" hide-details></v-text-field>
-      </v-col>
-      <v-col cols="4">
-        <v-text-field v-model.number="item.price" label="Price" type="number" variant="outlined" density="compact" hide-details></v-text-field>
-      </v-col>
-      <v-col cols="1">
-        <v-btn icon="mdi-delete" variant="text" color="error" size="small" @click="removeItem(index)"></v-btn>
-      </v-col>
+    <v-row class="px-2 mb-2" dense>
+      <v-col cols="4"><div class="text-caption font-weight-bold text-grey">ITEM NAME</div></v-col>
+      <v-col cols="2"><div class="text-caption font-weight-bold text-grey">TYPE</div></v-col>
+      <v-col cols="2"><div class="text-caption font-weight-bold text-grey">QTY</div></v-col>
+      <v-col cols="3"><div class="text-caption font-weight-bold text-grey">PRICE</div></v-col>
+      <v-col cols="1"></v-col>
     </v-row>
-    <v-btn color="indigo" variant="tonal" prepend-icon="mdi-plus" @click="addItem" class="mt-2">Add Item</v-btn>
+    <v-card variant="outlined" class="pa-2 mb-4 rounded-lg">
+      <v-row v-for="(item, index) in form.items" :key="index" class="align-center mb-2" dense>
+        <v-col cols="4">
+          <v-text-field v-model="item.name" placeholder="Name" variant="underlined" density="compact" hide-details></v-text-field>
+        </v-col>
+        <v-col cols="2">
+          <v-text-field v-model="item.item_type" placeholder="Type" variant="underlined" density="compact" hide-details></v-text-field>
+        </v-col>
+        <v-col cols="2">
+          <v-text-field v-model.number="item.quantity" type="number" variant="underlined" density="compact" hide-details></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field v-model.number="item.price" type="number" variant="underlined" density="compact" hide-details prefix=""></v-text-field>
+        </v-col>
+        <v-col cols="1" class="text-center">
+          <v-btn icon="mdi-delete" variant="text" color="error" size="x-small" @click="removeItem(index)"></v-btn>
+        </v-col>
+        
+        <v-col cols="12" class="pt-0">
+          <v-text-field v-model="item.description" placeholder="Add description(optional)" variant="plain" density="compact" class="text-caption mt-n2"></v-text-field>
+        </v-col>
+      </v-row>
+    </v-card>
+    <v-btn variant="text" prepend-icon="mdi-plus" color="indigo" @click="addItem" class="text-none">Add New Item</v-btn>
     <v-card-actions class="px-0 pt-6">
-  <v-spacer />
-  
-  <v-btn variant="text" rounded="lg" class="text-none font-weight-bold" :disabled="loading"@click="$emit('close')"> Cancel</v-btn>
+    <v-spacer />
+    
+    <v-btn variant="text" rounded="lg" class="text-none font-weight-bold" :disabled="loading"@click="$emit('close')"> Cancel</v-btn>
 
-  <v-btn color="#702E62" variant="flat" rounded="lg" elevation="2"class="text-none px-6 font-weight-bold" :loading="loading" @click="submitForm"
-  >
-    {{ isEdit ? 'Update' : 'Create' }}
-  </v-btn>
-</v-card-actions>
+    <v-btn color="#702E62" variant="flat" rounded="lg" elevation="2"class="text-none px-6 font-weight-bold" :loading="loading" @click="submitForm"
+    >
+      {{ isEdit ? 'Update' : 'Create' }}
+    </v-btn>
+  </v-card-actions>
   </v-form>
 </template>
 
@@ -100,6 +132,7 @@ const dialog = ref(false);
 const backendErrors = ref([]);
 const isClientFixed = ref(!!props.fixedClientId);
 const currencyOptions = ref([]);
+
 
 const getClientDisplayName = computed(() => {
   if (!props.clientOptions || props.clientOptions.length === 0) return 'Loading...';
@@ -126,6 +159,11 @@ watch(() => props.invoiceData, (newData) => {
       invoice_id: '', 
       client_id: props.fixedClientId || null, 
       terms: defaultTerms,
+      due_date: '',
+      currency: 'MMK',
+      discount_type: 'fixed',
+      discount_value: 0,
+      status: 'open',
       items: [{ name: '', quantity: 1, price: 0 }] 
     };
   }
@@ -143,22 +181,46 @@ async function fetchCurrencies() {
   }
 }
 
+const imagePreview = computed(() => {
+  if (paymentFile.value instanceof File) {
+    return URL.createObjectURL(paymentFile.value);
+  }
+  return form.value.payment_attachment ? `/storage/${form.value.payment_attachment}` : null;
+});
+
+const paymentFile = ref(null);
+
 async function submitForm() {
   const { valid } = await formRef.value.validate();
   if (!valid) return;
 
   loading.value = true;
-  try {
-    const url = isEdit ? `/api/invoices/${form.value.invoice_id}` : '/api/invoices';
-    const method = isEdit ? 'put' : 'post';
-    const response = await axios[method](url, form.value);
-
-    emit('saved', response.data); 
-  } catch (error) {
-    console.error("Save error:", error);
-    if (error.response?.data?.errors) {
-       emit('validation-error', error.response.data.errors);
+  
+  const formData = new FormData();
+  Object.keys(form.value).forEach(key => {
+    if (key !== 'payment_attachment') {
+        if (key === 'items') {
+            formData.append('items', JSON.stringify(form.value.items));
+        } else {
+            formData.append(key, form.value[key] ?? '');
+        }
     }
+});
+
+if (paymentFile.value instanceof File) {
+    formData.append('payment_attachment', paymentFile.value);
+}
+
+  const url = isEdit ? `/api/invoices/${form.value.invoice_id}` : '/api/invoices';
+  if (isEdit) formData.append('_method', 'PUT');
+
+  try {
+    await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    emit('saved');
+  } catch (error) {
+    console.error("Error saving invoice:", error);
   } finally {
     loading.value = false;
   }

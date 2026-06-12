@@ -59,7 +59,7 @@ const router = createRouter({
                     path: 'company-info',
                     name: 'company-info',
                     component: AboutUsPage,
-                    meta: { title: 'Company Info' },
+                    meta: { title: 'Company Info', permission: 'company-info.view' },
                     props: { title: 'Company Information', subtitle: 'Manage invoice company profile and contact details.' },
                 },
                 {
@@ -90,7 +90,7 @@ const router = createRouter({
                     path: '/staff/:user', 
                     name: 'staff.detail', 
                     component:StaffDetailPage, 
-                    meta: { title: 'Staff Detail' }
+                    meta: { title: 'Staff Detail', permission: 'staff.view'  }
                 },
                 {
                     path: 'attendance',
@@ -116,12 +116,20 @@ const router = createRouter({
                     component: AttendanceDetailPage,
                     meta: { title: 'Attendance Details', permission: 'attendance.view' },
                 },
-                {
+                 {
                     path: 'payroll',
                     name: 'payroll',
                     component: PlaceholderPage,
-                    meta: { title: 'Payroll', permission: ['payroll.view'] },
+                    meta: { title: 'Payroll' },
                     props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
+                    component: PayrollPage,
+                    meta: { title: 'Payroll', permission: 'payroll.view' },
+                },
+                {
+                    path: 'payroll/:id',
+                    name: 'payroll.detail',
+                    component: PayrollDetailPage,
+                    meta: { title: 'Payroll Detail', permission: 'payroll.view' },
                 },
                 {
                     path: 'leave-rules',
@@ -146,40 +154,40 @@ const router = createRouter({
                     path: 'clients',
                     name: 'clients',
                     component: ClientManagePage,
-                    meta: { title: 'Clients' },
+                    meta: { title: 'Clients', permission: 'clients.view'  },
                     props: { title: 'Client management', subtitle: 'Manage clients, projects, and related info.' },
                 },
                 {
                     path: '/clients/:id', 
                     name: 'clients-detail', 
                     component: ClientDetailPage,
-                    meta:{ title: 'Client Detail' }, 
+                    meta:{ title: 'Client Detail',permission: 'clients.view' }, 
                 },
                 {
                     path: 'invoices',
                     name: 'invoices',
                     component: InvoiceManagePage,
-                    meta: { title: 'Invoices', permission: ['invoices.view'] },
+                    meta: { title: 'Invoices', permission: 'invoices.view' },
                     props: { title: 'Client invoices', subtitle: 'Clients, projects, invoices, payments.' },
                 },
                 {
                     path:'estimates',
                     name:'estimates',
                     component: EstimateManagePage,
-                    meta: { title: 'Estimates', permission: ['estimates.view'] },
+                    meta: { title: 'Estimates', permission: 'estimates.view' },
                     props: { title: 'Estimates', subtitle: 'Client estimates, linked to projects and invoices.' },
                 },
                 {
                     path: '/invoices/:id/preview',
                     name: 'InvoicePreview',
                     component: InvoicePreviewPage,
-                    meta: {title: 'Invoice Preview'}
+                    meta: {title: 'Invoice Preview',permission: 'invoices.view'}
                 },
                 {
                     path: '/estimates/:id/preview',
                     name: 'EstimatePreview',
                     component: EstimatePreviewPage,
-                    meta: { title: 'Estimate Preview' }
+                    meta: { title: 'Estimate Preview' ,permission: 'estimates.view'}
                 },
                 {
                     path: 'profile', 

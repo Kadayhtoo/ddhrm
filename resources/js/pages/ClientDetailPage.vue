@@ -76,7 +76,7 @@
               <v-form ref="contactFormRef">
                 <v-text-field v-model="contactForm.name" label="Name *" variant="outlined" density="comfortable" :rules="[v => !!v || 'Required']" rounded="lg" class="mb-2"></v-text-field>
                 <v-text-field v-model="contactForm.phone" label="Phone *" variant="outlined" density="comfortable" :rules="[v => !!v || 'Required']" rounded="lg" class="mb-2"></v-text-field>
-                <v-text-field v-model="contactForm.email" label="Email" variant="outlined" density="comfortable" rounded="lg" class="mb-2"></v-text-field>
+                <v-text-field v-model="contactForm.email" label="Email *" variant="outlined" density="comfortable" rounded="lg" class="mb-2"></v-text-field>
                 <div class="d-flex align-center gap-2 mt-2">
                   <v-btn v-if="isContactEdit" variant="text" class="text-none rounded-lg" @click="resetContactForm">Cancel</v-btn>
                   <v-btn color="#702E62" @click="saveContactPerson" :loading="contactSubmitLoading" rounded="lg" class="px-6">{{ isContactEdit ? 'Update' : 'Add' }}</v-btn>
@@ -342,6 +342,7 @@
     { label: 'Paid', value: 'paid' },
     { label: 'Cancelled', value: 'cancelled' }
   ];
+  
   const filteredInvoices = computed(() => {
     if (!Array.isArray(invoiceList.value)) return [];
 

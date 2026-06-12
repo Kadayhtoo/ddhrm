@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 class PayrollService
 {
@@ -94,14 +95,13 @@ class PayrollService
     public function stats(?User $actor = null): array
     {
         $query = Payroll::query()->where('status', 'calculated');
-
         $totalPayroll = (clone $query)->sum('net_salary');
         $totalDeductions = (clone $query)->sum('total_deductions');
         $totalLatePenalties = (clone $query)->sum('late_penalty');
         $totalLeaveDeductions = (clone $query)->sum(DB::raw('unpaid_leave_deduction + paid_leave_deduction'));
         $count = (clone $query)->count();
+   
         $pendingCount = Payroll::query()->where('status', 'draft')->count();
-
         return [
             'total_payroll' => round($totalPayroll, 2),
             'total_deductions' => round($totalDeductions, 2),

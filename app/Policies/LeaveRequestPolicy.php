@@ -7,12 +7,9 @@ use App\Models\User;
 
 class LeaveRequestPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasPermission('leave-requests.view');
     }
 
     public function scopeForUser($query, $user)
@@ -24,51 +21,23 @@ class LeaveRequestPolicy
         return $query->where('user_id', $user->id);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, LeaveRequest $leaveRequest): bool
     {
-        return false;
+        return $user->hasPermission('leave-requests.view') || $user->id === $leaveRequest->user_id;
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $user->hasPermission('leave-requests.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, LeaveRequest $leaveRequest): bool
     {
-        return false;
+        return $user->hasPermission('leave-requests.update') || $user->id === $leaveRequest->user_id;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, LeaveRequest $leaveRequest): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, LeaveRequest $leaveRequest): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, LeaveRequest $leaveRequest): bool
-    {
-        return false;
+        return $user->hasPermission('leave-requests.delete') || $user->id === $leaveRequest->user_id;
     }
 }

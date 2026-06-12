@@ -34,13 +34,20 @@ class StoreInvoiceRequest extends FormRequest
             ],        
             'status' => ['required', 'in:open,sent,paid,cancelled'],
             'terms' => ['nullable', 'string', 'max:5000'],
-            
-            'items'            => ['required', 'array', 'min:1'],
             'items.*.name'     => ['required', 'string', 'max:255'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.price'    => ['required', 'numeric', 'min:0'],
             'items.*.item_type' => ['nullable', 'string', 'max:100'],
             'items.*.description' => ['nullable', 'string', 'max:1000'],
         ];
+    }
+    
+    protected function prepareForValidation()
+    {
+        if (is_string($this->items)) {
+            $this->merge([
+                'items' => json_decode($this->items, true)
+            ]);
+        }
     }
 }

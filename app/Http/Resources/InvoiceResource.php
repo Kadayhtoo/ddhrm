@@ -31,6 +31,7 @@ class InvoiceResource extends JsonResource
             'sub_total' => (float)$this->sub_total,
             'grand_total' => (float)$this->grand_total,
             'terms' => $this->terms,
+            'payment_attachment' => $this->payment_attachment,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             'items' => $this->items->map(function($item) {

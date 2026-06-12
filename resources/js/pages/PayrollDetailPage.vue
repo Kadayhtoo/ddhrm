@@ -287,7 +287,7 @@ const statusColor = computed(() => {
 
 function formatCurrency(value) {
     const num = Number(value) || 0;
-    return new Intl.NumberFormat('my-MM', { style: 'currency', currency: 'MMK', minimumFractionDigits: 0 }).format(num);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'MMK', minimumFractionDigits: 0 }).format(num);
 }
 
 function formatDate(value) {

@@ -1,154 +1,242 @@
 <template>
-    <div>
+    <div >
         <v-navigation-drawer
             v-model="drawer"
             :rail="rail && mdAndUp"
             :permanent="mdAndUp"
             :temporary="!mdAndUp"
             color="surface"
+            background-color="#641C55"
             border="end"
             v-if="!isPreviewPage"
             app
         >
             <div class="pa-4 d-flex align-center">
                 <v-avatar color="primary" size="36" rounded="lg" class=" font-weight-bold">
-                    D
+                    <img src="/assets/logo/d.png" alt="DDHRM Logo">
                 </v-avatar>
-                <div v-if="!rail || !mdAndUp" class="ms-3">
-                    <div class="text-subtitle-1 font-weight-bold ">DDHRM</div>
-                    <div class=" text-medium-emphasis te">HR + Payroll + Invoices</div>
+               <div v-if="!rail || !mdAndUp" class="ms-3">
+                <img src="/assets/logo/dd_logo.png" alt="DDHRM Logo" class="mb-2" style="width: 150px;">
+                    
+                    <div class="text-subtitle-1 font-weight-bold">DDHRM</div>
+                    <div class="text-subtitle-1">HR + Payroll + Invoices</div>
                 </div>
             </div>
+            
+            <v-list density="compact" nav class="sidebar-nav">
+              <v-list-item
+                v-if="auth.can('dashboard.view')"
+                title="Dashboard"
+                :to="{ name: 'dashboard' }"
+                rounded="xl"
+                exact
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-view-dashboard-outline</v-icon>
+                </template>
+              </v-list-item>
 
-            <v-list density="comfortable" nav class="px-2 ">
-                <v-list-item 
-                    v-if="auth.can('dashboard.view')"
-                    exact
-                    prepend-icon="mdi-view-dashboard-outline"
-                    title="Dashboard"
-                    :to="{ name: 'dashboard' }"
-                    rounded="lg"
-                />
-                
-                <v-list-item
-                    v-if="auth.can('admin.access')"
-                    prepend-icon="mdi-shield-crown-outline"
-                    title="Admin panel"
-                    :to="{ name: 'admin' }"
-                    rounded="lg"
-                />
+              <v-list-item
+                v-if="auth.can('admin.access')"
+                title="Admin Panel"
+                :to="{ name: 'admin' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-shield-crown-outline</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-item
+                v-if="auth.can('company-info.view')"
+                title="Company Info"
+                :to="{ name: 'company-info' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-domain</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-item
+                v-if="auth.can('departments.view')"
+                title="Department"
+                :to="{ name: 'department' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-office-building-outline</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-item
+                v-if="auth.can('positions.view')"
+                title="Position"
+                :to="{ name: 'position' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-sitemap-outline</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-item
+                v-if="auth.can('staff.view')"
+                title="Staff"
+                :to="{ name: 'staff' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-account-group-outline</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-group
+                value="attendance"
+                v-if="auth.can('attendance.view')"
+              >
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="props"
+                    title="Attendance Management"
+                    rounded="xl"
+                  >
+                    <template #prepend>
+                      <v-icon size="20">mdi-clock-outline</v-icon>
+                    </template>
+                  </v-list-item>
+                </template>
 
                 <v-list-item
-                    v-if="auth.can('company-info.view')"
-                    prepend-icon="mdi-domain"
-                    title="Company Info"
-                    :to="{ name: 'company-info' }"
-                    rounded="lg"
-                />
-                
-                <v-list-item
-                    v-if="auth.can('departments.view')"
-                    prepend-icon="mdi-office-building-outline"
-                    title="Department"
-                    :to="{ name: 'department' }"
-                    rounded="lg"
-                />
-                <v-list-item
-                    v-if="auth.can('positions.view')"
-                    prepend-icon="mdi-sitemap-outline"
-                    title="Position"
-                    :to="{ name: 'position' }"
-                    rounded="lg"
-                />
-                <v-list-item
-                    v-if="auth.can('staff.view')"
-                    prepend-icon="mdi-account-group-outline"
-                    title="Staff"
-                    :to="{ name: 'staff' }"
-                    rounded="lg"
-                />
-                <v-list-group value="attendance" v-if="auth.can('attendance.view')">
-                    <template #activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-clock-outline" title="Attendance Management"></v-list-item>
-                    </template>
-                <v-list-item
-                    v-if="auth.can('attendance.view')"
-                    prepend-icon="mdi-clock-outline"
-                    title="Attendance"
-                    :to="{ name: 'attendance' }"
-                    rounded="lg"
-                />
-                <v-list-item
-                    v-if="auth.can('attendance.manage')"
-                    prepend-icon="mdi-clock-settings"
-                    title="Attendance Settings"
-                    :to="{ name: 'attendance.settings' }"
-                    rounded="lg"
-                />
-                </v-list-group>
-                <v-list-group value="leave_management">
-                    <template #activator="{ props }">
-                        <v-list-item v-bind="props" prepend-icon="mdi-palm-tree" title="Leave Manage"></v-list-item>
-                    </template>
-                    <v-list-item 
-                        prepend-icon="mdi-cog-outline" 
-                        title="Leave Rules" 
-                        :to="{ name: 'leave-rules' }"
-                    ></v-list-item>  
-                    <v-list-item 
-                        prepend-icon="mdi-file-document-edit-outline" 
-                        title="Leave Requests" 
-                        :to="{ name: 'leave-requests' }"
-                    ></v-list-item>                 
-                </v-list-group>
+                  v-if="auth.can('attendance.view')"
+                  title="Attendance"
+                  :to="{ name: 'attendance' }"
+                  class="submenu-item"
+                >
+                  <template #prepend>
+                    <v-icon size="8">mdi-circle</v-icon>
+                  </template>
+                </v-list-item>
 
                 <v-list-item
-                    v-if="auth.can('clients.view')"
-                    prepend-icon="mdi-account-group-outline"
-                    title="Clients"
-                    :to="{ name: 'clients' }"
-                    rounded="lg"
-                />
-                
-                <v-list-item
-                    v-if="auth.can('invoices.view')"
-                    prepend-icon="mdi-file-chart-outline"
-                    title="Invoices"
-                    :to="{ name: 'invoices' }"
-                    rounded="lg"
-                />
-                <v-list-item
-                    v-if="auth.can('estimates.view')"
-                    prepend-icon="mdi-file-edit-outline"
-                    title="Estimates"
-                    :to="{ name: 'estimates' }"
-                    rounded="lg"
-                />
-                <v-list-item
-                    v-if="auth.can('payroll.view')"
-                    prepend-icon="mdi-cash-multiple"
-                    title="Payroll"
-                    :to="{ name: 'payroll' }"
-                    rounded="lg"
-                />
-                <v-list-group value="system-management" v-if="showSystemManageMenu">
-                    <template #activator="{ props }">
-                        <v-list-item
-                            v-bind="props"
-                            prepend-icon="mdi-cog-outline"
-                            title="System Manage"
-                            rounded="lg"
-                        />
+                  v-if="auth.can('attendance.manage')"
+                  title="Attendance Settings"
+                  :to="{ name: 'attendance.settings' }"
+                  class="submenu-item"
+                >
+                  <template #prepend>
+                    <v-icon size="8">mdi-circle</v-icon>
+                  </template>
+                </v-list-item>
+              </v-list-group>
+
+              <v-list-group value="leave_management">
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="props"
+                    title="Leave Management"
+                    rounded="xl"
+                  >
+                    <template #prepend>
+                      <v-icon size="20">mdi-palm-tree</v-icon>
                     </template>
-                    <v-list-item
-                        v-if="showRolesMenu"
-                        prepend-icon="mdi-shield-account-outline"
-                        title="Roles"
-                        :to="{ name: 'roles' }"
-                        rounded="lg"
-                    />
-                </v-list-group>
+                  </v-list-item>
+                </template>
+
+                <v-list-item
+                  title="Leave Rules"
+                  :to="{ name: 'leave-rules' }"
+                  class="submenu-item"
+                >
+                  <template #prepend>
+                    <v-icon size="8">mdi-circle</v-icon>
+                  </template>
+                </v-list-item>
+
+                <v-list-item
+                  title="Leave Requests"
+                  :to="{ name: 'leave-requests' }"
+                  class="submenu-item"
+                >
+                  <template #prepend>
+                    <v-icon size="8">mdi-circle</v-icon>
+                  </template>
+                </v-list-item>
+              </v-list-group>
+
+               <v-list-item
+                v-if="auth.can('payroll.view')"
+                title="Payroll"
+                :to="{ name: 'payroll' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-cash-multiple</v-icon>
+                </template>
+              </v-list-item>
+              
+              <v-list-item
+                v-if="auth.can('clients.view')"
+                title="Clients"
+                :to="{ name: 'clients' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-account-group-outline</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-item
+                v-if="auth.can('invoices.view')"
+                title="Invoices"
+                :to="{ name: 'invoices' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-file-chart-outline</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-item
+                v-if="auth.can('estimates.view')"
+                title="Estimates"
+                :to="{ name: 'estimates' }"
+                rounded="xl"
+              >
+                <template #prepend>
+                  <v-icon size="20">mdi-file-edit-outline</v-icon>
+                </template>
+              </v-list-item>
+
+              <v-list-group
+                value="system-management"
+                v-if="showSystemManageMenu"
+              >
+                <template #activator="{ props }">
+                  <v-list-item
+                    v-bind="props"
+                    title="System Management"
+                    rounded="xl"
+                  >
+                    <template #prepend>
+                      <v-icon size="20">mdi-cog-outline</v-icon>
+                    </template>
+                  </v-list-item>
+                </template>
+
+                <v-list-item
+                  v-if="showRolesMenu"
+                  title="Roles"
+                  :to="{ name: 'roles' }"
+                  class="submenu-item"
+                >
+                  <template #prepend>
+                    <v-icon size="8">mdi-circle</v-icon>
+                  </template>
+                </v-list-item>
+              </v-list-group>
             </v-list>
+
             <template #append>
                 <div class="pa-2">
                     <v-btn
@@ -277,10 +365,7 @@
 </script>
 
 <style scoped>
-.bg-navi {
-    background-color:#3B4860 !important; 
-}
-.text-caption{
-    color: #FFFFFF!important;
+.v-list-group__items .v-list-item{
+  padding: 5px 10px !important;
 }
 </style>

@@ -115,7 +115,7 @@ class StaffController extends Controller
     public function dropdownList(): JsonResponse
     {
         $staff = User::query()
-            ->select(['id', 'name', 'department_id'])
+            ->select(['id', 'name', 'department_id','salary'])
             ->with(['department:id,name'])
             ->orderBy('name')
             ->get();

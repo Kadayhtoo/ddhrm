@@ -89,42 +89,42 @@ class InvoiceService
         return $this->invoiceRepo->delete($invoice);
     }
 
-  private function calculateBillingTotals(array $items, string $discountType, float $discountValue, string $type = 'invoice'): array
-{
-    $subTotal = 0;
-    $processedItems = [];
+    private function calculateBillingTotals(array $items, string $discountType, float $discountValue, string $type = 'invoice'): array
+    {
+        $subTotal = 0;
+        $processedItems = [];
 
-    foreach ($items as $item) {
-        $lineTotal = ($item['quantity'] ?? 1) * ($item['price'] ?? 0);
-        $subTotal += $lineTotal;
+        foreach ($items as $item) {
+            $lineTotal = ($item['quantity'] ?? 1) * ($item['price'] ?? 0);
+            $subTotal += $lineTotal;
 
-        $processedItems[] = [
-            'name'        => $item['name'],
-            'quantity'    => (int)$item['quantity'],
-            'price'       => (float)$item['price'],
-            'total'       => (float)$lineTotal, 
-            'item_type'   => $item['item_type'] ?? null,
-            'description' => $item['description'] ?? null,
+            $processedItems[] = [
+                'name'        => $item['name'],
+                'quantity'    => (int)$item['quantity'],
+                'price'       => (float)$item['price'],
+                'total'       => (float)$lineTotal, 
+                'item_type'   => $item['item_type'] ?? null,
+                'description' => $item['description'] ?? null,
+            ];
+        }
+
+        $discountAmount = 0;
+
+        if ($type === 'invoice') {
+            if ($discountType === 'percentage') {
+                $discountAmount = $subTotal * ($discountValue / 100);
+            } else {
+                $discountAmount = $discountValue;
+            }
+        }
+
+        return [
+            'sub_total'       => (float)$subTotal,
+            'grand_total'     => (float)max(0, $subTotal - $discountAmount), 
+            'processed_items' => $processedItems
         ];
     }
-
-    $discountAmount = 0;
-
-    // Only apply discount if the type is 'invoice'
-    if ($type === 'invoice') {
-        if ($discountType === 'percentage') {
-            $discountAmount = $subTotal * ($discountValue / 100);
-        } else {
-            $discountAmount = $discountValue;
-        }
-    }
-
-    return [
-        'sub_total'       => (float)$subTotal,
-        'grand_total'     => (float)max(0, $subTotal - $discountAmount), 
-        'processed_items' => $processedItems
-    ];
-}
+    
     public function getInvoicesForClient(int $clientId)
     {
         return $this->invoiceRepo->getInvoicesByClient($clientId);

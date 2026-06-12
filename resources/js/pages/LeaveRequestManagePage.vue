@@ -2,7 +2,7 @@
     <div class="pa-2">
         <v-row class="mb-4" align="center">
             <v-col cols="12" md="4">
-                <div class="text-h5 font-weight-bold text-gradient mb-1">
+                <div class="text-h5 font-weight-bold mb-1">
                     {{ isManagement ? 'Leave Requests Management' : 'My Leave Requests' }}
                 </div>
                 <div class="text-body-2 text-medium-emphasis">
