@@ -1,12 +1,22 @@
 <template>
   <v-container fluid class="invoice-page">
     <div class="invoice-wrapper">
-      <div class="text-right mb-4 print-hide">
-        <v-btn color="#92387B" @click="printPage">
-          <v-icon start>mdi-printer</v-icon>
-          Print / Save PDF
-        </v-btn>
-      </div>
+     <div class="text-right mb-4 print-hide">
+      <v-btn 
+        color="primary" 
+        class="mr-2" 
+        :disabled="!(invoice.id || invoice.invoice_id)" 
+        @click="handleSendEmail(invoice.id || invoice.invoice_id)"
+      >
+        <v-icon start>mdi-email</v-icon>
+        Send Mail
+      </v-btn>
+      
+      <v-btn color="#92387B" @click="printPage">
+        <v-icon start>mdi-printer</v-icon>
+        Print / Save PDF
+      </v-btn>
+    </div>
       <v-row>
         <v-col cols="6">
           <div
@@ -17,6 +27,7 @@
           <div class="customer-name">
             {{ invoice.client_name }}
           </div>
+          
           <div v-if="invoice.client">
             <div>{{ invoice.client.address }}</div>
             <div>{{ invoice.client.township_name }}, {{ invoice.client.city_name }}</div>
@@ -152,19 +163,70 @@ async function fetchCompanyInfo() {
   }
 }
 
-  onMounted(async () => {
-    try {
-      const response = await axios.get(
-        `/api/invoices/${route.params.id}`
-      );
+const isSending = ref(false);
 
-      invoice.value = response.data.data;
-    } catch (error) {
-      console.error(error);
-    }
+import Swal from 'sweetalert2';
+const toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000
+});
 
-    await fetchCompanyInfo();
-  });
+// toast.fire({
+//   icon: 'info',
+//   title: 'Sending email...'
+// });
+// async function handleSendEmail(id) {
+//   if (!id) return;
+  
+//   isSending.value = true;
+//   try {
+//     const response = await axios.post(`/api/invoices/${id}/send-email`);
+//     alert(response.data.message);
+//   } catch (error) {
+//     alert(error.response?.data?.message ?? 'Error sending email');
+//   } finally {
+//     isSending.value = false;
+//   }
+// }
+async function handleSendEmail(id) {
+  if (!id) return;
+  
+  isSending.value = true;
+  try {
+    const response = await axios.post(`/api/invoices/${id}/send-email`);
+    Swal.fire({
+      icon: 'success',
+      title: 'Sent!',
+      text: response.data.message,
+      confirmButtonColor: '#2e7d32'
+    });
+    
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: error.response?.data?.message ?? 'Error sending email',
+      confirmButtonColor: '#d33'
+    });
+  } finally {
+    isSending.value = false;
+  }
+}
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(`/api/invoices/${route.params.id}`);
+    
+    invoice.value = response.data.data;
+    
+    console.log("Full Invoice Data:", invoice.value);
+        await fetchCompanyInfo();
+  } catch (error) {
+    console.error("Error loading invoice:", error);
+  }
+});
 
   function formatAmount(value) {
     return Number(value || 0).toLocaleString(undefined, {

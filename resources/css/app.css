@@ -112,3 +112,25 @@ body {
 .sidebar-nav .v-list-item:hover {
   background: rgba(var(--v-theme-primary), 0.05);
 }
+
+.sidebar-nav .v-list-group__items {
+  padding: 0 !important; 
+}
+
+.sidebar-nav .v-list-group__items .v-list-item {
+  padding-left: 16px !important;    
+  border-radius: 8px !important; 
+  min-height: 40px !important;      
+}
+
+.sidebar-nav .v-list-group__items .v-list-item:hover {
+  background: rgba(var(--v-theme-primary), 0.05) !important;
+}
+
+.sidebar-nav .v-list-group__items .v-list-item__prepend {
+  width: 24px !important;          
+  margin-inline-end: 16px !important; 
+}
+.v-list-group__items .v-list-item {
+  padding: 0px 5px !important;
+}

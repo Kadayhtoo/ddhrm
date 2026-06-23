@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
@@ -262,30 +263,51 @@ class AttendanceService
         ];
     }
 
-    public function dashboardWidgets(
-        User $actor,
-        ?string $date = null
-    ): array {
-        $filters = [
-            'date' => $date ?? now()->toDateString(),
-        ];
+    // public function dashboardWidgets(User $actor,?string $date = null): array
+    // {
+    //     $filters = [
+    //         'date' => $date ?? now()->toDateString(),
+    //     ];
+    //     if (! $this->canManage($actor)) {
+    //         $filters['user_id'] = $actor->id;
+    //     }
+    //     $records = $this->attendances->dailyRecords(
+    //         $filters['date'],
+    //         $filters
+    //     );
+    //     $summary = $this->summaryFromRecords($records);
+    //     return [
+    //         'present' => $summary['present'],
+    //         'absent' => $summary['absent'],
+    //         'late' => $summary['late'],
+    //         'attendance_percentage' => $summary['attendance_percentage'],
+    //     ];
+    // }
 
-        if (! $this->canManage($actor)) {
-            $filters['user_id'] = $actor->id;
+    public function dashboardWidgets(User $actor, ?string $date = null): array
+    {
+        if ($this->canManage($actor)) {
+            $targetDate = $date ?? now()->toDateString();
+
+            $records = $this->attendances->dailyRecords(
+                $targetDate,
+                ['date' => $targetDate]
+            );
+        } else {
+            $records = $this->attendances->rangeRecords(
+                now()->startOfMonth()->toDateString(),
+                now()->endOfMonth()->toDateString(),
+                ['user_id' => $actor->id]
+            );
         }
-
-        $records = $this->attendances->dailyRecords(
-            $filters['date'],
-            $filters
-        );
 
         $summary = $this->summaryFromRecords($records);
 
         return [
-            'present' => $summary['present'],
-            'absent' => $summary['absent'],
-            'late' => $summary['late'],
-            'attendance_percentage' => $summary['attendance_percentage'],
+            'present' => $summary['present'] ?? 0,
+            'absent' => $summary['absent'] ?? 0,
+            'late' => $summary['late'] ?? 0,
+            'attendance_percentage' => $summary['attendance_percentage'] ?? 0,
         ];
     }
 
@@ -294,12 +316,14 @@ class AttendanceService
         $today = now()->toDateString();
 
         foreach ($this->attendances->openBefore($today) as $attendance) {
-            $checkout = Carbon::parse(
-                $attendance->attendance_date->toDateString()
-                .' '
-                .self::officeEnd()
+            // $checkout = Carbon::parse(
+            //     $attendance->attendance_date->toDateString()
+            //     .' '
+            //     .self::officeEnd()
+            // );
+            $checkout = Carbon::createFromFormat('Y-m-d H:i', 
+                $attendance->attendance_date->toDateString() . ' ' . self::officeEnd()
             );
-
             $workMinutes = max(
                 0,
                 Carbon::parse($attendance->clock_in_at)
@@ -373,35 +397,50 @@ class AttendanceService
         return $attendance;
     }
 
+    // protected function summaryFromRecords($records): array
+    // {
+    //     $total = $records->count();
+
+    //     $present = $records
+    //         ->whereIn('status', ['present', 'late'])
+    //         ->count();
+
+    //     $absent = $records
+    //         ->where('status', 'absent')
+    //         ->count();
+
+    //     $late = $records
+    //         ->where('status', 'late')
+    //         ->count();
+
+    //     $halfDay = $records
+    //         ->where('status', 'half_day')
+    //         ->count();
+
+    //     return [
+    //         'total' => $total,
+    //         'present' => $present,
+    //         'absent' => $absent,
+    //         'late' => $late,
+    //         'half_day' => $halfDay,
+    //         'attendance_percentage' => $total > 0
+    //             ? round(($present / $total) * 100, 2)
+    //             : 0,
+    //     ];
+    // }
+
     protected function summaryFromRecords($records): array
     {
         $total = $records->count();
-
-        $present = $records
-            ->whereIn('status', ['present', 'late'])
-            ->count();
-
-        $absent = $records
-            ->where('status', 'absent')
-            ->count();
-
-        $late = $records
-            ->where('status', 'late')
-            ->count();
-
-        $halfDay = $records
-            ->where('status', 'half_day')
-            ->count();
+        $present = $records->whereIn('status', ['present', 'late'])->count();
+        $absent  = $records->where('status', 'absent')->count();
+        $late    = $records->where('status', 'late')->count();
 
         return [
-            'total' => $total,
             'present' => $present,
             'absent' => $absent,
             'late' => $late,
-            'half_day' => $halfDay,
-            'attendance_percentage' => $total > 0
-                ? round(($present / $total) * 100, 2)
-                : 0,
+            'attendance_percentage' => $total > 0 ? round(($present / $total) * 100, 2) : 0,
         ];
     }
 
