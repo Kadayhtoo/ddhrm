@@ -166,6 +166,7 @@
             loadingDepartments.value = false;
         }
     }
+    
     async function loadItems(options) {
         loading.value = true;
         try {

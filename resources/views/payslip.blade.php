@@ -14,7 +14,9 @@
 </head>
 <body>
     <div class="header">
-        <h2>Company Name</h2>
+        @if($company && $company->logo_path)
+            <img src="{{ public_path('storage/'. $company->logo_path) }}" style="width: 150px; margin-bottom: 10px;">
+        @endif        
         <div>Payslip for {{ $payroll->period_start }} - {{ $payroll->period_end }}</div>
     </div>
 

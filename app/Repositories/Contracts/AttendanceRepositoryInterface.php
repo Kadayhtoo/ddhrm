@@ -23,4 +23,6 @@ interface AttendanceRepositoryInterface
     public function monthlyRecords(int $year, int $month, array $filters = []): Collection;
 
     public function openBefore(string $date): Collection;
+    
+    public function rangeRecords(string $startDate, string $endDate, array $filters);
 }

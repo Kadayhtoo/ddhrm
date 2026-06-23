@@ -2,6 +2,10 @@
   <v-container fluid class="invoice-page">
     <div class="invoice-wrapper">
       <div class="text-right mb-4 print-hide">
+        <v-btn color="primary" @click="handleSendEmail" :loading="isSending" class="mr-2">
+          <v-icon start>mdi-email</v-icon> Send Mail
+        </v-btn>
+
         <v-btn color="#92387B" @click="printPage">
           <v-icon start>mdi-printer</v-icon>
           Print / Save PDF
@@ -42,6 +46,7 @@
             {{ estimate.client_name }}
           </div>
           <div v-if="estimate.client">
+            <div>{{ estimate.client.email }}</div>
             <div>{{ estimate.client.address }}</div>
             <div>{{ estimate.client.township_name }}, {{ estimate.client.city_name }}</div>
             <div>{{ estimate.client.country_name }}</div>
@@ -161,6 +166,20 @@ async function fetchCompanyInfo() {
       maximumFractionDigits: 2
     });
   }
+
+const isSending = ref(false);
+
+async function handleSendEmail() {
+  isSending.value = true;
+  try {
+    const response = await axios.post(`/api/estimates/${route.params.id}/send-email`);
+    Swal.fire({ icon: 'success', title: 'Sent!', text: response.data.message });
+  } catch (error) {
+    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Failed to send estimate' });
+  } finally {
+    isSending.value = false;
+  }
+}
 </script>
 <style scoped>
 .invoice-page {

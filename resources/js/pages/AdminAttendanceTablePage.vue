@@ -13,7 +13,7 @@
         <v-card variant="elevated" class="rounded-lg bg-white mb-5">
             <v-card-text>
                 <v-row dense>
-                    <v-col cols="12" md="3">
+                    <v-col cols="12" md="3" >
                         <v-text-field v-model="filters.search" label="Search employee" prepend-inner-icon="mdi-magnify" variant="outlined" density="comfortable" hide-details clearable />
                     </v-col>
                     <v-col cols="12" md="3">
@@ -134,7 +134,12 @@ function reload() {
 
 function formatDateTime(value) {
     if (!value) return '-';
-    return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    return new Date(value).toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
 }
 
 function statusColor(status) {

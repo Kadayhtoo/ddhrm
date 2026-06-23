@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
+use App\Models\Invoice;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceController extends Controller
@@ -71,42 +73,6 @@ class InvoiceController extends Controller
         ]);
     }
 
-    // public function update(UpdateInvoiceRequest $request, string $invoiceNumber): JsonResponse
-    // {
-    //     $invoice = $this->invoiceService->getInvoiceByNumber($invoiceNumber);
-    //     if (!$invoice) {
-    //         return response()->json([
-    //             'message' => 'Invoice not found.'
-    //         ], 404);
-    //     }
-    //     try {
-    //         $data = $request->validated();
-
-    //         if ($request->hasFile('payment_attachment')) {
-    //             if ($invoice->payment_attachment) {
-    //                 Storage::disk('public')->delete($invoice->payment_attachment);
-    //             }
-    //             $data['payment_attachment'] = $request
-    //                 ->file('payment_attachment')
-    //                 ->store('payment-attachments', 'public');
-    //         }
-
-    //         $this->invoiceService->updateInvoice($invoice, $data);
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Invoice and line items updated successfully.',
-    //             'data' => new InvoiceResource($invoice->fresh())
-    //         ]);
-
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to update invoice.',
-    //             'error' => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function update(UpdateInvoiceRequest $request, string $invoiceNumber): JsonResponse
     {
         $invoice = $this->invoiceService->getInvoiceByNumber($invoiceNumber);
@@ -143,6 +109,7 @@ class InvoiceController extends Controller
             ], 500);
         }
     }
+
     public function destroy(string $invoiceNumber): JsonResponse
     {
         $deleted = $this->invoiceService->deleteInvoice($invoiceNumber);
@@ -161,4 +128,16 @@ class InvoiceController extends Controller
         
         return response()->json(['data' => InvoiceResource::collection($invoices)]);
     }
+
+    public function sendInvoiceEmail($id)
+    {
+        $invoice = Invoice::with(['client', 'items'])->findOrFail($id);
+        
+        $company = \App\Models\AboutUs::first(); 
+
+        Mail::to($invoice->client->email)->send(new \App\Mail\InvoiceMail($invoice, $company));
+
+        return response()->json(['message' => 'Email queued successfully!']);
+    }
+
 }

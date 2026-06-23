@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEstimateRequest;
 use App\Http\Requests\UpdateEstimateRequest;
 use App\Http\Resources\EstimateResource;
+use App\Models\Estimate;
 use App\Services\EstimateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Mail;
 
 class EstimateController extends Controller
 {
@@ -112,4 +114,25 @@ class EstimateController extends Controller
         
         return response()->json(['data' => EstimateResource::collection($estimates)]);
     }
+
+    public function sendEstimateEmail($id)
+    {
+        $estimate = Estimate::with(['client', 'items'])->findOrFail($id); 
+        
+        if (!$estimate->client) {
+            return response()->json(['message' => 'No client assigned!'], 400);
+        }
+
+        if (!filter_var($estimate->client->email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'message' => 'Invalid email format: ' . $estimate->client->email 
+            ], 400);
+        }
+
+        $company = \App\Models\AboutUs::first();
+
+        Mail::to($estimate->client->email)->send(new \App\Mail\EstimateMail($estimate, $company));
+
+        return response()->json(['message' => 'Estimate email sent successfully!']);
+}
 }

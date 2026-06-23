@@ -57,7 +57,6 @@ class PositionController extends Controller
     public function update(UpdatePositionRequest $request, Position $position): PositionResource
     {
         $updatedPosition = $this->positionService->updatePosition($position, $request->validated());
-
         return new PositionResource($updatedPosition);
     }
 

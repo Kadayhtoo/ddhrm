@@ -182,17 +182,20 @@
                 <v-card v-if="canOverride.value || (auth.can('payroll.manage'))" rounded="lg" class="pa-6">
                     <v-row>
                         <v-col cols="12" md="6">
-                            <v-btn block color="success" size="large" @click="markPaid"
+                            <v-btn block color="success" size="small" @click="markPaid"
                                 :disabled="payroll.status === 'paid'">
                                 {{ payroll.status === 'paid' ? 'Paid' : 'Mark as Paid' }}
                             </v-btn>
                         </v-col>
                         <v-col cols="12" md="6">
-                            <v-btn block color="primary" size="large" class="mb-3" prepend-icon="mdi-download"
+                            <v-btn block color="primary" size="small" class="mb-3" prepend-icon="mdi-download"
                                 @click="downloadPayslip">
                                 Download Payslip
                             </v-btn>
-                            <v-btn block color="warning" size="large" prepend-icon="mdi-pencil"
+                            <v-btn block color="secondary" size="small" class="mb-3" prepend-icon="mdi-email" @click="sendPayslipEmail" :loading="sendingEmail">
+                                Send Email
+                            </v-btn>
+                            <v-btn block color="warning" size="small" prepend-icon="mdi-pencil"
                                 @click="openOverrideDialog">
                                 Override Payslip
                             </v-btn>
@@ -225,7 +228,7 @@
                                 type="number" />
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <v-text-field v-model="overrideForm.total_deductions" label="Total Deductions"
+                            <v-text-field v-model="overrideForm.total_dedudtions" label="Total Deductions"
                                 type="number" />
                         </v-col>
                         <v-col cols="12" sm="6">
@@ -336,7 +339,6 @@ async function markPaid() {
         payroll.value.status = 'paid';
         payroll.value.paid_at = new Date().toISOString();
     } catch {
-        // ignore
     }
 }
 
@@ -360,6 +362,26 @@ async function downloadPayslip() {
     }
 }
 
+const sendingEmail = ref(false); 
+
+async function sendPayslipEmail() {
+    if (!payroll.value) return;
+
+    if (!confirm('Are you sure you want to send this payslip to ' + payroll.value.user.email + '?')) {
+        return;
+    }
+
+    sendingEmail.value = true;
+    try {
+        await axios.post(`/api/payroll/${payroll.value.id}/send-email`);
+        alert('Payslip sent successfully to ' + payroll.value.user.email);
+    } catch (error) {
+        console.error('Email sending failed', error);
+        alert(error.response?.data?.message || 'Failed to send email');
+    } finally {
+        sendingEmail.value = false;
+    }
+}
 onMounted(async () => {
     try {
         const { data } = await axios.get(`/api/payroll/${route.params.id}`);

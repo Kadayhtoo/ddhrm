@@ -10,6 +10,7 @@ use App\Services\PayrollService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class PayrollController extends Controller
@@ -39,48 +40,95 @@ class PayrollController extends Controller
         return new PayrollResource($this->payrollService->show($id));
     }
 
+    // public function override(Request $request, int $id): JsonResponse
+    // {
+    //     $validated = $request->validate([
+    //         'base_salary' => 'nullable|numeric',
+    //         'gross_salary' => 'nullable|numeric',
+    //         'total_deductions' => 'nullable|numeric',
+    //         'net_salary' => 'nullable|numeric',
+    //         'late_penalty' => 'nullable|numeric',
+    //         'unpaid_leave_deduction' => 'nullable|numeric',
+    //         'paid_leave_deduction' => 'nullable|numeric',
+    //         'note' => 'nullable|string',
+    //     ]);
+
+    //     $user = $request->user();
+
+    //     if (! $user->hasRoleSlug('ceo') && ! $user->hasPermission('payroll.manage')) {
+    //         abort(403, 'Unauthorized');
+    //     }
+
+    //     $payroll = $this->payrollService->show($id);
+
+    //     $payroll->update(array_filter($validated, fn($v) => $v !== null));
+
+    //     return response()->json([
+    //         'data' => new PayrollResource($payroll->fresh()),
+    //         'message' => 'Payroll updated (override) successfully.',
+    //     ]);
+    // }
     public function override(Request $request, int $id): JsonResponse
-    {
-        $validated = $request->validate([
-            'base_salary' => 'nullable|numeric',
-            'gross_salary' => 'nullable|numeric',
-            'total_deductions' => 'nullable|numeric',
-            'net_salary' => 'nullable|numeric',
-            'late_penalty' => 'nullable|numeric',
-            'unpaid_leave_deduction' => 'nullable|numeric',
-            'paid_leave_deduction' => 'nullable|numeric',
-            'note' => 'nullable|string',
-        ]);
+{
+    $validated = $request->validate([
+        'base_salary' => 'nullable|numeric',
+        'gross_salary' => 'nullable|numeric',
+        'total_deductions' => 'nullable|numeric',
+        'net_salary' => 'nullable|numeric',
+        'late_penalty' => 'nullable|numeric',
+        'unpaid_leave_deduction' => 'nullable|numeric',
+        'paid_leave_deduction' => 'nullable|numeric',
+        'note' => 'nullable|string',
+    ]);
 
-        $user = $request->user();
+    $payroll = $this->payrollService->show($id);
 
-        if (! $user->hasRoleSlug('ceo') && ! $user->hasPermission('payroll.manage')) {
-            abort(403, 'Unauthorized');
-        }
+    $payroll->fill(array_filter($validated, fn($v) => $v !== null));
 
-        $payroll = $this->payrollService->show($id);
+    $payroll->net_salary = $payroll->base_salary 
+                         - $payroll->late_penalty 
+                         - $payroll->unpaid_leave_deduction 
+                         - $payroll->paid_leave_deduction;
 
-        $payroll->update(array_filter($validated, fn($v) => $v !== null));
+    $payroll->save();
 
-        return response()->json([
-            'data' => new PayrollResource($payroll->fresh()),
-            'message' => 'Payroll updated (override) successfully.',
-        ]);
-    }
+    return response()->json([
+        'data' => new PayrollResource($payroll->fresh()),
+        'message' => 'Payroll updated and recalculated successfully.',
+    ]);
+}
 
+    // public function payslip(Request $request, int $id)
+    // {
+    //     $payroll = $this->payrollService->show($id);
+
+    //     $data = ['payroll' => $payroll];
+
+    //     if (! class_exists('\PDF')) {
+    //         return response()->json(['data' => $data, 'warning' => 'PDF generator not installed.'], 200);
+    //     }
+
+    //     $pdf = \PDF::loadView('payslip', $data);
+
+    //     $filename = sprintf('payslip_%d_%s.pdf', $payroll->id, now()->format('Ymd'));
+
+    //     return $pdf->download($filename);
+    // }
     public function payslip(Request $request, int $id)
     {
         $payroll = $this->payrollService->show($id);
+        $company = \App\Models\AboutUs::first(); 
 
-        $data = ['payroll' => $payroll];
+        $data = [
+            'payroll' => $payroll,
+            'company' => $company
+        ];
 
-        if (! class_exists('\PDF')) {
-            // Fallback: return JSON if PDF package not installed
+        if (!class_exists('\PDF')) {
             return response()->json(['data' => $data, 'warning' => 'PDF generator not installed.'], 200);
         }
 
         $pdf = \PDF::loadView('payslip', $data);
-
         $filename = sprintf('payslip_%d_%s.pdf', $payroll->id, now()->format('Ymd'));
 
         return $pdf->download($filename);
@@ -199,5 +247,19 @@ class PayrollController extends Controller
             'year' => $request->query('year'),
             'month' => $request->query('month'),
         ];
+    }
+
+    public function sendEmail($id)
+    {
+        $payroll = Payroll::with(['user'])->findOrFail($id);
+        $company = \App\Models\AboutUs::first(); 
+
+        if (!$payroll->user || !$payroll->user->email) {
+            return response()->json(['message' => 'Staff has no email!'], 400);
+        }
+
+        Mail::to($payroll->user->email)->send(new \App\Mail\PayslipMail($payroll, $company));
+
+        return response()->json(['message' => 'Payslip sent successfully!']);
     }
 }

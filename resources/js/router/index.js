@@ -92,7 +92,7 @@ const router = createRouter({
                     component:StaffDetailPage, 
                     meta: { title: 'Staff Detail', permission: 'staff.view'  }
                 },
-                {
+                   {
                     path: 'attendance',
                     name: 'attendance',
                     component: AdminAttendanceTablePage,
@@ -116,16 +116,14 @@ const router = createRouter({
                     component: AttendanceDetailPage,
                     meta: { title: 'Attendance Details', permission: 'attendance.view' },
                 },
-                 {
+                {
                     path: 'payroll',
                     name: 'payroll',
-                    component: PlaceholderPage,
-                    meta: { title: 'Payroll' },
-                    props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
                     component: PayrollPage,
-                    meta: { title: 'Payroll', permission: 'payroll.view' },
+                    meta: { title: 'Payroll', permission: ['payroll.view'] },
+                    props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
                 },
-                {
+                 {
                     path: 'payroll/:id',
                     name: 'payroll.detail',
                     component: PayrollDetailPage,

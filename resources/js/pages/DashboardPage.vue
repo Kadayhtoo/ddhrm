@@ -72,12 +72,48 @@ const cards = ref({});
 const roleSlugs = ref([]);
 const attendanceSummary = ref({ present: 0, absent: 0, late: 0, attendance_percentage: 0 });
 
-const attendanceWidgets = computed(() => [
-    { key: 'present', label: 'Present Today', value: attendanceSummary.value.present, icon: 'mdi-account-check-outline', color: 'success' },
-    { key: 'absent', label: 'Absent Today', value: attendanceSummary.value.absent, icon: 'mdi-account-off-outline', color: 'error' },
-    { key: 'late', label: 'Late Today', value: attendanceSummary.value.late, icon: 'mdi-clock-alert-outline', color: 'warning' },
-    { key: 'percentage', label: 'Attendance %', value: `${attendanceSummary.value.attendance_percentage}%`, icon: 'mdi-chart-donut', color: 'primary' },
-]);
+// const attendanceWidgets = computed(() => [
+//     { key: 'present', label: 'Present Today', value: attendanceSummary.value.present, icon: 'mdi-account-check-outline', color: 'success' },
+//     { key: 'absent', label: 'Absent Today', value: attendanceSummary.value.absent, icon: 'mdi-account-off-outline', color: 'error' },
+//     { key: 'late', label: 'Late Today', value: attendanceSummary.value.late, icon: 'mdi-clock-alert-outline', color: 'warning' },
+//     { key: 'percentage', label: 'Attendance %', value: `${attendanceSummary.value.attendance_percentage}%`, icon: 'mdi-chart-donut', color: 'primary' },
+// ]);
+
+const attendanceWidgets = computed(() => {
+    const isStaff = roleSlugs.value.includes('staff');
+    const periodLabel = isStaff ? 'This Month' : 'Today';
+
+    return [
+        {
+            key: 'present',
+            label: `Present (${periodLabel})`,
+            value: attendanceSummary.value.present,
+            icon: 'mdi-account-check-outline',
+            color: 'success',
+        },
+        {
+            key: 'absent',
+            label: `Absent (${periodLabel})`,
+            value: attendanceSummary.value.absent,
+            icon: 'mdi-account-off-outline',
+            color: 'error',
+        },
+        {
+            key: 'late',
+            label: `Late (${periodLabel})`,
+            value: attendanceSummary.value.late,
+            icon: 'mdi-clock-alert-outline',
+            color: 'warning',
+        },
+        {
+            key: 'percentage',
+            label: `Attendance % (${periodLabel})`,
+            value: `${attendanceSummary.value.attendance_percentage}%`,
+            icon: 'mdi-chart-donut',
+            color: 'primary',
+        },
+    ];
+});
 
 onMounted(async () => {
     try {

@@ -100,7 +100,7 @@ class PayrollService
         $totalLatePenalties = (clone $query)->sum('late_penalty');
         $totalLeaveDeductions = (clone $query)->sum(DB::raw('unpaid_leave_deduction + paid_leave_deduction'));
         $count = (clone $query)->count();
-   
+
         $pendingCount = Payroll::query()->where('status', 'draft')->count();
         return [
             'total_payroll' => round($totalPayroll, 2),

@@ -4,7 +4,7 @@
             <v-card class="rounded-lg bg-white h-100">
                 <v-card-text class="pa-4 d-flex align-center justify-space-between">
                     <div>
-                        <div class="text-caption text-medium-emphasis text-uppercase">{{ card.label }}</div>
+-                        <div class="text-caption text-medium-emphasis text-uppercase">{{ card.label }}</div>
                         <div class="text-h5 font-weight-bold mt-1">{{ card.value }}</div>
                     </div>
                     <v-avatar :color="card.color" variant="tonal" size="44">

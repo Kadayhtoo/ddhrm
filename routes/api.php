@@ -87,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('invoices', InvoiceController::class)->parameters([
         'invoices' => 'invoice_id' 
     ]);
+    Route::post('/invoices/{id}/send-email', [InvoiceController::class, 'sendInvoiceEmail']);
     Route::get('/clients/{client}/invoices', [InvoiceController::class, 'indexByClient']);
     
     Route::get('estimates/next-number', [EstimateController::class, 'getNextEstimateNumber']);
@@ -94,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'estimates' => 'estimate_id'
     ]);
     Route::get('/clients/{client}/estimates', [EstimateController::class, 'indexByClient']);
+    Route::post('/estimates/{id}/send-email', [EstimateController::class, 'sendEstimateEmail']);
     
     Route::prefix('payroll')->middleware('permission:payroll.view')->group(function () {
         Route::get('/', [PayrollController::class, 'index']);
@@ -106,5 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}/override', [PayrollController::class, 'override'])->middleware('permission:payroll.manage');
         Route::get('/{id}/payslip', [PayrollController::class, 'payslip']);
         Route::get('/{id}', [PayrollController::class, 'show']);
+        Route::post('/{id}/send-email', [PayrollController::class, 'sendEmail']);
+
     });
 });

@@ -119,4 +119,15 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             $query->whereHas('user', fn ($q) => $q->where('name', 'like', $term)->orWhere('email', 'like', $term));
         }
     }
+    
+    public function rangeRecords(string $startDate, string $endDate, array $filters)
+    {
+        $query = Attendance::whereBetween('attendance_date', [$startDate, $endDate]);
+
+        if (isset($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        return $query->get();
+    }
 }

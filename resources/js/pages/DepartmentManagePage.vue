@@ -173,11 +173,6 @@
         dialog.value = true;
     }
 
-    function confirmDelete(row) {
-        deleteId.value = row.id;
-        deleteDialog.value = true;
-    }
-
     function setNotification(message, type = 'success') {
         notification.value = message;
         notificationType.value = type;
@@ -214,6 +209,11 @@
         } finally {
             saving.value = false;
         }
+    }
+    
+    function confirmDelete(row) {
+        deleteId.value = row.id;
+        deleteDialog.value = true;
     }
 
     async function doDelete() {
