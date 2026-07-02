@@ -21,7 +21,7 @@
             <v-btn 
                 color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold" :disabled="!auth.can('staff.create')" @click="openCreate"
             >
-                <v-icon start>mdi-plus</v-icon> Add Staff
+                <v-icon start>mdi-plus</v-icon> Add New
             </v-btn>
             </v-col>
         </v-row>
@@ -137,6 +137,26 @@
                         type="email"
                         class="mb-1"
                     />
+
+                    <div v-if="previewImage" class="mb-3 text-center">
+                        <v-avatar size="80" class="elevation-2">
+                            <v-img :src="previewImage" cover></v-img>
+                        </v-avatar>
+                        <div class="text-caption mt-1">
+                            {{ form.profile_image_file ? 'New Photo Preview' : 'Current Photo' }}
+                        </div>
+                    </div>
+
+                    <v-file-input
+                        v-model="form.profile_image_file"
+                        label="Profile Photo"
+                        variant="outlined"
+                        density="comfortable"
+                        prepend-icon="mdi-camera"
+                        accept="image/*"
+                        class="mb-3"
+                    />
+
                     <v-select
                         v-model="form.department_id"
                         :items="departments"
@@ -241,7 +261,7 @@
 </template>
 
 <script setup>
-    import { ref, reactive, onMounted } from 'vue';
+    import { ref, reactive, onMounted , computed} from 'vue';
     import axios from 'axios';
     import { useAuthStore } from '@/stores/auth';
 
@@ -292,6 +312,8 @@
         salary: null,
         role_id: null,
         is_active: true,
+        profile_image_file: null, 
+        existing_image_url: null  
     });
 
     function setNotification(message, type = 'success') {
@@ -380,6 +402,8 @@
         form.is_active = true;
         positionOptions.value = [];
         dialog.value = true;
+        form.profile_image_file = null;
+    form.existing_image_url = null;
     }
 
     async function openEdit(item) {
@@ -390,7 +414,7 @@
         form.email = item.email;
         form.password = '';
         form.department_id = item.department_id ?? null; 
-        
+        form.existing_image_url = item.profile_image_url;
         if (item.department_id) {
             await onDepartmentChange(item.department_id);
         }
@@ -411,43 +435,60 @@
         formError.value = '';
         saving.value = true;
 
-        const payload = {
-            name: form.name,
-            email: form.email,
-            password: form.password,
-            department_id: form.department_id,
-            position_id: form.position_id, 
-            salary: form.salary,
-            role_id: form.role_id,
-            is_active: form.is_active,
-        };
-
-        try {
-            if (isEdit.value) {
-                await axios.put(`/api/staff/${editId.value}`, payload);
-                setNotification('Staff updated successfully.', 'success');
-            } else {
-                if (!form.password || form.password.length < 8) {
-                    formError.value = 'Password is required (min 8 characters) for new users.';
-                    saving.value = false;
-                    return;
-                }
-                await axios.post('/api/staff', payload);
-                setNotification('Staff created successfully.', 'success');
-            }
-            dialog.value = false;
-            await auth.fetchMe();
-            await loadItems({ page: page.value, itemsPerPage: itemsPerPage.value });
-        } catch (e) {
-            const msg = e?.response?.data?.message;
-            const errs = e?.response?.data?.errors;
-            formError.value = msg
-                ?? (errs && Object.values(errs).flat().join(' '))
-                ?? 'Unable to save data.';
-        } finally {
-            saving.value = false;
-        }
+        const formData = new FormData();
+        
+        formData.append('name', form.name);
+        formData.append('email', form.email);
+        formData.append('department_id', form.department_id || '');
+        formData.append('position_id', form.position_id || '');
+        formData.append('salary', form.salary || '');
+        formData.append('role_id', form.role_id || '');
+        formData.append('is_active', form.is_active ? 1 : 0);
+        
+        if (form.password) {
+            formData.append('password', form.password);
     }
+
+    if (form.profile_image_file) {
+        formData.append('profile_image', form.profile_image_file);
+    }
+
+    try {
+        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+
+        if (isEdit.value) {
+            formData.append('_method', 'PUT');
+            await axios.post(`/api/staff/${editId.value}`, formData, config);
+            setNotification('Staff updated successfully.', 'success');
+        } else {
+            if (!form.password || form.password.length < 8) {
+                formError.value = 'Password is required (min 8 characters) for new users.';
+                saving.value = false;
+                return;
+            }
+            await axios.post('/api/staff', formData, config);
+            setNotification('Staff created successfully.', 'success');
+        }
+        dialog.value = false;
+        await auth.fetchMe();
+        await loadItems({ page: page.value, itemsPerPage: itemsPerPage.value });
+        auth.user.name = response.data.user.name;
+        auth.user.profile_image = response.data.user.profile_image;
+    } catch (e) {
+        const msg = e?.response?.data?.message;
+        const errs = e?.response?.data?.errors;
+        formError.value = msg ?? (errs && Object.values(errs).flat().join(' ')) ?? 'Unable to save data.';
+    } finally {
+        saving.value = false;
+    }
+    }
+
+    const previewImage = computed(() => {
+        if (form.profile_image_file) {
+            return URL.createObjectURL(form.profile_image_file);
+        }
+        return form.existing_image_url;
+    });
 
     async function doDelete() {
         deleting.value = true;

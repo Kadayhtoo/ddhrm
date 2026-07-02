@@ -33,8 +33,8 @@ class Payroll extends Model
     protected function casts(): array
     {
         return [
-            'period_start' => 'date',
-            'period_end' => 'date',
+            'period_start' => 'date:Y-m-d',
+            'period_end' => 'date:Y-m-d',
             'base_salary' => 'decimal:2',
             'late_penalty' => 'decimal:2',
             'unpaid_leave_deduction' => 'decimal:2',
@@ -53,4 +53,5 @@ class Payroll extends Model
     {
         return $this->belongsTo(User::class);
     }
+
 }

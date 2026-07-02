@@ -8,7 +8,13 @@
                     
                     <div class="d-flex align-center ga-4">
                         <v-avatar color="primary" size="72" class="elevation-1">
-                            <span class="text-h4 text-white font-weight-bold">
+                            <v-img
+                                v-if="staff.profile_image"
+                                :src="'/storage/' + staff.profile_image"
+                                alt="Profile"
+                                cover
+                            />
+                            <span v-else class="text-h4 text-white font-weight-bold">
                                 {{ staff.name?.charAt(0).toUpperCase() }}
                             </span>
                         </v-avatar>
@@ -35,16 +41,15 @@
 
                     <div>
                         <v-btn
-                            variant="outlined"
                             color="primary"
-                            prepend-icon="mdi-account-outline"
-                            to="/profile"
-                            class="text-none font-weight-medium px-4 rounded-lg"
+                            variant="flat"
+                            prepend-icon="mdi-file-plus-outline"
+                            @click="documentDialog = true"
+                            class="ml-auto"
                         >
-                            View Profile
+                            Add Document
                         </v-btn>
                     </div>
-
                 </v-card-text>
             </v-card>
 
@@ -72,6 +77,7 @@
                 <v-tab value="balance"><v-icon start>mdi-scale-balance</v-icon> Leave Balance</v-tab>
                 <v-tab value="requests"><v-icon start>mdi-file-document-outline</v-icon> Leave Requests</v-tab>
                 <v-tab value="attendance"><v-icon start>mdi-calendar-check</v-icon> Attendance Records</v-tab>
+                <v-tab value="documents"><v-icon start>mdi-file-document-multiple-outline</v-icon> Documents</v-tab>
             </v-tabs>
 
             <v-window v-model="activeTab" class="pt-2">  
@@ -316,7 +322,167 @@
                         </v-data-table>
                     </v-card>
                 </v-window-item>
+
+                <v-window-item value="documents">
+                    <v-alert v-if="errorMessage" type="error" density="compact" variant="tonal" class="mb-4">
+                        {{ errorMessage }}
+                    </v-alert>
+
+                    <v-card variant="outlined" class="rounded-lg border-thin elevation-0 bg-white pa-4">
+                        <v-row v-if="Object.keys(staffDocuments).length > 0">
+                        <v-col v-for="(path, type) in staffDocuments" :key="type" cols="6" md="3">
+                            <v-card class="border-thin" variant="outlined">
+                                <v-card-text class="pa-3">
+                                    <div class="text-caption font-weight-bold text-uppercase text-primary mb-2">
+                                        {{ type.replace('_', ' ') }}
+                                    </div>
+
+                                    <div v-if="documentImages[type]">
+                                        <div
+                                            v-if="documentImages[type]?.mimeType?.toLowerCase().includes('pdf')"
+                                            class="text-center py-4 rounded border border-error-lighten-3 bg-error-lighten-5"
+                                            @click="openPreview(documentImages[type], 'pdf')"
+                                            style="cursor: pointer;"
+                                        >
+                                            <v-icon size="64" color="error">mdi-file-pdf-box</v-icon>
+                                            <div class="text-caption font-weight-bold mt-2 text-error-darken-2">View PDF</div>
+                                            <div class="text-caption mt-1 text-medium-emphasis">Open document preview</div>
+                                        </div>
+
+                                        <v-img 
+                                            v-else-if="documentImages[type]?.mimeType?.startsWith('image/')"
+                                            :src="documentImages[type].url" 
+                                            height="150" 
+                                            cover 
+                                            class="rounded mb-2 border" 
+                                            @click="openPreview(documentImages[type], 'image')"
+                                            style="cursor: pointer;"
+                                        ></v-img>
+
+                                        <div v-else class="text-center py-6 rounded border border-dashed" @click="openPreview(documentImages[type], 'file')">
+                                            <v-icon size="48" color="primary">mdi-file-document-outline</v-icon>
+                                            <div class="text-caption mt-2">Open file</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <v-skeleton-loader v-else type="image" height="150" class="rounded mb-2" />
+
+                                    <div class="d-flex ga-1">
+                                        <v-btn size="x-small" variant="text" color="warning" @click="updateDocument(type)">Change</v-btn>
+                                        <v-btn size="x-small" variant="text" color="error" icon="mdi-delete" @click="deleteDocument(type)"></v-btn>
+                                    </div>
+                                </v-card-text>
+                            </v-card>
+                        </v-col>
+                        </v-row>
+                        <div v-else class="text-center py-10 text-grey">No documents uploaded yet.</div>
+                    </v-card>
+                </v-window-item>
             </v-window>
+
+            <v-dialog v-model="documentDialog" max-width="500px">
+                <v-card class="rounded-lg">
+                    <v-toolbar color="primary" density="compact" flat>
+                        <v-toolbar-title class="text-subtitle-1">Document Upload</v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-btn icon="mdi-close" @click="documentDialog = false" size="small"></v-btn>
+                    </v-toolbar>
+
+                    <v-card-text class="pa-6">
+                        <v-form @submit.prevent="submitAllDocuments">
+                            <v-row dense>
+                                <v-col cols="12">
+                                    <p class="text-caption text-grey-darken-1 mb-2">Select files to upload for this staff member:</p>
+                                </v-col>
+                                
+                                <v-col cols="12">
+                                    <v-file-input v-model="docForm.nrc_front" label="NRC Front" variant="outlined" density="compact" prepend-icon="mdi-card-account-details-outline"></v-file-input>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-file-input v-model="docForm.nrc_back" label="NRC Back" variant="outlined" density="compact" prepend-icon="mdi-card-account-details-outline"></v-file-input>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-file-input v-model="docForm.household_front" label="Household Front" variant="outlined" density="compact" prepend-icon="mdi-home-account"></v-file-input>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-file-input
+                                        v-model="docForm.cv"
+                                        label="CV File"
+                                        variant="outlined"
+                                        density="compact"
+                                        prepend-icon="mdi-file-document-multiple-outline"
+                                        accept="application/pdf,image/*"
+                                    ></v-file-input>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-card-text>
+
+                    <v-card-actions class="pa-4 pt-0">
+                        <v-spacer></v-spacer>
+                        <v-btn variant="text" @click="documentDialog = false">Cancel</v-btn>
+                        <v-btn 
+                            color="primary" 
+                            variant="flat" 
+                            @click="submitAllDocuments" 
+                            :loading="uploading"
+                            class="px-6"
+                        >
+                            Upload Documents
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+            <v-dialog v-model="editDialog" max-width="450px">
+                <v-card>
+                    <v-toolbar color="primary" density="compact">
+                        <v-toolbar-title class="text-subtitle-1">Update {{ editingType?.replace('_', ' ') }}</v-toolbar-title>
+                    </v-toolbar>
+                    
+                    <v-card-text class="pt-4">
+                        <v-alert density="compact" variant="tonal" type="info" class="mb-4 text-caption">
+                            Select a new file to replace your existing document.
+                        </v-alert>
+                        
+                        <v-file-input 
+                            v-model="fileToUpload" 
+                            label="Choose new file" 
+                            prepend-icon="mdi-paperclip"
+                            variant="outlined"
+                            density="comfortable"
+                            chips
+                            show-size
+                        ></v-file-input>
+                    </v-card-text>
+                    
+                    <v-card-actions class="pa-4">
+                        <v-spacer></v-spacer>
+                        <v-btn variant="text" @click="editDialog = false">Cancel</v-btn>
+                        <v-btn color="primary" variant="flat" @click="confirmUpdate" :loading="uploading">
+                            Update Document
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+            <v-dialog v-model="previewDialog" max-width="900px">
+                <v-card>
+                    <v-toolbar color="primary" density="compact">
+                        <v-toolbar-title>{{ previewType === 'pdf' ? 'PDF Preview' : 'Image Preview' }}</v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-btn icon="mdi-close" @click="previewDialog = false"></v-btn>
+                    </v-toolbar>
+                    <v-card-text class="pa-0">
+                        <iframe
+                            v-if="previewType === 'pdf' && previewUrl"
+                            :src="previewUrl"
+                            style="width: 100%; height: 75vh; border: 0;"
+                        >
+                    
+                        </iframe>
+                        <v-img v-else-if="previewUrl" :src="previewUrl" contain max-height="75vh"></v-img>
+                    </v-card-text>
+                </v-card>
+            </v-dialog>
         </template>
     </div>
 </template>
@@ -333,6 +499,7 @@
     const activeTab = ref('balance');
 
     const currentYear = new Date().getFullYear(); 
+
     const selectedYear = ref(currentYear);
     const yearOptions = ref(Array.from({ length: 5 }, (_, i) => currentYear - i));
     const staff = ref(null);
@@ -394,6 +561,9 @@
             } else if (activeTab.value === 'attendance') {
                 const { data } = await axios.get(`/api/staff/${staffId}/attendances`, { params });
                 attendances.value = data.data?.data || data.data || [];
+
+            }else if (activeTab.value === 'documents') {
+                await fetchDocuments(); 
             }
         } catch (e) {
             console.error(`Tab fetch data error:`, e);
@@ -431,14 +601,173 @@
     function getStatusColor(s) {
         return s === 'approved' ? 'success' : (s === 'rejected' ? 'error' : (s === 'pending_hr' ? 'info' : 'warning'));
     }
-    
+
+    async function fetchDocuments() {
+        try {
+            const { data } = await axios.get(`/api/staff/${staffId}/documents`);
+            staffDocuments.value = {};
+            data.data.forEach(doc => {
+                staffDocuments.value[doc.document_type] = doc.file_path;
+                loadDecryptedImage(doc.file_path, doc.document_type);
+            });
+        } catch (e) { /* ... */ }
+    }
+
+    const documentImages = ref({});
+
+    async function loadDecryptedImage(path, type) {
+        try {
+            const response = await axios.get('/api/staff/documents/view', {
+                params: { path },
+                responseType: 'blob' 
+            });
+
+            const mimeType = response.headers['content-type'] || response.data?.type || 'application/octet-stream';
+            documentImages.value[type] = {
+                path,
+                url: URL.createObjectURL(response.data),
+                mimeType,
+            };
+        } catch (e) { console.error("Decryption failed", e); }
+    }
+
+    const uploading = ref(false);
+    const documentDialog = ref(false);
+    const staffDocuments = ref({});
+    const docForm = ref({
+        nrc_front: null,
+        nrc_back: null,
+        household_front: null,
+        cv: null
+    });
+
+    async function submitAllDocuments() {
+        uploading.value = true;
+        const formData = new FormData();
+        
+        const fields = ['nrc_front', 'nrc_back', 'household_front', 'cv'];
+        fields.forEach(field => {
+            if (docForm.value[field]) {
+                formData.append(`documents[${field}]`, docForm.value[field]);
+            }
+        });
+
+        try {
+            await axios.post(`/api/staff/${staffId}/documents/bulk`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            documentDialog.value = false;
+            fetchDocuments(); 
+        } catch (e) {
+            console.error('Upload failed:', e);
+        } finally {
+            uploading.value = false;
+        }
+    }
+
+    const viewDocument = (path) => {
+    const fileUrl = '/storage/' + path;
+    window.open(fileUrl, '_blank');
+    };
+
+    const errorMessage = ref(null);
+    const snackbar = ref({ show: false, text: '' });
+
+    const handleError = (error) => {
+        if (error.response && error.response.status === 422) {
+            const errors = error.response.data.errors;
+            errorMessage.value = Object.values(errors).flat().join(', ');
+        } else {
+            errorMessage.value = 'An unexpected error occurred.';
+        }
+    };
+
+    const errors = ref({});
+    async function deleteDocument(type) {
+        try {
+            await axios.delete(`/api/staff/${staffId}/documents/${type}`);
+            fetchDocuments(); // Refresh list
+        } catch (e) {
+            // Show notification: "Failed to delete"
+        }
+    }
+
+    const editDialog = ref(false);
+    const editingType = ref(null);
+    const fileToUpload = ref(null);
+
+    function updateDocument(type) {
+        editingType.value = type;
+        editDialog.value = true;
+    }
+
+    async function confirmUpdate() {
+        if (!fileToUpload.value) return;
+
+        uploading.value = true; 
+        const formData = new FormData();
+        formData.append('document', fileToUpload.value);
+
+    try {
+        await axios.post(`/api/staff/${staffId}/documents/${editingType.value}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        
+        editDialog.value = false;
+        fileToUpload.value = null; 
+        fetchDocuments(); 
+    } catch (e) {
+        handleError(e); 
+    } finally {
+        uploading.value = false; 
+    }
+}
     watch([activeTab, selectedYear], () => {
-        fetchTabData();
+        if (activeTab.value === 'documents') {
+            fetchDocuments();
+        } else {
+            fetchTabData();
+        }
+        
         if (detailDialog.value && currentActiveBalanceItem.value) {
             openLeaveDetail(currentActiveBalanceItem.value);
         }
     });
 
+    const previewDialog = ref(false);
+    const previewUrl = ref(null);
+    const previewType = ref('image');
+
+    const openPreview = async (documentData, type) => {
+        if (!documentData) return;
+
+        if (previewUrl.value?.startsWith('blob:')) {
+            URL.revokeObjectURL(previewUrl.value);
+        }
+
+        if (type === 'pdf') {
+            try {
+                const response = await axios.get('/api/staff/documents/view', {
+                    params: { path: documentData.path },
+                    responseType: 'blob',
+                });
+
+                previewUrl.value = URL.createObjectURL(response.data);
+                previewType.value = 'pdf';
+                previewDialog.value = true;
+            } catch (error) {
+                console.error('Failed to load PDF preview:', error);
+                previewUrl.value = null;
+                previewType.value = 'pdf';
+                previewDialog.value = true;
+            }
+        } else {
+            previewUrl.value = documentData.url;
+            previewType.value = 'image';
+            previewDialog.value = true;
+        }
+    };
+    
     onMounted(() => {
         fetchStaffProfile();
         fetchTabData();

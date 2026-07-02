@@ -10,6 +10,8 @@ import DashboardPage from '@/pages/DashboardPage.vue';
 import LoginPage from '@/pages/LoginPage.vue';
 import PayrollPage from '@/pages/PayrollPage.vue';
 import PayrollDetailPage from '@/pages/PayrollDetailPage.vue';
+import PayrollDetail from '@/pages/staff/PayrollDetail.vue';
+import PayrollHistoryPage from '@/pages/PayrollHistoryPage.vue';
 import PlaceholderPage from '@/pages/PlaceholderPage.vue';
 import RoleDetailPage from '@/pages/RoleDetailPage.vue';
 import RoleListViewPage from '@/pages/RoleListViewPage.vue';
@@ -90,9 +92,9 @@ const router = createRouter({
                     path: '/staff/:user', 
                     name: 'staff.detail', 
                     component:StaffDetailPage, 
-                    meta: { title: 'Staff Detail', permission: 'staff.view'  }
+                    meta: { title: 'Detail', permission: 'view.detail'  }
                 },
-                   {
+                {
                     path: 'attendance',
                     name: 'attendance',
                     component: AdminAttendanceTablePage,
@@ -123,11 +125,23 @@ const router = createRouter({
                     meta: { title: 'Payroll', permission: ['payroll.view'] },
                     props: { title: 'Payroll', subtitle: 'Monthly payroll, payslip PDF, linked to attendance.' },
                 },
-                 {
+                {
                     path: 'payroll/:id',
                     name: 'payroll.detail',
                     component: PayrollDetailPage,
                     meta: { title: 'Payroll Detail', permission: 'payroll.view' },
+                },
+                {
+                    path: '/payroll/history',
+                    name: 'payroll/history',
+                    component: PayrollHistoryPage,
+                    meta: { title: 'Payroll', permission: 'payroll.history' },
+                },
+                {
+                    path: '/my-payroll/:id',
+                    name: ' my-payroll/history',
+                    component: PayrollDetail,
+                    meta: { title: 'Payroll', permission: 'payroll.history' },
                 },
                 {
                     path: 'leave-rules',

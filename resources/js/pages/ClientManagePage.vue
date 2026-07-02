@@ -14,8 +14,8 @@
 
     <v-card class="rounded-xl mb-6 pa-4 border-0 elevation-1 bg-white">
       <v-row class="align-center" dense>
-        <v-col cols="12" lg="3" md="6" sm="12" class="pa-2">
-          <v-text-field v-model="searchQuery" prepend-inner-icon="mdi-magnify" label="Search by name, email or phone..." variant="outlined" density="comfortable" hide-details rounded="lg" color="indigo-lighten-1" clearable></v-text-field>
+        <v-col cols="12" lg="2" md="6" sm="12" class="pa-2">
+          <v-text-field v-model="searchQuery" prepend-inner-icon="mdi-magnify" label="Search ..." variant="outlined" density="comfortable" hide-details rounded="lg" color="indigo-lighten-1" clearable></v-text-field>
         </v-col>
         <v-col cols="12" lg="2" md="6" sm="4" class="pa-2">
           <v-select v-model="filterCountry" :items="filterCountryOptions" item-title="name" item-value="id" label="Country" variant="outlined" density="comfortable" hide-details rounded="lg" color="indigo-lighten-1" clearable></v-select>
@@ -27,7 +27,7 @@
           <v-select v-model="filterTownship" :items="filterTownshipOptions" item-title="name" item-value="id" label="Township" variant="outlined" density="comfortable" hide-details rounded="lg" color="indigo-lighten-1" :disabled="!filterCity" clearable></v-select>
         </v-col>
         <v-col cols="12" lg="3" md="6" class="pa-2 text-right">
-          <v-btn color="grey-darken-1" variant="text" class="text-none rounded-lg font-weight-bold mr-2" prepend-icon="mdi-filter-off" @click="resetFilters">Clear</v-btn>
+          <v-btn color="grey-darken-1" variant="text" class="text-none rounded-lg font-weight-bold mr-2" prepend-icon="mdi-filter-off" @click="resetFilters"></v-btn>
         </v-col>
       </v-row>
     </v-card>

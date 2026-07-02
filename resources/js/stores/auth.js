@@ -43,9 +43,22 @@ export const useAuthStore = defineStore('auth', {
                 this.clearSession();
             }
         },
+        // async fetchMe() {
+        //     const { data } = await axios.get('/api/auth/me');
+        //     this.user = data.user;
+        // },
+
         async fetchMe() {
-            const { data } = await axios.get('/api/auth/me');
-            this.user = data.user;
-        },
+    try {
+        const { data } = await axios.get('/api/auth/me');
+        this.user = data.user;
+        // Use 'this' to access the user object within the store
+        if (this.user) {
+            this.user.profile_image_url = data.user.profile_image_url;
+        }
+    } catch (error) {
+        this.user = null;
+    }
+},
     },
 });

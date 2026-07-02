@@ -20,7 +20,7 @@
                 
                 <v-btn color="#702E62" rounded="lg" size="large" class="text-none rounded-lg px-5 py-2 elevation-2 font-weight-bold"  :disabled="!auth.can('departments.create')" @click="openCreate"
                 >
-                    <v-icon start>mdi-plus</v-icon> Add Department
+                    <v-icon start>mdi-plus</v-icon> Add New
                 </v-btn>
             </v-col>
         </v-row>

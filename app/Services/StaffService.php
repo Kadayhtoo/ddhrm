@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class StaffService
@@ -69,6 +70,12 @@ class StaffService
             'is_active' => array_key_exists('is_active', $data) ? (bool) $data['is_active'] : $target->is_active,
         ];
 
+        if (isset($data['profile_image'])) {
+            if ($target->profile_image) {
+                Storage::disk('public')->delete($target->profile_image);
+            }
+            $payload['profile_image'] = $data['profile_image']->store('profile-images/' . $target->id, 'public');
+        }
         if (! empty($data['password'])) {
             $payload['password'] = Hash::make($data['password']);
         }

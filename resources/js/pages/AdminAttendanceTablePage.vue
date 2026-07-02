@@ -5,7 +5,7 @@
                 <div class="text-h5 font-weight-bold">Attendance Table</div>
                 <div class="text-body-2 text-medium-emphasis">Monitor employee attendance</div>
             </div>
-            <v-btn v-if="auth.can('admin.access')" color="primary" variant="tonal" prepend-icon="mdi-chart-box-outline" :to="{ name: 'attendance.reports' }">Reports</v-btn>
+            <v-btn v-if="auth.can('attendance.manage')" color="primary" variant="tonal" prepend-icon="mdi-chart-box-outline" :to="{ name: 'attendance.reports' }">Reports</v-btn>
         </div>
 
         <v-alert v-if="notice" :type="noticeType" variant="tonal" class="mb-4" closable>{{ notice }}</v-alert>
@@ -13,7 +13,8 @@
         <v-card variant="elevated" class="rounded-lg bg-white mb-5">
             <v-card-text>
                 <v-row dense>
-                    <v-col cols="12" md="3" >
+
+                    <v-col cols="12" md="3"  v-if="auth.can('attendance.manage')">
                         <v-text-field v-model="filters.search" label="Search employee" prepend-inner-icon="mdi-magnify" variant="outlined" density="comfortable" hide-details clearable />
                     </v-col>
                     <v-col cols="12" md="3">

@@ -10,8 +10,8 @@ body {
 }
 
 .custom-search-btn-width {
-    width: 240px;
-    max-width: 240px;
+    width: 140px;
+    max-width: 140px;
 }
 
 @media (max-width: 600px) {

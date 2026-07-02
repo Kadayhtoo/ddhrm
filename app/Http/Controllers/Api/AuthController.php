@@ -61,9 +61,13 @@ class AuthController extends Controller
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'profile_image' => ['nullable', 'image', 'max:2048'], // Add this
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
+        if ($request->hasFile('profile_image')) {
+            $validatedData['profile_image'] = $request->file('profile_image');
+        }
         $updatedUser = $this->authService->updateProfile($user, $validatedData);
 
         return response()->json([

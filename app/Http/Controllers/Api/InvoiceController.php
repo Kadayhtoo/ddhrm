@@ -137,7 +137,7 @@ class InvoiceController extends Controller
 
         Mail::to($invoice->client->email)->send(new \App\Mail\InvoiceMail($invoice, $company));
 
-        return response()->json(['message' => 'Email queued successfully!']);
+        return response()->json(['message' => 'Email was sent successfully!']);
     }
 
 }

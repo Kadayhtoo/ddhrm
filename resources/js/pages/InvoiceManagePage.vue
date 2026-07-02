@@ -66,7 +66,7 @@
           ></v-select>
         </v-col>
         <v-col cols="12" md="3" class="pa-2 text-md-right">
-          <v-btn color="grey-darken-1" variant="text" class="text-none rounded-lg font-weight-bold" prepend-icon="mdi-filter-off" @click="resetFilters">Clear Filters</v-btn>
+          <v-btn color="grey-darken-1" variant="text" class="text-none rounded-lg font-weight-bold" prepend-icon="mdi-filter-off" @click="resetFilters"></v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -132,7 +132,6 @@
           <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" title="Delete Invoice" @click="confirmDelete(item.invoice_id)"></v-btn>
           
           <v-btn icon="mdi-eye-outline" variant="text" size="small" color="#702E62" title="Preview" @click="previewInvoice(item.invoice_id)"></v-btn>
-          <!-- <v-btn icon="mdi-download" variant="text" size="small" color="success" title="Download PDF" @click="downloadInvoice(item.invoice_id)"></v-btn> -->
         </div>
       </template>
       </v-data-table>
@@ -478,7 +477,12 @@
       showToast(response.data.message || 'Invoice saved successfully!', 'success');
       await fetchInvoices();
       closeDialog();
-    } catch (error) {
+    } catch (e) {
+      if (e.response && e.response.status === 422) {
+      backendErrors.value = Object.values(e.response.data.errors).flat();
+    } else {
+      backendErrors.value = ['An unexpected error occurred. Please try again.'];
+    }
     } finally {
       submitLoading.value = false;
     }

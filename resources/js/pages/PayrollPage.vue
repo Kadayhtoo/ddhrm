@@ -35,97 +35,68 @@
         </v-row>
 
         <v-card rounded="lg" class="mt-4 pa-6">
-            <div class="d-flex align-center flex-wrap ga-4 mb-4">
-                <v-select
-                    v-model="filters.employee"
-                    :items="employees"
-                    item-title="name"
-                    item-value="id"
-                    label="Select Employee"
-                    clearable
-                    density="compact"
-                    style="min-width: 280px"
-                >
-                    <template #item="{ props, item }">
-                        <v-list-item v-bind="props" :subtitle="item.raw.department?.name || '—'">
-                            <template #append>
-                                <v-chip
-                                    v-if="!item.raw.salary"
-                                    size="x-small"
-                                    color="warning"
-                                    variant="tonal"
-                                >
-                                    no salary
-                                </v-chip>
-                                 <v-chip
-                                    v-else
-                                    size="x-small"
-                                    color="warning"
-                                    variant="tonal"
-                                >
-                                    {{ item.raw.salary }}
-                                </v-chip>
-                            </template>
-                        </v-list-item>
-                    </template>
-                    <template #selection="{ item }">
-                        <span>{{ item.raw.name }}</span>
-                        <span class="text-caption text-medium-emphasis ms-1">
-                            ({{ item.raw.department?.name || '—' }})
-                        </span>
-                    </template>
-                </v-select>
-                <v-select
-                    v-model="filters.periodType"
-                    :items="periodOptions"
-                    label="Period"
-                    density="compact"
-                    style="min-width: 140px"
-                />
-                <v-select
-                    v-if="filters.periodType === 'monthly'"
-                    v-model="filters.month"
-                    :items="monthOptions"
-                    label="Month"
-                    density="compact"
-                    style="min-width: 140px"
-                />
-                <v-select
-                    v-if="filters.periodType === 'monthly'"
-                    v-model="filters.year"
-                    :items="yearOptions"
-                    label="Year"
-                    density="compact"
-                    style="min-width: 120px"
-                />
-                <v-text-field
-                    v-if="filters.periodType === 'daily'"
-                    v-model="filters.date"
-                    type="date"
-                    label="Date"
-                    density="compact"
-                    style="min-width: 180px"
-                />
-                <v-btn
-                    v-if="auth.can('payroll.manage')"
-                    color="primary"
-                    prepend-icon="mdi-calculator"
-                    :loading="calculating"
-                    :disabled="!canCalculate"
-                    @click="calculatePayroll"
-                >
-                    Calculate
-                </v-btn>
-                <v-spacer />
-                <v-text-field
-                    v-model="search"
-                    prepend-inner-icon="mdi-magnify"
-                    placeholder="Search employee..."
-                    density="compact"
-                    hide-details
-                    style="max-width: 260px"
-                />
-            </div>
+           <v-row align="center" class="ga-0">
+                <v-col cols="6" md="2">
+                    <v-select
+                        v-model="filters.employee"
+                        :items="employees"
+                        item-title="name"
+                        item-value="id"
+                        label="Select Employee"
+                        clearable
+                        density="compact"
+                        variant="outlined"
+                        hide-details
+                    >
+                    </v-select>
+                </v-col>
+
+                <v-col cols="6" md="2">
+                    <v-select
+                        v-model="filters.periodType"
+                        :items="periodOptions"
+                        label="Period"
+                        density="compact"
+                        variant="outlined"
+                        hide-details
+                    />
+                </v-col>
+
+                <v-col cols="6" md="2" v-if="filters.periodType === 'monthly'">
+                    <v-select v-model="filters.month" :items="monthOptions" label="Month" density="compact" variant="outlined" hide-details />
+                </v-col>
+                <v-col cols="6" md="2" v-if="filters.periodType === 'monthly'">
+                    <v-select v-model="filters.year" :items="yearOptions" label="Year" density="compact" variant="outlined" hide-details />
+                </v-col>
+                <v-col cols="12" md="2" v-if="filters.periodType === 'daily'">
+                    <v-text-field v-model="filters.date" type="date" label="Date" density="compact" variant="outlined" hide-details />
+                </v-col>
+
+                <v-col cols="12" md="2">
+                    <v-btn
+                        v-if="auth.can('payroll.manage')"
+                        color="primary"
+                        prepend-icon="mdi-calculator"
+                        :loading="calculating"
+                        :disabled="!canCalculate"
+                        @click="calculatePayroll"
+                        height="40"
+                    >
+                        Calculate
+                    </v-btn>
+                </v-col>
+
+                <v-col cols="12" md=""2>
+                    <v-text-field
+                        v-model="search"
+                        prepend-inner-icon="mdi-magnify"
+                        placeholder="Search ..."
+                        density="compact"
+                        variant="outlined"
+                        hide-details
+                    />
+                </v-col>
+            </v-row>
 
             <v-data-table
                 :headers="tableHeaders"
@@ -302,7 +273,7 @@ const statCards = computed(() => [
     { key: 'total', label: 'Total Payroll', value: formatCurrency(stats.value.total_payroll), icon: 'mdi-cash-multiple', color: 'primary' },
     { key: 'deductions', label: 'Total Deductions', value: formatCurrency(stats.value.total_deductions), icon: 'mdi-arrow-down-bold', color: 'error' },
     { key: 'late', label: 'Late Penalties', value: formatCurrency(stats.value.total_late_penalties), icon: 'mdi-clock-alert', color: 'warning' },
-    { key: 'leave', label: 'Leave Deductions', value: formatCurrency(stats.value.total_leave_deductions), icon: 'mdi-palm-tree', color: 'info' },
+    { key: 'leave', label: 'Leave Deductions', value: formatCurrency(stats.value.total_leave_deductions), icon: 'mdi-calendar-clock', color: 'info' },
 ]);
 
 const tableHeaders = [
@@ -358,7 +329,14 @@ async function fetchStats() {
 async function fetchEmployees() {
     try {
         const { data } = await axios.get('/api/staff-dropdown');
-        employees.value = data ?? [];
+        
+        const allEmployeesOption = {
+            id: 'all', 
+            name: 'All Employees',
+            department: { name: 'Company-wide' } 
+        };
+
+        employees.value = [allEmployeesOption, ...(data ?? [])];
         
     } catch {
         employees.value = [];
@@ -380,9 +358,10 @@ async function calculatePayroll() {
     calculating.value = true;
     try {
         const payload = {
-            user_id: filters.value.employee,
+            user_id: filters.value.employee === 'all' ? null : filters.value.employee,
             period_type: filters.value.periodType,
         };
+
         if (payload.period_type === 'monthly') {
             payload.year = filters.value.year;
             payload.month = filters.value.month;
@@ -393,6 +372,11 @@ async function calculatePayroll() {
         await axios.post('/api/payroll/calculate', payload);
         await fetchPayrolls();
         await fetchStats();
+    } catch (error) {
+        if (error.response?.status === 422) {
+            console.error('Validation Errors:', error.response.data.errors);
+            alert('Please check your inputs: ' + JSON.stringify(error.response.data.errors));
+        }
     } finally {
         calculating.value = false;
     }

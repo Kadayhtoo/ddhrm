@@ -168,14 +168,32 @@ async function fetchCompanyInfo() {
   }
 
 const isSending = ref(false);
+import Swal from 'sweetalert2';
+const toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000
+});
 
 async function handleSendEmail() {
   isSending.value = true;
   try {
     const response = await axios.post(`/api/estimates/${route.params.id}/send-email`);
-    Swal.fire({ icon: 'success', title: 'Sent!', text: response.data.message });
+    Swal.fire({ 
+      icon: 'success', 
+      title: '', 
+      text: response.data.message,
+      confirmButtonColor: '#2e7d32'
+    });
   } catch (error) {
-    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Failed to send estimate' });
+    Swal.fire({ 
+      icon: 'error', 
+      title: 'Oops...',
+      text: error.response?.data?.message ?? 'Failed to send estimate',
+      confirmButtonColor: '#d33'
+
+    });
   } finally {
     isSending.value = false;
   }

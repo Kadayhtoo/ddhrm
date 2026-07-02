@@ -22,6 +22,7 @@ class UpdateStaffRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            'profile_image' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'password' => ['sometimes', 'nullable', 'string', 'min:8'],
             'role_id' => ['sometimes', 'integer', 'exists:roles,id'],
             'department_id' => ['sometimes', 'nullable', 'integer'],

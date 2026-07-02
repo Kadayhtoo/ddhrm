@@ -92,9 +92,9 @@ const ReportSummary = defineComponent({
     setup(props) {
         return () => h('div', { class: 'd-flex flex-column ga-2' }, [
             row('Total', props.summary.total ?? 0),
-            row('Present', props.summary.present ?? 0),
-            row('Absent', props.summary.absent ?? 0),
-            row('Late', props.summary.late ?? 0),
+            row('Today Present Employee' , props.summary.present ?? 0),
+            row('Today Absent Employee', props.summary.absent ?? 0),
+            row('Today Late Employee', props.summary.late ?? 0),
             row('Half Day', props.summary.half_day ?? 0),
             row('Attendance', `${props.summary.attendance_percentage ?? 0}%`),
         ]);

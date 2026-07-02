@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Models\Attendance;
+use App\Models\LeaveRequest;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
@@ -263,27 +263,6 @@ class AttendanceService
         ];
     }
 
-    // public function dashboardWidgets(User $actor,?string $date = null): array
-    // {
-    //     $filters = [
-    //         'date' => $date ?? now()->toDateString(),
-    //     ];
-    //     if (! $this->canManage($actor)) {
-    //         $filters['user_id'] = $actor->id;
-    //     }
-    //     $records = $this->attendances->dailyRecords(
-    //         $filters['date'],
-    //         $filters
-    //     );
-    //     $summary = $this->summaryFromRecords($records);
-    //     return [
-    //         'present' => $summary['present'],
-    //         'absent' => $summary['absent'],
-    //         'late' => $summary['late'],
-    //         'attendance_percentage' => $summary['attendance_percentage'],
-    //     ];
-    // }
-
     public function dashboardWidgets(User $actor, ?string $date = null): array
     {
         if ($this->canManage($actor)) {
@@ -361,6 +340,17 @@ class AttendanceService
             : 0;
     }
 
+    // public function lateMinutes(Carbon|string $clockIn): int
+    // {
+    //     $clockIn = Carbon::parse($clockIn);
+    //     $limit = Carbon::parse($clockIn->toDateString() . ' ' . self::officeStart())
+    //                 ->addMinutes(self::graceMinutes());
+    //     if ($clockIn->greaterThan($limit)) {
+    //         return $limit->diffInMinutes($clockIn);
+    //     }
+    //     return 0; 
+    // }
+
     public function statusFromClockIn(Carbon|string $clockIn): string
     {
         return $this->lateMinutes($clockIn) > 0
@@ -397,50 +387,28 @@ class AttendanceService
         return $attendance;
     }
 
-    // protected function summaryFromRecords($records): array
-    // {
-    //     $total = $records->count();
-
-    //     $present = $records
-    //         ->whereIn('status', ['present', 'late'])
-    //         ->count();
-
-    //     $absent = $records
-    //         ->where('status', 'absent')
-    //         ->count();
-
-    //     $late = $records
-    //         ->where('status', 'late')
-    //         ->count();
-
-    //     $halfDay = $records
-    //         ->where('status', 'half_day')
-    //         ->count();
-
-    //     return [
-    //         'total' => $total,
-    //         'present' => $present,
-    //         'absent' => $absent,
-    //         'late' => $late,
-    //         'half_day' => $halfDay,
-    //         'attendance_percentage' => $total > 0
-    //             ? round(($present / $total) * 100, 2)
-    //             : 0,
-    //     ];
-    // }
-
-    protected function summaryFromRecords($records): array
+    protected function summaryFromRecords(): array
     {
-        $total = $records->count();
-        $present = $records->whereIn('status', ['present', 'late'])->count();
-        $absent  = $records->where('status', 'absent')->count();
-        $late    = $records->where('status', 'late')->count();
+        $today = now()->toDateString();
+        $totalActiveEmployees = User::where('is_active', 1)->count();
+        $presentRecords = Attendance::where('attendance_date', $today)->get();
+        $presentCount = $presentRecords->whereIn('status', ['present', 'late'])->count();
+        $lateCount = $presentRecords->where('status', 'late')->count();
 
+        $leaveCount = LeaveRequest::where('status', 'approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->count();
+        $absentCount = $totalActiveEmployees - ($presentCount + $leaveCount);
+        
         return [
-            'present' => $present,
-            'absent' => $absent,
-            'late' => $late,
-            'attendance_percentage' => $total > 0 ? round(($present / $total) * 100, 2) : 0,
+            'present' => $presentCount,
+            'late'    => $lateCount,
+            'leave'   => $leaveCount,
+            'absent'  => $absentCount, 
+            'attendance_percentage' => $totalActiveEmployees > 0 
+                ? round((($presentCount + $leaveCount) / $totalActiveEmployees) * 100, 2) 
+                : 0,
         ];
     }
 
