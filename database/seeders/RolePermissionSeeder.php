@@ -15,6 +15,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Admin panel', 'slug' => 'admin.access'],
             ['name' => 'View company info', 'slug' => 'company-info.view'],
             ['name' => 'View staff', 'slug' => 'staff.view'],
+            ['name' => 'View staff detail', 'slug' => 'view.detail'],
             ['name' => 'Create staff', 'slug' => 'staff.create'],
             ['name' => 'Update staff', 'slug' => 'staff.update'],
             ['name' => 'Delete staff', 'slug' => 'staff.delete'],
@@ -44,6 +45,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'View leave balances', 'slug' => 'leave-balances.view'],
             ['name' => 'Manage leave balances', 'slug' => 'leave-balances.manage'],
             ['name' => 'View payroll', 'slug' => 'payroll.view'],
+            ['name' => 'View payroll history', 'slug' => 'payroll.history'],
             ['name' => 'Manage payroll', 'slug' => 'payroll.manage'],
             ['name' => 'View invoices','slug' => 'invoices.view'],
             ['name' => 'Manage invoices', 'slug' => 'invoices.manage'],
@@ -51,6 +53,8 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Manage estimates', 'slug' => 'estimates.manage'],
             ['name' => 'View clients', 'slug' => 'clients.view'],
             ['name' => 'Manage clients', 'slug' => 'clients.manage'],
+            ['name' => 'Manage staff documents', 'slug' => 'staff-documents.manage'],
+            ['name' => 'View staff documents', 'slug' => 'staff-documents.view'],
         ];
 
         $permissions = collect($definitions)->map(fn (array $row) => Permission::query()->firstOrCreate(

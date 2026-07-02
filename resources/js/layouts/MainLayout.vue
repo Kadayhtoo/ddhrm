@@ -162,7 +162,7 @@
                 rounded="xl"
               >
                 <template #prepend>
-                  <v-icon size="20">mdi-palm-tree</v-icon>
+                  <v-icon size="20">mdi-calendar-clock</v-icon>
                 </template>
               </v-list-item>
             </template>
@@ -188,10 +188,21 @@
             </v-list-item>
           </v-list-group>
 
-            <v-list-item
+          <v-list-item
             v-if="auth.can('payroll.view')"
             title="Payroll"
             :to="{ name: 'payroll' }"
+            rounded="xl"
+          >
+            <template #prepend>
+              <v-icon size="20">mdi-cash-multiple</v-icon>
+            </template>
+          </v-list-item>
+          
+            <v-list-item
+            v-if="auth.can('payroll.history')"
+            title="Payroll"
+            :to="{ name: 'payroll/history' }"
             rounded="xl"
           >
             <template #prepend>
@@ -255,7 +266,7 @@
               class="submenu-item"
             >
               <template #prepend>
-                <v-icon size="8">mdi-circle</v-icon>
+                <v-icon size="20">mdi-shield-account</v-icon>
               </template>
             </v-list-item>
           </v-list-group>
@@ -270,29 +281,49 @@
         </v-toolbar-title>
         <v-spacer />
         <v-menu>
-            <template #activator="{ props }">
-                <v-btn v-bind="props" variant="text" class="me-2">
-                    <v-avatar color="primary" size="32" class=" me-2">
-                        {{ initials }}
-                    </v-avatar>
-                    <span class="d-none d-sm-inline text-body-2">{{ auth.user?.name }}</span>
-                    <v-icon end>mdi-chevron-down</v-icon>
-                </v-btn>
-            </template>
+          <!-- <template #activator="{ props }">
+            <v-btn v-bind="props" variant="text" class="me-2">
+                <v-avatar color="primary" size="32" class=" me-2">
+                    {{ initials }}
+                </v-avatar>
+                <span class="d-none d-sm-inline text-body-2">{{ auth.user?.name }}</span>
+                <v-icon end>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template> -->
+          <template #activator="{ props }">
+    <v-btn v-bind="props" variant="text" class="me-2">
+        <v-avatar size="32" class="me-2" color="primary">
+            <v-img
+                v-if="auth.user?.profile_image_url"
+                :src="auth.user.profile_image_url"
+                cover
+            />
+            <span v-else>
+                {{ initials }}
+            </span>
+        </v-avatar>
 
-            <v-list density="compact" min-width="200">
-                <v-list-item 
-                    v-if="auth.user?.id" 
-                    title="Profile" 
-                    prepend-icon="mdi-account-outline" 
-                    :to="{ name: 'staff.detail', params: { user: auth.user.id } }"
-                />
-                <v-list-item 
-                    title="Logout" 
-                    prepend-icon="mdi-logout" 
-                    @click="onLogout" 
-                />
-            </v-list>
+        <span class="d-none d-sm-inline text-body-2">
+            {{ auth.user?.name }}
+        </span>
+        <v-icon end>mdi-chevron-down</v-icon>
+    </v-btn>
+</template>
+
+          <v-list density="compact" min-width="200">
+              <v-list-item 
+                  v-if="auth.user?.id" 
+                  title="Profile" 
+                  prepend-icon="mdi-account-outline" 
+                  to="/profile"
+              />
+            
+              <v-list-item 
+                  title="Logout" 
+                  prepend-icon="mdi-logout" 
+                  @click="onLogout" 
+              />
+          </v-list>
         </v-menu>
     </v-app-bar>
 
@@ -314,7 +345,7 @@
     import axios from 'axios';
     import { useDisplay } from 'vuetify';
     import { useAuthStore } from '@/stores/auth';
-
+  
     const isPreviewPage = computed(() => route.name === 'InvoicePreview' || route.name === 'EstimatePreview');
 
     const { mdAndUp } = useDisplay();
@@ -348,18 +379,8 @@
         }
     }
 
-    function openRole(role) {
-        router.push({ name: 'roles.detail', params: { id: role.id } });
-    }
-
-    function isSelectedRole(role) {
-        return route.name === 'roles.detail' && Number(route.params.id) === role.id;
-    }
-
-    onMounted(loadRoles);
-
     const initials = computed(() => {
-        const name = auth.user?.name ?? '?';
+      const name = auth.user?.name ?? '?';
         return name
             .split(' ')
             .map((p) => p[0])
@@ -367,6 +388,14 @@
             .slice(0, 2)
             .toUpperCase();
     });
+
+    function openRole(role) {
+        router.push({ name: 'roles.detail', params: { id: role.id } });
+    }
+
+    function isSelectedRole(role) {
+        return route.name === 'roles.detail' && Number(route.params.id) === role.id;
+    }
 
     async function onLogout() {
         await auth.logout();

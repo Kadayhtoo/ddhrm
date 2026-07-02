@@ -39,6 +39,9 @@ class StaffResource extends JsonResource
                 'name' => $r->name,
                 'slug' => $r->slug,
             ])),
+            'profile_image_url' => $this->profile_image 
+            ? asset('storage/' . $this->profile_image) 
+            : null,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
 

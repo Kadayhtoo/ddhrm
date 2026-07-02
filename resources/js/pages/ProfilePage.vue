@@ -60,6 +60,26 @@
           </v-col>
         </v-row>
 
+        <div v-if="isEdit" class="mb-4 mt-4 text-center">
+          <v-avatar size="120" class="elevation-4 mb-2">
+              <v-img 
+                  :src="previewImage || '/default-avatar.png'" 
+                  cover
+              ></v-img>
+          </v-avatar>
+          <div class="text-caption text-grey">Profile Photo</div>
+            </div>
+
+            <v-file-input
+                v-if="isEdit"
+                v-model="form.profile_image_file"
+                label="Choose New Photo"
+                variant="outlined"
+                density="comfortable"
+                accept="image/*"
+                prepend-icon="mdi-camera"
+                class="mb-3"
+          />
         <v-divider class="my-6" />
         
         <div class="text-subtitle-2 font-weight-bold mb-1 text-primary d-flex align-center ga-2">
@@ -116,7 +136,7 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted , computed} from 'vue';
   import axios from 'axios';
   import { useAuthStore } from '@/stores/auth'; 
 
@@ -131,20 +151,21 @@
   const showPassword = ref(false);
   const showConfirmPassword = ref(false);
 
+  const isEdit = ref(true);
   const form = ref({
     name: '',
     email: '',
     password: '',
-    password_confirmation: ''
+    password_confirmation: '',
+    profile_image_file: null,   
+    existing_image_url: null
   });
 
-  // Regular Validation Rules
   const rules = {
     required: v => !!v || 'This field is required.',
     email: v => /.+@.+\..+/.test(v) || 'E-mail must be valid.'
   };
 
-  // Password Match Validation Rule
   const passwordConfirmationRule = (value) => {
     if (form.value.password && !value) {
       return 'Please confirm your new password.';
@@ -165,38 +186,65 @@
     if (auth.user) {
       form.value.name = auth.user.name || '';
       form.value.email = auth.user.email || '';
-    }
+      form.value.existing_image_url = auth.user.profile_image_url;   
+     }
   }
 
   async function saveProfile() {
     if (profileForm.value) {
-      const { valid } = await profileForm.value.validate();
-      if (!valid) {
-        setNotification('Please correct the highlighted fields before saving.', 'error');
-        return;
-      }
+        const { valid } = await profileForm.value.validate();
+        if (!valid) {
+            setNotification('Please correct the highlighted fields before saving.', 'error');
+            return;
+        }
     }
 
-    saving.value = true;
-    try {
-      const { data } = await axios.put('/api/profile', form.value);
-      
-      if (auth.setUser) {
-        auth.setUser(data.user);
-      }
+    const formData = new FormData();
+        formData.append('name', form.value.name);
+        formData.append('email', form.value.email);
+        
+        if (form.value.password) {
+            formData.append('password', form.value.password);
+            formData.append('password_confirmation', form.value.password_confirmation);
+        }
 
-      // Clear password fields on success
-      form.value.password = '';
-      form.value.password_confirmation = '';
+        if (form.value.profile_image_file) {
+            formData.append('profile_image', form.value.profile_image_file);
+        }
 
-      setNotification('Your profile details have been successfully saved.', 'success');
-    } catch (error) {
-      const errorMsg = error?.response?.data?.message ?? 'Failed to update profile.';
-      setNotification(errorMsg, 'error');
-    } finally {
-      saving.value = false;
-    }
+        formData.append('_method', 'PUT');
+
+        saving.value = true;
+        try {
+            const { data } = await axios.post('/api/profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
+            if (auth.setUser) {
+                auth.setUser(data.user);
+                form.value.existing_image_url = data.user.profile_image_url;
+                form.value.profile_image_file = null; 
+            }
+
+            form.value.password = '';
+            form.value.password_confirmation = '';
+
+            setNotification('Your profile details have been successfully saved.', 'success');
+            await auth.fetchMe();
+        } catch (error) {
+            const errorMsg = error?.response?.data?.message ?? 'Failed to update profile.';
+            setNotification(errorMsg, 'error');
+        } finally {
+            saving.value = false;
+        }
   }
+
+  const previewImage = computed(() => {
+      if (form.value.profile_image_file) {
+        return URL.createObjectURL(form.value.profile_image_file);
+    }
+    return form.value.existing_image_url;
+  });
 
   onMounted(() => {
     initProfileForm();
@@ -204,7 +252,6 @@
 </script>
 
 <style scoped>
-/* Mobile responsive support for row item spacing gap */
 .row-gap-4 {
   row-gap: 16px !important;
 }

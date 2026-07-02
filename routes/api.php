@@ -1,5 +1,6 @@
 <?php
 
+
 use App\Http\Controllers\Api\AboutUsController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AttendanceReportController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\APi\PositionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\StaffDocumentController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -109,6 +111,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}/payslip', [PayrollController::class, 'payslip']);
         Route::get('/{id}', [PayrollController::class, 'show']);
         Route::post('/{id}/send-email', [PayrollController::class, 'sendEmail']);
+    });
+    Route::get('/my-payroll/history', [PayrollController::class, 'getPayrollHistory']);
+    Route::get('/my-payroll/{payroll}', [PayrollController::class, 'showMyPayroll']);
+
+    Route::group(['prefix' => 'staff/{user}'], function () {
+        Route::get('documents', [StaffDocumentController::class, 'index']);
+        Route::post('documents/bulk', [StaffDocumentController::class, 'store']);
+        
+        Route::post('documents/{type}', [StaffDocumentController::class, 'update']);
+        
+        Route::delete('documents/{type}', [StaffDocumentController::class, 'destroy']);
+    });
+
+    Route::get('/staff/documents/view', [StaffDocumentController::class, 'view']);
 
     });
-});

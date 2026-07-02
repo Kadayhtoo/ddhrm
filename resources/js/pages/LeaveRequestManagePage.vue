@@ -30,10 +30,10 @@
                     density="comfortable"
                     variant="outlined"
                     hide-details
-                    label="Search Staff or Rule..."
+                    label="Search..."
                     prepend-inner-icon="mdi-magnify"
                     clearable
-                    style="max-width: 240px;"
+                    style="max-width: 170px;"
                     @keyup.enter="applySearch"
                     @click:clear="clearSearch"
                 />
@@ -194,17 +194,6 @@
                         <div class="text-body-2 text-medium-emphasis mb-5" style="max-width: 380px;">
                             There are currently no leave requests recorded matching your selected criteria or date range.
                         </div>
-                        <v-btn
-                            v-if="!isManagement"
-                            color="primary"
-                            variant="flat"
-                            size="comfortable"
-                            prepend-icon="mdi-plus"
-                            class="text-none font-weight-bold rounded-lg px-5 elevation-1"
-                            @click="openLeaveFormDialog()"
-                        >
-                            Create First Request
-                        </v-btn>
                     </div>
                 </template>
             </v-data-table-server>
@@ -618,7 +607,7 @@
         }
 
         try {
-            const rDept = await axios.get('/api/department').catch(() => axios.get('/api/departments'));
+            const rDept = await axios.get('/api/department').catch(() => axios.get('/api/department'));
             departmentsList.value = rDept.data?.data || rDept.data || [];
         } catch (e) {
             console.error("🚨 Department API Error:", e);

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
@@ -50,6 +51,16 @@ class AuthService
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
+        }
+        if (isset($data['profile_image'])) {
+            if ($data['profile_image'] instanceof \Illuminate\Http\UploadedFile) {
+                
+                if ($user->profile_image) {
+                    Storage::disk('public')->delete($user->profile_image);
+                }
+
+                $data['profile_image'] = $data['profile_image']->store('profile-images/' . $user->id, 'public');
+            } 
         }
         $user->update($data);
 

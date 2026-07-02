@@ -163,10 +163,25 @@ class PayrollService
             $dailyRate = $salary / max($this->daysPerMonth(), 1);
 
             // Minute rate = dailyRate / dailyWorkMinutes (kept for reference)
-            $minuteRate = $dailyRate / max($this->dailyWorkMinutes(), 1);
+            //$minuteRate = $dailyRate / max($this->dailyWorkMinutes(), 1);
 
             // Late penalty = (late minutes / 30) * rate (MMK per 30 min)
-            $latePenalty = round(($totalLateMinutes / 30) * $this->latePenaltyRate(), 2);
+            //$latePenalty = round(($totalLateMinutes / 30) * $this->latePenaltyRate(), 2);
+
+            $monthlyLatePenalty = 0;
+
+            foreach ($attendances as $attendance) {
+                $lateMinutes = (int) $attendance->late_minutes;
+                
+                if ($lateMinutes > 60) {
+                    // Rule: If late > 60 mins on this day, add half-day penalty
+                    $monthlyLatePenalty += ($dailyRate / 2);
+                } elseif ($lateMinutes > 0) {
+                    // Rule: If late <= 60 mins, add minute-based penalty
+                    $monthlyLatePenalty += round(($lateMinutes / 30) * $this->latePenaltyRate(), 2);
+                }
+            }
+            $latePenalty = round($monthlyLatePenalty, 2);
 
             $unpaidDeduction = round($dailyRate * $totalUnpaidDays, 2);
             $paidDeduction = round($dailyRate * $totalPaidDays * $this->paidLeaveDeductionRate(), 2);
@@ -217,17 +232,108 @@ class PayrollService
      * @author HHA
      * @date 01/06/2026
      */
+    // public function calculateDaily(int $userId, string $date): Payroll
+    // {
+    //     $user = User::query()->findOrFail($userId);
+    //     // $salary = (float) ($user->salary ?? 0);
+    //     $salary = (float) 50000; // for test
+
+    //     $day = Carbon::parse($date);
+    //     $periodStart = $day->copy()->startOfDay();
+    //     $periodEnd = $day->copy()->endOfDay();
+
+    //     return DB::transaction(function () use ($user, $salary, $day, $periodStart, $periodEnd, $date) {
+    //         $attendance = Attendance::query()
+    //             ->where('user_id', $user->id)
+    //             ->whereDate('attendance_date', $date)
+    //             ->first();
+
+    //         $lateMinutes = $attendance ? (int) $attendance->late_minutes : 0;
+    //         $workMinutes = $attendance ? (int) $attendance->work_minutes : 0;
+    //         $workingDays = $attendance ? 1 : 0;
+
+    //         $approvedLeave = LeaveRequest::query()
+    //             ->where('user_id', $user->id)
+    //             ->where('status', 'approved')
+    //             ->whereDate('start_date', '<=', $date)
+    //             ->whereDate('end_date', '>=', $date)
+    //             ->with('leaveRule')
+    //             ->first();
+
+    //         $unpaidDays = 0;
+    //         $paidDays = 0;
+
+    //         if ($approvedLeave) {
+    //             $days = (float) $approvedLeave->total_days;
+    //             if ($approvedLeave->leaveRule && $approvedLeave->leaveRule->type === 'unpaid') {
+    //                 $unpaidDays += $days;
+    //             } else {
+    //                 $paidDays += $days;
+    //             }
+    //         }
+
+    //         // Daily rate = salary / daysPerMonth (reference)
+    //         $dailyRate = $salary / max($this->daysPerMonth(), 1);
+    //         $minuteRate = $dailyRate / max($this->dailyWorkMinutes(), 1);
+
+    //         // Late penalty = (late minutes / 30) * rate (MMK per 30 min)
+    //         $latePenalty = round(($lateMinutes / 30) * $this->latePenaltyRate(), 2);
+
+    //         $unpaidDeduction = round($dailyRate * $unpaidDays, 2);
+    //         $paidDeduction = round($dailyRate * $paidDays * $this->paidLeaveDeductionRate(), 2);
+
+    //         // Total deductions = late penalty + unpaid deduction + paid deduction
+    //         $deductions = round($latePenalty + $unpaidDeduction + $paidDeduction, 2);
+
+    //         // e.g., $gross = $salary + $allowances - $otherEarnings (for future use)
+    //         $gross = $salary;
+
+    //         // Net salary = gross - deductions
+    //         $net = round($gross - $deductions, 2);
+
+    //         $attributes = [
+    //             'user_id' => $user->id,
+    //             'period_type' => 'daily',
+    //             'period_start' => $periodStart,
+    //             'period_end' => $periodEnd,
+    //             'base_salary' => $salary,
+    //             'total_working_days' => $workingDays,
+    //             'total_work_minutes' => $workMinutes,
+    //             'total_late_minutes' => $lateMinutes,
+    //             'late_penalty' => $latePenalty,
+    //             'total_unpaid_leave_days' => $unpaidDays,
+    //             'unpaid_leave_deduction' => $unpaidDeduction,
+    //             'total_paid_leave_days' => $paidDays,
+    //             'paid_leave_deduction' => $paidDeduction,
+    //             'gross_salary' => $gross,
+    //             'total_deductions' => $deductions,
+    //             'net_salary' => $net,
+    //             'status' => 'calculated',
+    //             'calculated_at' => now(),
+    //         ];
+
+    //         return Payroll::query()->updateOrCreate(
+    //             [
+    //                 'user_id' => $user->id,
+    //                 'period_type' => 'daily',
+    //                 'period_start' => $periodStart->toDateString(),
+    //                 'period_end' => $periodEnd->toDateString(),
+    //             ],
+    //             $attributes
+    //         );
+    //     });
+    // }
+
     public function calculateDaily(int $userId, string $date): Payroll
     {
         $user = User::query()->findOrFail($userId);
-        // $salary = (float) ($user->salary ?? 0);
-        $salary = (float) 50000; // for test
+        $salary = (float) ($user->salary ?? 0);
 
         $day = Carbon::parse($date);
         $periodStart = $day->copy()->startOfDay();
         $periodEnd = $day->copy()->endOfDay();
 
-        return DB::transaction(function () use ($user, $salary, $day, $periodStart, $periodEnd, $date) {
+        return DB::transaction(function () use ($user, $salary, $periodStart, $periodEnd, $date) {
             $attendance = Attendance::query()
                 ->where('user_id', $user->id)
                 ->whereDate('attendance_date', $date)
@@ -235,8 +341,9 @@ class PayrollService
 
             $lateMinutes = $attendance ? (int) $attendance->late_minutes : 0;
             $workMinutes = $attendance ? (int) $attendance->work_minutes : 0;
-            $workingDays = $attendance ? 1 : 0;
-
+            
+            $hasAttendance = $attendance ? 1 : 0;
+            
             $approvedLeave = LeaveRequest::query()
                 ->where('user_id', $user->id)
                 ->where('status', 'approved')
@@ -247,6 +354,7 @@ class PayrollService
 
             $unpaidDays = 0;
             $paidDays = 0;
+            $hasLeave = $approvedLeave ? 1 : 0;
 
             if ($approvedLeave) {
                 $days = (float) $approvedLeave->total_days;
@@ -257,23 +365,23 @@ class PayrollService
                 }
             }
 
-            // Daily rate = salary / daysPerMonth (reference)
-            $dailyRate = $salary / max($this->daysPerMonth(), 1);
-            $minuteRate = $dailyRate / max($this->dailyWorkMinutes(), 1);
+            $workingDays = ($hasAttendance || $hasLeave) ? 1 : 0;
 
-            // Late penalty = (late minutes / 30) * rate (MMK per 30 min)
+            $dailyRate = $salary / max($this->daysPerMonth(), 1);
+
+            $latePenalty = 0;
+           if ($lateMinutes > 60) {
+            $latePenalty = $dailyRate / 2;
+        } elseif ($lateMinutes > 0) {
             $latePenalty = round(($lateMinutes / 30) * $this->latePenaltyRate(), 2);
+        }
 
             $unpaidDeduction = round($dailyRate * $unpaidDays, 2);
             $paidDeduction = round($dailyRate * $paidDays * $this->paidLeaveDeductionRate(), 2);
 
-            // Total deductions = late penalty + unpaid deduction + paid deduction
             $deductions = round($latePenalty + $unpaidDeduction + $paidDeduction, 2);
 
-            // e.g., $gross = $salary + $allowances - $otherEarnings (for future use)
-            $gross = $salary;
-
-            // Net salary = gross - deductions
+            $gross = $dailyRate;
             $net = round($gross - $deductions, 2);
 
             $attributes = [

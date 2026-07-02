@@ -14,10 +14,7 @@
                     </v-btn>
                     <div>
                         <div class="text-h4 font-weight-bold">Payroll Detail</div>
-                        <div class="text-body-1 text-medium-emphasis">
-                            {{ payroll.user?.name }} · {{ payroll.period_type | capitalize }} ·
-                            {{ payroll.period_start }} — {{ payroll.period_end }}
-                        </div>
+                       
                     </div>
                 </div>
                 <v-chip :color="statusColor" size="small">{{ payroll.status }}</v-chip>
@@ -247,6 +244,24 @@
             </v-card>
         </v-dialog>
 
+        <v-dialog v-model="confirmDialog" max-width="400">
+            <v-card>
+                <v-card-title>Confirm Sending</v-card-title>
+                <v-card-text>
+                    Are you sure you want to send this payslip to <strong>{{ payroll?.user?.email }}</strong>?
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="grey" variant="text" @click="confirmDialog = false">Cancel</v-btn>
+                    <v-btn color="primary" @click="proceedWithEmail">Send</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
+            {{ snackbarText }}
+        </v-snackbar>
+
         <v-card v-if="payroll.notes" rounded="lg" class="pa-6 mt-2">
             <div class="text-subtitle-1 font-weight-bold mb-2">Notes</div>
             <p class="text-body-1">{{ payroll.notes }}</p>
@@ -267,6 +282,7 @@ const auth = useAuthStore();
 const loading = ref(true);
 const payroll = ref(null);
 const overrideDialog = ref(false);
+
 const overrideForm = ref({
     base_salary: 0,
     gross_salary: 0,
@@ -364,24 +380,39 @@ async function downloadPayslip() {
 
 const sendingEmail = ref(false); 
 
-async function sendPayslipEmail() {
+const confirmDialog = ref(false);
+const snackbar = ref(false);
+const snackbarText = ref('');
+const snackbarColor = ref('success');
+
+// 1. Trigger the dialog
+function sendPayslipEmail() {
     if (!payroll.value) return;
+    confirmDialog.value = true;
+}
 
-    if (!confirm('Are you sure you want to send this payslip to ' + payroll.value.user.email + '?')) {
-        return;
-    }
-
+// 2. Perform the action after user confirms
+async function proceedWithEmail() {
+    confirmDialog.value = false;
     sendingEmail.value = true;
+    
     try {
         await axios.post(`/api/payroll/${payroll.value.id}/send-email`);
-        alert('Payslip sent successfully to ' + payroll.value.user.email);
+        
+        // Show success notification
+        snackbarText.value = 'Payslip sent successfully!';
+        snackbarColor.value = 'success';
+        snackbar.value = true;
     } catch (error) {
-        console.error('Email sending failed', error);
-        alert(error.response?.data?.message || 'Failed to send email');
+        // Show error notification
+        snackbarText.value = error.response?.data?.message || 'Failed to send email';
+        snackbarColor.value = 'error';
+        snackbar.value = true;
     } finally {
         sendingEmail.value = false;
     }
 }
+
 onMounted(async () => {
     try {
         const { data } = await axios.get(`/api/payroll/${route.params.id}`);

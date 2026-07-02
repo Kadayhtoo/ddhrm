@@ -173,23 +173,6 @@ const toast = Swal.mixin({
   timer: 3000
 });
 
-// toast.fire({
-//   icon: 'info',
-//   title: 'Sending email...'
-// });
-// async function handleSendEmail(id) {
-//   if (!id) return;
-  
-//   isSending.value = true;
-//   try {
-//     const response = await axios.post(`/api/invoices/${id}/send-email`);
-//     alert(response.data.message);
-//   } catch (error) {
-//     alert(error.response?.data?.message ?? 'Error sending email');
-//   } finally {
-//     isSending.value = false;
-//   }
-// }
 async function handleSendEmail(id) {
   if (!id) return;
   
@@ -198,7 +181,7 @@ async function handleSendEmail(id) {
     const response = await axios.post(`/api/invoices/${id}/send-email`);
     Swal.fire({
       icon: 'success',
-      title: 'Sent!',
+      title: 'Email was sent successfully!',
       text: response.data.message,
       confirmButtonColor: '#2e7d32'
     });

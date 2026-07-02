@@ -27,9 +27,9 @@ const props = defineProps({
 });
 
 const cards = computed(() => [
-    { key: 'present', label: 'Present', value: props.widgets.present ?? 0, icon: 'mdi-account-check-outline', color: 'success' },
-    { key: 'absent', label: 'Absent', value: props.widgets.absent ?? 0, icon: 'mdi-account-off-outline', color: 'error' },
-    { key: 'late', label: 'Late', value: props.widgets.late ?? 0, icon: 'mdi-clock-alert-outline', color: 'warning' },
-    { key: 'percentage', label: 'Attendance', value: `${props.widgets.attendance_percentage ?? 0}%`, icon: 'mdi-chart-donut', color: 'primary' },
+    { key: 'present', label: 'Toay Present Employee', value: props.widgets.present ?? 0, icon: 'mdi-account-check-outline', color: 'success' },
+    { key: 'absent', label: 'Today Absent Employee', value: props.widgets.absent ?? 0, icon: 'mdi-account-off-outline', color: 'error' },
+    { key: 'late', label: 'Today Late Employee', value: props.widgets.late ?? 0, icon: 'mdi-clock-alert-outline', color: 'warning' },
+    { key: 'percentage', label: 'Today Attendance %', value: `${props.widgets.attendance_percentage ?? 0}%`, icon: 'mdi-chart-donut', color: 'primary' },
 ]);
 </script>

@@ -24,6 +24,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'profile_image',
         'password',
         'department_id',
         'position_id',
@@ -131,6 +132,9 @@ class User extends Authenticatable
             'is_active' => $this->is_active,
             'roles' => $this->rolesPayload(),
             'permissions' => $this->permissionSlugs(),
+            'profile_image_url' => $this->profile_image 
+            ? asset('storage/' . $this->profile_image) 
+            : null,
         ];
     }
 
@@ -149,8 +153,18 @@ class User extends Authenticatable
         return $this->hasMany(Attendance::class);
     }
 
+    public function leaveRequests() {
+
+        return $this->hasMany(LeaveRequest::class);
+    }
+
     public function payrolls(): HasMany
     {
         return $this->hasMany(Payroll::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(StaffDocument::class, 'staff_id');
     }
 }

@@ -1,4 +1,9 @@
 <template>
+    <v-alert v-if="backendErrors.length > 0" type="error" variant="tonal" class="rounded-lg mb-4 text-body-2" closable @click:close="backendErrors = []">
+      <ul class="pl-4 mb-0">
+        <li v-for="(err, idx) in backendErrors" :key="idx">{{ err }}</li>
+      </ul>
+    </v-alert>
   <v-form ref="formRef">
     <v-row>
       <v-col cols="12" sm="6" class="py-1">
@@ -133,7 +138,6 @@ const backendErrors = ref([]);
 const isClientFixed = ref(!!props.fixedClientId);
 const currencyOptions = ref([]);
 
-
 const getClientDisplayName = computed(() => {
   if (!props.clientOptions || props.clientOptions.length === 0) return 'Loading...';
 
@@ -219,8 +223,12 @@ if (paymentFile.value instanceof File) {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     emit('saved');
-  } catch (error) {
-    console.error("Error saving invoice:", error);
+  } catch (e) {
+    if (e.response && e.response.status === 422) {
+      backendErrors.value = Object.values(e.response.data.errors).flat();
+    } else {
+      backendErrors.value = ['An unexpected error occurred. Please try again.'];
+    }
   } finally {
     loading.value = false;
   }

@@ -59,7 +59,7 @@
           ></v-select>
         </v-col>
         <v-col cols="12" md="3" class="pa-2 text-md-right">
-          <v-btn color="grey-darken-1" variant="text" class="text-none rounded-lg font-weight-bold" prepend-icon="mdi-filter-off" @click="resetFilters">Clear Filters</v-btn>
+          <v-btn color="grey-darken-1" variant="text" class="text-none rounded-lg font-weight-bold" prepend-icon="mdi-filter-off" @click="resetFilters"></v-btn>
         </v-col>
       </v-row>
     </v-card>

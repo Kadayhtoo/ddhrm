@@ -39,12 +39,25 @@
                 <AttendanceTodayActions v-if="card.label === 'Attendance' && auth.can('attendance.view') && auth.user?.email !== 'ceo@ddhrm.local'" />
                 <v-card v-else rounded="lg" class="pa-5 h-100">
                     <div class="text-caption text-medium-emphasis text-uppercase">{{ card.label }}</div>
-                    <div class="text-h5 font-weight-semibold mt-2">{{ card.value }}</div>
+                    
+                    <div v-if="card.link" class="mt-2">
+                        <v-btn :to="card.link" color="primary" variant="text" class="px-0">
+                            {{ card.value }}
+                        </v-btn>
+                    </div>
+
+                    <div v-else-if="typeof card.value === 'object' && card.value !== null" class="mt-2">
+                        <div v-for="(count, type) in card.value" :key="type" class="text-h6 font-weight-semibold">
+                            {{ type }}: {{ count }}
+                        </div>
+                    </div>
+
+                    <div v-else class="text-h5 font-weight-semibold mt-2">{{ card.value }}</div>
                 </v-card>
             </v-col>
         </v-row>
 
-        <v-row v-if="auth.can('attendance.view')" class="mt-2">
+        <v-row v-if="auth.can('attendance.manage')" class="mt-2">
             <v-col v-for="widget in attendanceWidgets" :key="widget.key" cols="12" sm="6" md="3">
                 <v-card rounded="lg" class="pa-5 h-100">
                     <div class="d-flex align-center justify-space-between">
@@ -86,28 +99,28 @@ const attendanceWidgets = computed(() => {
     return [
         {
             key: 'present',
-            label: `Present (${periodLabel})`,
+            label: `(${periodLabel}) Present`,
             value: attendanceSummary.value.present,
             icon: 'mdi-account-check-outline',
             color: 'success',
         },
         {
             key: 'absent',
-            label: `Absent (${periodLabel})`,
+            label: `(${periodLabel}) Absent`,
             value: attendanceSummary.value.absent,
             icon: 'mdi-account-off-outline',
             color: 'error',
         },
         {
             key: 'late',
-            label: `Late (${periodLabel})`,
+            label: `(${periodLabel}) Late `,
             value: attendanceSummary.value.late,
             icon: 'mdi-clock-alert-outline',
             color: 'warning',
         },
         {
             key: 'percentage',
-            label: `Attendance % (${periodLabel})`,
+            label: `(${periodLabel}) Attendance % `,
             value: `${attendanceSummary.value.attendance_percentage}%`,
             icon: 'mdi-chart-donut',
             color: 'primary',

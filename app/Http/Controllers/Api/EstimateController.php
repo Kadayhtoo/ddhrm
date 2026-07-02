@@ -133,6 +133,6 @@ class EstimateController extends Controller
 
         Mail::to($estimate->client->email)->send(new \App\Mail\EstimateMail($estimate, $company));
 
-        return response()->json(['message' => 'Estimate email sent successfully!']);
+        return response()->json(['message' => 'Estimate email was sent successfully!']);
 }
 }
