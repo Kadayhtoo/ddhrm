@@ -6,12 +6,13 @@ use App\Http\Requests\StoreStaffDocumentRequest;
 use App\Http\Requests\UpdateStaffDocumentRequest;
 use App\Models\StaffDocument;
 use App\Models\User;
+use App\Notifications\DocumentUpdatedNotification;
 use App\Services\StaffDocumentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Notification;
 class StaffDocumentController extends Controller
 {
     protected StaffDocumentService $documentService;

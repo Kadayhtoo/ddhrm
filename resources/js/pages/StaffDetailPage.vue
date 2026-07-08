@@ -686,9 +686,8 @@
     async function deleteDocument(type) {
         try {
             await axios.delete(`/api/staff/${staffId}/documents/${type}`);
-            fetchDocuments(); // Refresh list
+            fetchDocuments(); 
         } catch (e) {
-            // Show notification: "Failed to delete"
         }
     }
 
@@ -767,9 +766,10 @@
             previewDialog.value = true;
         }
     };
-    
+  
     onMounted(() => {
-        fetchStaffProfile();
+      fetchStaffProfile();
         fetchTabData();
     });
+    
 </script>

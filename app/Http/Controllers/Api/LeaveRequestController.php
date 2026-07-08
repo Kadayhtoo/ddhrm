@@ -36,16 +36,66 @@ class LeaveRequestController extends Controller
 
         return response()->json($requests);
     }
+
+    public function show($id)
+    {
+        try {
+            $leaveRequest = $this->service->getLeaveDetails($id);
+            return response()->json($leaveRequest);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Record not found'], 404);
+        }
+    }
+    
+    // public function store(StoreLeaveRequest $request): JsonResponse
+    // {
+    //     try {
+    //         $validated = $request->validated();
+    //         $currentUser = Auth::user();
+
+    //         $validated['requested_by'] = $currentUser->id;
+    //         if (empty($validated['user_id'])) {
+    //             $validated['user_id'] = $currentUser->id;
+    //         }
+    //         $leaveRequest = $this->service->applyLeave($validated, $request->file('attachment'), $currentUser);
+
+    //         return response()->json([
+    //             'message' => 'Leave request submitted successfully.',
+    //             'data' => $leaveRequest,
+    //         ], 201);
+
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => $e->getMessage()], 422);
+    //     }
+
+    // }
+
     public function store(StoreLeaveRequest $request): JsonResponse
     {
         try {
             $validated = $request->validated();
             $currentUser = Auth::user();
 
+            $targetUserId = !empty($validated['user_id']) ? $validated['user_id'] : $currentUser->id;
+            
+            $validated['user_id'] = $targetUserId;
             $validated['requested_by'] = $currentUser->id;
-            if (empty($validated['user_id'])) {
-                $validated['user_id'] = $currentUser->id;
+
+            // leave rule to check to check allowed days
+            $leaveRule = \App\Models\LeaveRule::find($validated['leave_rule_id']);
+
+            $balance = \App\Models\LeaveBalance::where('user_id', $targetUserId)
+                ->where('leave_rule_id', $validated['leave_rule_id'])
+                ->first();
+
+            $remainingDays = $balance ? (float) $balance->remaining_days : (float) $leaveRule->days;
+
+            if ((float) $validated['total_days'] > $remainingDays) {
+                return response()->json([
+                    'message' => "Insufficient leave balance. The user only has {$remainingDays} days remaining."
+                ], 422);
             }
+
             $leaveRequest = $this->service->applyLeave($validated, $request->file('attachment'), $currentUser);
 
             return response()->json([

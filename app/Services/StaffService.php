@@ -42,9 +42,12 @@ class StaffService
     {
         $roleId = (int) $data['role_id'];
         $this->assertRoleAssignable($actor, $roleId);
+        $data['username'] = $this->generateUniqueUsername($data['name']);
+
         $user = $this->users->create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'username' => $data['username'],
             'password' => Hash::make($data['password']),
             'department_id' => $data['department_id'] ?? null,
             'position_id' => $data['position_id'] ?? null,
@@ -63,6 +66,7 @@ class StaffService
         $payload = [
             'name' => $data['name'] ?? $target->name,
             'email' => $data['email'] ?? $target->email,
+            'username' => $data['username'] ?? $target->username,
             'department_id' => array_key_exists('department_id', $data) ? $data['department_id'] : $target->department_id,
             'position_id' => array_key_exists('position_id', $data) ? $data['position_id'] : $target->position_id,
             'salary' => array_key_exists('salary', $data) ? $data['salary'] : $target->salary,
@@ -70,12 +74,18 @@ class StaffService
             'is_active' => array_key_exists('is_active', $data) ? (bool) $data['is_active'] : $target->is_active,
         ];
 
+        if (isset($data['name']) && $data['name'] !== $target->name) {
+            // Automatically regenerate username based on new name
+            $payload['username'] = $this->generateUniqueUsername($data['name'], $target->id);
+        }
+
         if (isset($data['profile_image'])) {
             if ($target->profile_image) {
                 Storage::disk('public')->delete($target->profile_image);
             }
             $payload['profile_image'] = $data['profile_image']->store('profile-images/' . $target->id, 'public');
         }
+        
         if (! empty($data['password'])) {
             $payload['password'] = Hash::make($data['password']);
         }
@@ -125,4 +135,26 @@ class StaffService
             ]);
         }
     }
+
+    private function generateUniqueUsername(string $name, ?int $excludeId = null): string
+{
+    $base = strtolower(str_replace(' ', '', $name));
+    $username = $base;
+    $count = 1;
+    $query = \App\Models\User::where('username', $username);
+    if ($excludeId) {
+        $query->where('id', '!=', $excludeId);
+    }
+
+    while ($query->exists()) {
+        $username = $base . $count;
+        $count++;
+        $query = \App\Models\User::where('username', $username);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+    }
+
+    return $username;
+}
 }

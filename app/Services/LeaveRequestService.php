@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Notifications\LeaveRequestedNotification;
+use App\Notifications\LeaveStatusChanged;
 use App\Repositories\Contracts\LeaveRequestRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class LeaveRequestService
@@ -21,6 +24,11 @@ class LeaveRequestService
         return $this->repository->paginateByRole($user, $perPage, $search, $scope, $dateFilter);
     }
 
+    public function getLeaveDetails($id)
+    {
+        return $this->repository->findById($id);
+    }
+    
     public function applyLeave(array $data, $attachment, User $actor): LeaveRequest
     {
         if (empty($data['user_id'])) {
@@ -41,12 +49,28 @@ class LeaveRequestService
         $data['is_approve'] = 0;
         $data['is_approve_hr'] = 0;
 
-        return $this->repository->create($data);
+        $leaveRequest = $this->repository->create($data);
+
+        $recipients = collect();
+        if (!empty($data['approver_id'])) {
+            $approver = User::find($data['approver_id']);
+            if ($approver) $recipients->push($approver);
+        }
+
+        $hrUsers = User::whereHas('roles', function ($query) {
+            $query->where('slug', 'hr');
+        })->get();
+        
+        $recipients = $recipients->merge($hrUsers);
+
+        Notification::send($recipients, new LeaveRequestedNotification($leaveRequest));
+
+        return $leaveRequest;
     }
 
     public function handleApproval(int $id, string $action, User $actor): LeaveRequest
     {
-        return DB::transaction(function () use ($id, $action, $actor) {
+        $updatedRequest = DB::transaction(function () use ($id, $action, $actor) {
 
             $leaveRequest = $this->repository->findById($id);
             if (! $leaveRequest) {
@@ -111,9 +135,11 @@ class LeaveRequestService
                     return $this->repository->update($leaveRequest, $updateData);
                 }
             }
-
             throw new \Exception('Invalid status action requested.');
         });
+        $this->sendApprovalNotifications($updatedRequest, $actor);
+
+        return $updatedRequest;
     }
 
     public function cancelLeaveRequest(int $id, User $actor): LeaveRequest
@@ -159,5 +185,30 @@ class LeaveRequestService
         $data['is_approve_hr'] = 0;
 
         return $this->repository->update($leaveRequest, $data);
+    }
+
+    private function sendApprovalNotifications(LeaveRequest $leaveRequest, User $actor)
+    {
+        $recipients = collect();
+
+        // 1. Always notify the Staff member who requested the leave
+        $recipients->push($leaveRequest->user);
+
+        // 2. Determine the secondary recipient based on who acted
+        $isHR = $actor->hasRoleSlug('hr');
+        $isApprover = ((int) $leaveRequest->approver_id === (int) $actor->id);
+
+        if ($isHR) {
+            // If HR changed status, notify the original Approver (so they know)
+            if ($leaveRequest->approver) {
+                $recipients->push($leaveRequest->approver);
+            }
+        } elseif ($isApprover) {
+            // If Approver changed status, notify HR team
+            $hrUsers = User::whereHas('roles', fn($q) => $q->where('slug', 'hr'))->get();
+            $recipients = $recipients->merge($hrUsers);
+        }
+
+        Notification::send($recipients, new LeaveStatusChanged($leaveRequest, $actor));
     }
 }

@@ -7,11 +7,14 @@ use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Models\User;
+use App\Notifications\InvoiceEmailSentNotification;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceController extends Controller
@@ -137,6 +140,11 @@ class InvoiceController extends Controller
 
         Mail::to($invoice->client->email)->send(new \App\Mail\InvoiceMail($invoice, $company));
 
+        $recipients = User::whereHas('roles', function ($query) {
+            $query->whereIn('slug', ['admin', 'hr', 'ceo']);
+        })->get();
+
+        Notification::send($recipients, new InvoiceEmailSentNotification($invoice));
         return response()->json(['message' => 'Email was sent successfully!']);
     }
 
