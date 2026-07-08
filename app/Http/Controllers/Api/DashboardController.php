@@ -63,8 +63,8 @@ class DashboardController extends Controller
                 ],
                 'payroll' => [
                     'label' => 'Payroll',
-                    'value' => $isAdminOrHr ? 'Generate & payslips' : 'View My Payroll',
-                    'link' => $isAdminOrHr ? null : 'payroll/history'
+                    'value' => $isAdminOrHr ? 'Payrolls & Payslips' : 'View My Payroll',
+                    'link' => $isAdminOrHr ? 'payroll' : 'payroll/history'
                 ],
                
             ],

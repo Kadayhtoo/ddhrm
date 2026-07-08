@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class StaffDocument extends Model
-{
+{    
     protected $fillable = [
         'staff_id',
         'document_type',

@@ -17,28 +17,76 @@ class AuthService
     /**
      * @return array{user: User, token: string}
      */
-    public function attemptTokenLogin(string $email, string $password, string $deviceName = 'spa'): array
+    // public function attemptTokenLogin(string $email, string $password, string $deviceName = 'spa'): array
+    // {
+    //     $user = $this->users->findByEmail($email);
+
+    //     if (! $user || ! Hash::check($password, $user->password)) {
+    //         throw ValidationException::withMessages([
+    //             'email' => [__('auth.failed')],
+    //         ]);
+    //     }
+
+    //     if (! $user->is_active) {
+    //         throw ValidationException::withMessages([
+    //             'email' => [__('Your account is inactive.')],
+    //         ]);
+    //     }
+    
+    //     $user->tokens()->where('name', $deviceName)->delete();
+
+    //     $token = $user->createToken($deviceName)->plainTextToken;
+
+    //     return ['user' => $user, 'token' => $token];
+    // }
+     public function attemptTokenLogin(string $username, string $password, string $deviceName = 'spa'): array
     {
-        $user = $this->users->findByEmail($email);
+        $user = $this->users->findByUsername($username);
 
         if (! $user || ! Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => [__('auth.failed')],
+                'username' => [__('auth.failed')],
             ]);
         }
 
         if (! $user->is_active) {
             throw ValidationException::withMessages([
-                'email' => [__('Your account is inactive.')],
+                'username' => [__('Your account is inactive.')],
             ]);
         }
-
+    
         $user->tokens()->where('name', $deviceName)->delete();
 
         $token = $user->createToken($deviceName)->plainTextToken;
 
         return ['user' => $user, 'token' => $token];
     }
+
+    // public function attemptTokenLogin(string $inputName, string $password, string $deviceName = 'spa'): array
+    // {
+    //     $normalizedInput = strtolower(str_replace(' ', '', $inputName));
+        
+        
+    //     $user = User::whereRaw("LOWER(REPLACE(name, ' ', '')) = ?", [$normalizedInput])->first();
+
+    //     if (! $user || ! Hash::check($password, $user->password)) {
+    //         throw ValidationException::withMessages([
+    //             'username' => [__('auth.failed')],
+    //         ]);
+    //     }
+        
+    //     if (! $user->is_active) {
+    //         throw ValidationException::withMessages([
+    //             'username' => [__('Your account is inactive.')],
+    //         ]);
+    //     }
+
+    //     $user->tokens()->where('name', $deviceName)->delete();
+
+    //     $token = $user->createToken($deviceName)->plainTextToken;
+
+    //     return ['user' => $user, 'token' => $token]; 
+    // }
 
     public function revokeCurrentToken(User $user): void
     {

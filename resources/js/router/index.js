@@ -30,6 +30,8 @@ import ClientDetailPage from '@/pages/ClientDetailPage.vue';
 import InvoicePreviewPage from '@/pages/InvoicePreviewPage.vue';
 import EstimatePreviewPage from '@/pages/EstimatePreviewPage.vue';
 import AboutUsPage from '@/pages/AboutUsPage.vue';
+import NotificationsPage from '@/pages/NotificationsPage.vue';
+import LeaveRequestDetailsPage from '@/pages/LeaveRequestDetailsPage.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -157,6 +159,12 @@ const router = createRouter({
                     meta: { title: 'Leave Request' },
                 },
                 {
+                    path: '/leave-requests/:id',
+                    name: 'leave-request-details',
+                    component: LeaveRequestDetailsPage, 
+                    meta: {title: 'Leave Request Detail'},
+                },
+                {
                     path: 'leave-balances',
                     name: 'leave-balances',
                     component: LeaveBalancePage,
@@ -207,6 +215,12 @@ const router = createRouter({
                     component: ProfilePage,
                     meta: { title: 'Account Profile' },
                 },
+                {
+                    path: '/notifications',
+                    name: 'notifications',
+                    component: NotificationsPage
+
+                }
             ],
         },
     ],

@@ -19,6 +19,7 @@ class StaffResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'username' => $this->username,
             'department_id' => $this->department_id,
             'department' => $this->whenLoaded('department', fn () => [
                 'id' => $this->department->id,

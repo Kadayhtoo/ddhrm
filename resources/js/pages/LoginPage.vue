@@ -15,7 +15,7 @@
                 </v-alert>
 
                 <v-form @submit.prevent="submit">
-                    <v-text-field
+                    <!-- <v-text-field
                         v-model="email"
                         label="Email"
                         type="email"
@@ -23,6 +23,15 @@
                         variant="outlined"
                         density="comfortable"
                         autocomplete="username"
+                        class="mb-3"
+                    />  -->
+                   
+                    <v-text-field
+                        v-model="username" 
+                        label="Username" 
+                        @input="username = username.toLowerCase()" 
+                        prepend-inner-icon="mdi-account-outline" 
+                        variant="outlined" 
                         class="mb-3"
                     />
                     <v-text-field
@@ -49,10 +58,10 @@
 
                 <div class="text-caption text-medium-emphasis text-center mt-6">
                     Seeded accounts (password <strong>password</strong>):
-                    <strong>ceo@ddhrm.local</strong>,
-                    <strong>admin@ddhrm.local</strong>,
-                    <strong>hr@ddhrm.local</strong>,
-                    <strong>staff@ddhrm.local</strong>
+                    <strong>ceo</strong>,
+                    <strong>admin</strong>,
+                    <strong>hr</strong>,
+                    <strong>staff</strong>
                 </div>
             </v-card>
         </v-col>
@@ -69,6 +78,7 @@ const router = useRouter();
 const route = useRoute();
 
 const email = ref('hr@ddhrm.local');
+const username = ref('');
 const password = ref('password');
 const loading = ref(false);
 const error = ref('');
@@ -77,7 +87,8 @@ async function submit() {
     error.value = '';
     loading.value = true;
     try {
-        await auth.login({ email: email.value, password: password.value });
+        // await auth.login({ email: email.value, password: password.value });
+         await auth.login({ username: username.value.toLowerCase(), password: password.value });
         const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/';
         await router.push(redirect);
     } catch (e) {

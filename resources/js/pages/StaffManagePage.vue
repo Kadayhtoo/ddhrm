@@ -297,6 +297,7 @@
         { title: 'ID', key: 'id', sortable: false },
         { title: 'Name', key: 'name', sortable: false },
         { title: 'Email', key: 'email', sortable: false },
+        { title: 'Username', key: 'username', sortable: false },
         { title: 'Position', key: 'position', sortable: false },
         { title: 'Department', key: 'department', sortable: false },
         { title: 'Status', key: 'status', sortable: false },

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LeaveBalanceController;
 use App\Http\Controllers\Api\LeaveRequestController;
 use App\Http\Controllers\Api\LeaveRuleController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PayrollController;
 use App\Http\Controllers\APi\PositionController;
 use App\Http\Controllers\Api\RoleController;
@@ -89,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('invoices', InvoiceController::class)->parameters([
         'invoices' => 'invoice_id' 
     ]);
+    
     Route::post('/invoices/{id}/send-email', [InvoiceController::class, 'sendInvoiceEmail']);
     Route::get('/clients/{client}/invoices', [InvoiceController::class, 'indexByClient']);
     
@@ -96,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('estimates', EstimateController::class)->parameters([
         'estimates' => 'estimate_id'
     ]);
+
     Route::get('/clients/{client}/estimates', [EstimateController::class, 'indexByClient']);
     Route::post('/estimates/{id}/send-email', [EstimateController::class, 'sendEstimateEmail']);
     
@@ -125,5 +128,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/staff/documents/view', [StaffDocumentController::class, 'view']);
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 
     });

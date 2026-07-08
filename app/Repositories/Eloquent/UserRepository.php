@@ -31,6 +31,14 @@ class UserRepository implements UserRepositoryInterface
             ->first();
     }
 
+    public function findByUsername(string $username): ?User
+    {
+        return $this->model->newQuery()
+            ->with(['roles.permissions'])
+            ->where('username', $username)
+            ->first();
+    }
+    
     public function allActive(): Collection
     {
         return $this->model->newQuery()->where('is_active', true)->orderBy('name')->get();

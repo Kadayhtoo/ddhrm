@@ -243,6 +243,16 @@
             </template>
           </v-list-item>
 
+          <v-list-item
+            title="Notifications"
+            :to="{ name: 'notifications' }"
+            rounded="xl"
+          >
+            <template #prepend>
+              <v-icon size="20">mdi-bell-outline</v-icon>
+            </template>
+          </v-list-item>
+
           <v-list-group
             value="system-management"
             v-if="showSystemManageMenu"
@@ -280,51 +290,74 @@
             {{ pageTitle }}
         </v-toolbar-title>
         <v-spacer />
-        <v-menu>
-          <!-- <template #activator="{ props }">
-            <v-btn v-bind="props" variant="text" class="me-2">
-                <v-avatar color="primary" size="32" class=" me-2">
-                    {{ initials }}
-                </v-avatar>
-                <span class="d-none d-sm-inline text-body-2">{{ auth.user?.name }}</span>
-                <v-icon end>mdi-chevron-down</v-icon>
-            </v-btn>
-          </template> -->
-          <template #activator="{ props }">
-    <v-btn v-bind="props" variant="text" class="me-2">
-        <v-avatar size="32" class="me-2" color="primary">
-            <v-img
-                v-if="auth.user?.profile_image_url"
-                :src="auth.user.profile_image_url"
-                cover
-            />
-            <span v-else>
-                {{ initials }}
-            </span>
-        </v-avatar>
+        <div class="d-flex align-center">
+          <v-menu :close-on-content-click="false" location="bottom end">
+              <template #activator="{ props }">
+                  <v-btn icon v-bind="props" class="me-2">
+                      <v-badge color="error" :content="unreadCount" :model-value="unreadCount > 0">
+                          <v-icon>mdi-bell-outline</v-icon>
+                      </v-badge>
+                  </v-btn>
+              </template>
+              <v-card width="350" class="py-0">
+                  <v-list density="compact" class="overflow-y-auto" style="max-height: 400px;">
+                    <v-list-subheader class="d-flex justify-space-between">
+                      Notifications
+                      <v-btn variant="text" size="x-small" @click="markAllAsRead">Mark All Read</v-btn>
+                    </v-list-subheader>
+                      
+                      <v-divider />
+                      
+                      <v-list-item 
+                          v-for="note in notifications.filter(n => !n.read_at)" 
+                              :key="note.id" 
+                              @click="handleNotificationClick(note)"
+                          >
+                          <v-list-item-title class="text-body-2" :class="{'font-weight-bold': !note.read_at}">
+                              {{ note.data.message }}
+                          </v-list-item-title>
+                      </v-list-item>
+                  </v-list>
+              </v-card>
+          </v-menu>
+          <v-menu>
+            <template #activator="{ props }">
+              <v-btn v-bind="props" variant="text" class="me-2">
+                  <v-avatar size="32" class="me-2" color="primary">
+                      <v-img
+                          v-if="auth.user?.profile_image_url"
+                          :src="auth.user.profile_image_url"
+                          cover
+                      />
+                      <span v-else>
+                          {{ initials }}
+                      </span>
+                  </v-avatar>
 
-        <span class="d-none d-sm-inline text-body-2">
-            {{ auth.user?.name }}
-        </span>
-        <v-icon end>mdi-chevron-down</v-icon>
-    </v-btn>
-</template>
+                  <span class="d-none d-sm-inline text-body-2">
+                      {{ auth.user?.name }}
+                  </span>
+                  <v-icon end>mdi-chevron-down</v-icon>
+              </v-btn>
+            </template>
 
-          <v-list density="compact" min-width="200">
-              <v-list-item 
-                  v-if="auth.user?.id" 
-                  title="Profile" 
-                  prepend-icon="mdi-account-outline" 
-                  to="/profile"
-              />
-            
-              <v-list-item 
-                  title="Logout" 
-                  prepend-icon="mdi-logout" 
-                  @click="onLogout" 
-              />
-          </v-list>
-        </v-menu>
+            <v-list density="compact" min-width="200">
+                <v-list-item 
+                    v-if="auth.user?.id" 
+                    title="Profile" 
+                    prepend-icon="mdi-account-outline" 
+                    to="/profile"
+                />
+              
+                <v-list-item 
+                    title="Logout" 
+                    prepend-icon="mdi-logout" 
+                    @click="onLogout" 
+                />
+            </v-list>
+          </v-menu>
+        </div>
+       
     </v-app-bar>
 
     <v-main class="bg-background">
@@ -401,6 +434,72 @@
         await auth.logout();
         await router.push({ name: 'login' });
     }
+
+    const handleNotificationClick = async (note) => {
+    // 1. Mark as read
+    await axios.post(`/api/notifications/${note.id}/read`);
+
+    // 2. Determine if we are already on the target page
+    if (note.data && note.data.url) {
+        if (route.path === note.data.url) {
+            // WE ARE ALREADY ON THE PAGE
+            // Dispatch an event so the current page knows to refresh its data
+            window.dispatchEvent(new CustomEvent('refresh-page-data'));
+        } else {
+            // WE ARE ON A DIFFERENT PAGE
+            // Navigate normally
+            router.push(note.data.url);
+        }
+    }
+
+    // 3. Update the notification list
+    fetchNotifications();
+};
+
+    const notifications = ref([]);
+    const unreadCount = ref(0);
+
+    const lastUnreadCount = ref(null);
+
+    const fetchNotifications = async () => {
+        try {
+            const { data } = await axios.get('/api/notifications');
+            
+            // Check if this is the first load
+            if (lastUnreadCount.value === null) {
+                lastUnreadCount.value = data.unreadCount;
+            } 
+            // If the count has changed, trigger a reload
+            else if (data.unreadCount !== lastUnreadCount.value) {
+                console.log("Notification count changed. Reloading page...");
+                window.location.reload(); // Performs a full browser refresh
+            }
+
+            notifications.value = data.notifications;
+            unreadCount.value = data.unreadCount;
+            lastUnreadCount.value = data.unreadCount; // Update the tracker
+            
+        } catch (e) {
+            console.error("Failed to load", e);
+        }
+    };
+
+    const markAllAsRead = async () => {
+        try {
+            await axios.post('/api/notifications/mark-all-read');
+            fetchNotifications(); 
+        } catch (e) {
+            console.error("Failed to mark all as read", e);
+        }
+    };
+
+    onMounted(() => {
+    fetchNotifications();
+    
+        setInterval(() => {
+            fetchNotifications();
+        }, 30000); 
+    });
 </script>
 
 <style scoped>

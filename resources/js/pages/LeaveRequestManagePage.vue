@@ -45,6 +45,17 @@
             </v-col>
         </v-row>
 
+        <v-alert
+            v-if="notification"
+            :type="notificationType"
+            variant="tonal"
+            class="mb-4"
+            closable
+            @click:close="clearNotification"
+        >
+            {{ notification }}
+        </v-alert>
+
         <v-tabs
             v-if="isManagement"
             v-model="activeTab"
@@ -52,17 +63,14 @@
             class="mb-4 border-b"
             @update:model-value="onTabChange"
         >
-            <v-tab value="my_requests">
-                <v-icon start size="small">mdi-account-outline</v-icon> My Leave Requests
-            </v-tab>
             <v-tab value="approvals">
                 <v-icon start size="small">mdi-account-multiple-outline</v-icon> Staff Approvals
             </v-tab>
+            <v-tab value="my_requests">
+                <v-icon start size="small">mdi-account-outline</v-icon> My Leave Requests
+            </v-tab>
+           
         </v-tabs>
-
-        <v-alert v-if="notification" :type="notificationType" variant="tonal" class="mb-4 text-body-2" rounded="lg" closable>
-            {{ notification }}
-        </v-alert>
 
        <v-card 
             :variant="items.length > 0 ? 'outlined' : 'flat'" 
@@ -152,30 +160,45 @@
                                     Reject
                                 </v-btn>
                             </div>
+                           <div v-else-if="(auth.hasRoleSlug('admin') || auth.hasRoleSlug('hr')) && item.is_approve === 1 && item.is_approve_hr === 0" class="d-flex ga-1">
+                            <v-btn 
+                                color="success" 
+                                variant="flat" 
+                                size="small" 
+                                class="text-none font-weight-bold" 
+                                prepend-icon="mdi-check-all" 
+                                :loading="statusLoading.id === item.id && statusLoading.action === 'approved'" 
+                                @click="updateStatus(item.id, 'approved')"
+                            >
+                                Accept
+                            </v-btn>
 
-                            <div v-else-if="(auth.hasRoleSlug('admin') || auth.hasRoleSlug('hr')) && item.is_approve === 1 && item.is_approve_hr === 0" class="d-flex ga-1">
-                                <v-btn color="success" variant="flat" size="small" class="text-none font-weight-bold" prepend-icon="mdi-check-all" :loading="statusLoadingId === item.id" @click="updateStatus(item.id, 'approved')">
-                                    Accept
-                                </v-btn>
-                                <v-btn color="error" variant="tonal" size="small" class="text-none font-weight-bold" prepend-icon="mdi-close" :loading="statusLoadingId === item.id" @click="updateStatus(item.id, 'rejected')">
-                                    Reject
-                                </v-btn>
-                            </div>
-
-                            <div v-else-if="item.user_id === auth.user?.id && item.is_approve === 0" class="d-flex ga-1">
+                            <v-btn 
+                                color="error" 
+                                variant="tonal" 
+                                size="small" 
+                                class="text-none font-weight-bold" 
+                                prepend-icon="mdi-close" 
+                                :loading="statusLoading.id === item.id && statusLoading.action === 'rejected'" 
+                                @click="updateStatus(item.id, 'rejected')"
+                            >
+                                Reject
+                            </v-btn>
+                        </div>
+                        <div v-else-if="item.user_id === auth.user?.id && item.is_approve === 0" class="d-flex ga-1">
                                 <v-btn color="warning" variant="tonal" size="small" class="text-none font-weight-bold rounded-md" prepend-icon="mdi-pencil" @click="openLeaveFormDialog(item)">
                                     Edit
                                 </v-btn>
                                 <v-btn color="grey-darken-1" variant="outlined" size="small" class="text-none font-weight-bold rounded-md" prepend-icon="mdi-cancel" :loading="statusLoadingId === item.id" @click="cancelRequest(item.id)">
                                     Cancel
                                 </v-btn>
-                            </div>
+                        </div>
 
-                            <span v-else class="text-caption font-weight-medium text-amber-darken-3 bg-amber-lighten-5 px-2 py-1 rounded d-flex align-center">
-                                <v-icon size="x-small" class="mr-1">mdi-clock-fast</v-icon>
-                                Waiting for Approval
-                            </span>
-                        </template>
+                        <span v-else class="text-caption font-weight-medium text-amber-darken-3 bg-amber-lighten-5 px-2 py-1 rounded d-flex align-center">
+                            <v-icon size="x-small" class="mr-1">mdi-clock-fast</v-icon>
+                            Waiting for Approval
+                        </span>
+                    </template>
 
                         <span v-else-if="item.status !== 'pending' && item.status !== 'pending_tl' && item.status !== 'pending_hr'" class="text-caption text-medium-emphasis bg-grey-lighten-4 px-2 py-1 rounded d-flex align-center">
                             <v-icon size="x-small" class="mr-1">mdi-lock-outline</v-icon>Processed
@@ -207,7 +230,9 @@
                     <v-spacer />
                     <v-btn icon="mdi-close" variant="text" size="small" @click="closeLeaveFormDialog" />
                 </v-card-title>
-
+<v-alert v-if="formError" type="error" variant="tonal" class="mb-4" closable @click:close="formError = ''">
+    {{ formError }}
+</v-alert>
                 <v-card-text class="pa-5" style="max-height: 70vh;">
                 <v-form ref="leaveRequestForm">
                     <template v-if="canRequestForOthers">
@@ -422,11 +447,18 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <v-snackbar v-model="snackbar" :timeout="4000" :color="notificationType">
+            {{ notification }}
+            <template #actions>
+                <v-btn variant="text" @click="snackbar = false">Close</v-btn>
+            </template>
+        </v-snackbar>
     </div>
 </template>
 
 <script setup>
-    import { onMounted, ref, computed, watch } from 'vue'; 
+    import { onMounted, ref, computed, watch, onActivated } from 'vue'; 
     import axios from 'axios';
     import { useRouter } from 'vue-router'; 
     import { useAuthStore } from '@/stores/auth';
@@ -443,11 +475,13 @@
     const searchInput = ref('');
     const search = ref('');
     const dateFilter = ref(''); 
-    const activeTab = ref('my_requests');
+    const activeTab = ref('approvals');
 
-    const statusLoadingId = ref(null);
+    const statusLoading = ref({ id: null, action: null });
     const notification = ref('');
     const notificationType = ref('success');
+    const snackbar = ref(false);
+    let notificationTimer = null;
     
     const leaveFormDialog = ref(false);
     const submittingForm = ref(false);
@@ -575,11 +609,42 @@
     }
 
     function calculateTotalDays() {
-        const { start_date, end_date, leave_session } = leaveForm.value; if (!start_date || !end_date) { leaveForm.value.total_days = 0; return; }
-        const s = new Date(start_date); const e = new Date(end_date); if (e < s) { leaveForm.value.total_days = 0; return; }
-        if (leave_session !== 'full_day') { leaveForm.value.total_days = 0.5; return; }
-        let w = 0; let curr = new Date(s); while (curr <= e) { if (curr.getDay() !== 0 && curr.getDay() !== 6) w++; curr.setDate(curr.getDate() + 1); }
-        leaveForm.value.total_days = w;
+        const { start_date, end_date, leave_session } = leaveForm.value;
+        
+        if (!start_date || !end_date) {
+            leaveForm.value.total_days = 0;
+            return;
+        }
+
+        const s = new Date(start_date);
+        const e = new Date(end_date);
+        
+        if (e < s) {
+            leaveForm.value.total_days = 0;
+            return;
+        }
+
+        let w = 0;
+        let curr = new Date(s);
+        while (curr <= e) {
+            if (curr.getDay() !== 0 && curr.getDay() !== 6) {
+                w++;
+            }
+            curr.setDate(curr.getDate() + 1);
+        }
+
+        // Check if the selection is entirely weekends
+        if (w === 0) {
+            leaveForm.value.total_days = 0;
+            setNotification('The selected dates fall on weekends. Please select working days.', 'warning');
+            return;
+        }
+
+        if (leave_session !== 'full_day') {
+            leaveForm.value.total_days = 0.5;
+        } else {
+            leaveForm.value.total_days = w;
+        }
     }
 
     function onFileSelected(e) { leaveForm.value.attachment = e.target?.files[0] || e || null; }
@@ -677,10 +742,11 @@
                 await axios.post('/api/leave-requests', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
                 setNotification('Leave request submitted.', 'success');
             }
-            closeLeaveFormDialog(); loadItems();
-        } catch (e) { formError.value = e?.response?.data?.message || 'Error processing request'; } finally { submittingForm.value = false; }
+            closeLeaveFormDialog();
+            await refreshLeaveRequests();
+        } catch (e) { formError.value = e?.response?.data?.message || 'Error processing request'; } finally { submittingForm.value = false;  }
     }
-
+    
     async function loadItems(options) {
         if (!auth.token) { router.push('/login'); return; }
         loading.value = true;
@@ -699,6 +765,11 @@
         } catch (e) { setNotification('Error fetching requests.', 'error'); } finally { loading.value = false; }
     }
 
+    async function refreshLeaveRequests() {
+        page.value = 1;
+        await loadItems({ page: 1, itemsPerPage: itemsPerPage.value });
+    }
+
     function onTabChange() { page.value = 1; loadItems({ page: 1, itemsPerPage: itemsPerPage.value }); }
     function applySearch() { search.value = searchInput.value?.trim() ?? ''; page.value = 1; loadItems({ page: 1, itemsPerPage: itemsPerPage.value }); }
     function clearSearch() { searchInput.value = ''; applySearch(); }
@@ -707,15 +778,57 @@
     function getStatusIcon(s) { return s === 'approved' ? 'mdi-check-circle' : (s === 'rejected' ? 'mdi-close-circle' : 'mdi-account-clock'); }
 
     async function updateStatus(id, status) {
-        statusLoadingId.value = id; try { await axios.patch(`/api/leave-requests/${id}/status`, { status }); setNotification('Status updated.', 'success'); loadItems(); } catch(e) { setNotification('Error updating status.', 'error'); } finally { statusLoadingId.value = null; }
+        statusLoading.value = { id, action: status }; 
+        
+        try {
+            await axios.patch(`/api/leave-requests/${id}/status`, { status });
+            setNotification('Status updated.', 'success');
+            await refreshLeaveRequests();
+        } catch(e) {
+            setNotification('Error updating status.', 'error');
+        } finally {
+            statusLoading.value = { id: null, action: null };
+        }
+    }
+    
+    function cancelRequest(id) { cancelId.value = id; cancelDialog.value = true; }
+    async function doCancel() { canceling.value = true; try { await axios.post(`/api/leave-requests/${cancelId.value}/cancel`); cancelDialog.value = false; setNotification('Cancelled.', 'success'); await refreshLeaveRequests(); } catch(e) { setNotification('Error.', 'error'); } finally { canceling.value = false; } }
+
+    function clearNotification() {
+        notification.value = '';
+        snackbar.value = false;
+        if (notificationTimer) {
+            clearTimeout(notificationTimer);
+            notificationTimer = null;
+        }
     }
 
-    function cancelRequest(id) { cancelId.value = id; cancelDialog.value = true; }
-    async function doCancel() { canceling.value = true; try { await axios.post(`/api/leave-requests/${cancelId.value}/cancel`); cancelDialog.value = false; setNotification('Cancelled.', 'success'); loadItems(); } catch(e) { setNotification('Error.', 'error'); } finally { canceling.value = false; } }
-    function setNotification(m, t) { notification.value = m; notificationType.value = t; setTimeout(() => notification.value = '', 4000); }
+    function setNotification(message, type = 'success') {
+        notification.value = message;
+        notificationType.value = type;
+        snackbar.value = true;
+
+        if (notificationTimer) {
+            clearTimeout(notificationTimer);
+        }
+
+        notificationTimer = setTimeout(() => {
+            clearNotification();
+        }, 4000);
+    }
+
     onMounted(() => loadItems());
 
     const previewDialog = ref(false); const previewUrl = ref('');
     function viewAttachment(p) { if (!p) return; previewUrl.value = p.startsWith('storage/') ? '/' + p : '/storage/' + p; previewDialog.value = true; }
     const isImage = (url) => { if (!url) return false; return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(url.split('.').pop().toLowerCase()); }
+
+    const selectedLeaveRule = ref(null);
+    const requestedDays = ref(0);
+    const userBalances = ref([]); 
+
+    const isBalanceExceeded = computed(() => {
+    const balance = userBalances.value.find(b => b.leave_rule_id === selectedLeaveRule.value);
+    return balance ? requestedDays.value > balance.remaining_days : false;
+    });
 </script>

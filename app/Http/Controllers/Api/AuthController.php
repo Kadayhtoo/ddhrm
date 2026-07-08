@@ -16,13 +16,13 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'email' => ['required', 'string', 'email'],
+            'username' => ['required', 'string'],
             'password' => ['required', 'string'],
             'device_name' => ['sometimes', 'string', 'max:255'],
         ]);
 
         $result = $this->authService->attemptTokenLogin(
-            $data['email'],
+            $data['username'],
             $data['password'],
             $data['device_name'] ?? 'spa',
         );
